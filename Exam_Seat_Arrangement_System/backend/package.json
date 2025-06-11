@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Exam Seat Arrangement Systen for Centralized Exams",
+  "description": "Exam Seat Arrangement System for Centralized Exams",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -17,8 +17,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "nodemon": "^3.1.10",
-    "pg": "^8.16.0"
+    "nodemon": "^3.1.10"
   },
   "devDependencies": {
     "prisma": "^6.9.0"
