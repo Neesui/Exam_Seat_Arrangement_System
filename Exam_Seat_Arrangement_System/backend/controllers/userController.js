@@ -1,18 +1,31 @@
-import prisma from "../utils/db";
+import prisma from "../utils/db.js"; 
 
-export const loginController = (req, res) => {
+export const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const checkUser = prisma.user.findFirst({
-      where: {
-        email,
-      },
+
+    const checkUser = await prisma.user.findFirst({
+      where: { email, password }, // 
     });
+
     if (!checkUser) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
-        message: "üser not found",
+        message: "User not found or incorrect password",
       });
     }
-  } catch (error) {}
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      user: checkUser,
+    });
+
+  } catch (error) {
+    console.error("Login Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
 };
