@@ -30,6 +30,7 @@ app.listen(port, async () => {
     await prisma.$connect();
     console.log('Database Connection Successfully');
   } catch (err) {
-    console.err('Database Connection Failed:', err);
+    console.error('Database Connection Failed:', err);
+
   }
 });
