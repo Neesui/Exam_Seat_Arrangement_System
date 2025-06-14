@@ -1,24 +1,32 @@
-import prisma from "../utils/db.js"; 
+import prisma from "../utils/db.js";
 
 export const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const checkUser = await prisma.user.findFirst({
-      where: { email, password }, // 
+    // Find user by email first
+    const user = await prisma.user.findUnique({
+      where: { email },
     });
 
-    if (!checkUser) {
+    if (!user || user.password !== password) {
       return res.status(400).json({
         success: false,
         message: "User not found or incorrect password",
       });
     }
 
+    if (user.role !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: "Only admins can login here",
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Login successful",
-      user: checkUser,
+      user,
     });
 
   } catch (error) {
@@ -28,7 +36,4 @@ export const loginController = async (req, res) => {
       message: "Internal Server Error",
     });
   }
-};
-
-export const addInvigilators = async (req, res) => {
 };
