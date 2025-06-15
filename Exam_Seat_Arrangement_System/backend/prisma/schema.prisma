@@ -12,17 +12,34 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(INVIGILATOR)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int      @id @default(autoincrement())  // Primary key, auto-incremented user ID
+  name      String                                 // User's full name
+  email     String   @unique                       // User's email address (must be unique)
+  password  String                                 // User's password (hashed, usually)
+  role      Role     @default(INVIGILATOR)        // User role, defaults to INVIGILATOR
+  createdAt DateTime @default(now())               // Timestamp of when the user was created
+  updatedAt DateTime @updatedAt                     // Timestamp of last update (auto-managed)
+
+  invigilator Invigilator?                         // Optional one-to-one relation: if user is an invigilator, link to Invigilator profile
+}
+
+model Invigilator {
+  id         Int     @id @default(autoincrement()) // Primary key, auto-incremented invigilator profile ID
+  department String                                 // Department name of the invigilator
+  phone      String                                 // Phone number of the invigilator
+  address    String                                 // Address of the invigilator
+  gender     String                                 // Gender of the invigilator
+
+  userId     Int     @unique                        // Foreign key referencing the User ID, unique so one invigilator per user
+  user       User    @relation(fields: [userId], references: [id]) // Relation field: links Invigilator to corresponding User account
+
+  @@map("invigilators")                            // Maps this model to the "invigilators" table in the database
 }
 
 enum Role {
-  ADMIN
-  INVIGILATOR
+  ADMIN        // Admin user role with elevated privileges
+  INVIGILATOR  // Invigilator user role (default)
 }
+
