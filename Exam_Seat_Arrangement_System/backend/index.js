@@ -1,11 +1,15 @@
 import express from 'express';
 import prisma from './utils/db.js'; 
 import userRouter from './routes/userRoutes.js';
+import cookieParser from "cookie-parser";
+
+
 
 const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(cookieParser());  
 
 // Routes
 app.use("/api/user", userRouter);

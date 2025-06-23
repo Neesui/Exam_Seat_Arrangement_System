@@ -1,60 +1,50 @@
-import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import prisma from "../utils/db.js";
-import dotenv from "dotenv";
-
-dotenv.config(); // Load .env variables
+import jwt from "jsonwebtoken";
 
 export const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. Find user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const user = await prisma.user.findUnique({ where: { email } });
 
-    // 2. Validate user
-    if (!user || user.password !== password) {
-      return res.status(400).json({
-        success: false,
-        message: "User not found or incorrect password",
-      });
+    if (!user) {
+      return res.status(400).json({ success: false, message: "User not found" });
     }
 
-    // 3. Check role
-    if (user.role !== 'ADMIN') {
-      return res.status(403).json({
-        success: false,
-        message: "Only admins can login here",
-      });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ success: false, message: "Incorrect password" });
     }
 
-    // 4. Generate JWT token
+    if (user.role !== "ADMIN") {
+      return res.status(403).json({ success: false, message: "Only admins can login here" });
+    }
+
     const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      },
+      { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: process.env.JWT_EXPIRES_IN || "1d",
-      }
+      { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
     );
 
-    // 5. Return token and user info
+    // Send token as HttpOnly cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+
+    // Return user info (excluding password)
+    const { password: _, ...userWithoutPassword } = user;
+
     res.status(200).json({
       success: true,
       message: "Login successful",
-      token,
-      user,
+      user: userWithoutPassword,
     });
-
   } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    console.error("Login error:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
