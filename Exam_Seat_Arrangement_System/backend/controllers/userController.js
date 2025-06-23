@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import prisma from "../utils/db.js";
 import jwt from "jsonwebtoken";
 
+//admin login
 export const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -47,4 +48,10 @@ export const loginController = async (req, res) => {
     console.error("Login error:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
+};
+
+//Admin logout
+export const logoutController = (req, res) => {
+  res.clearCookie("token");
+  res.status(200).json({ success: true, message: "Logged out successfully" });
 };
