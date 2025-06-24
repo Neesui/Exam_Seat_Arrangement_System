@@ -1,54 +1,58 @@
+import bcrypt from "bcrypt";
 import prisma from "../utils/db.js";
 
-export const addInvigilator = async (req, res) => {
+/**
+ * Admin-only: Add a new invigilator (creates a user + profile)
+ */
+export const addInvigilatorController = async (req, res) => {
   try {
     const { name, email, password, department, phone, address, gender } = req.body;
 
     // 1. Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exists with this email",
-      });
+      return res.status(400).json({ success: false, message: "Email already in use" });
     }
 
-    // 2. Create user with role INVIGILATOR
+    // 2. Hash password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 3. Create the user with role INVIGILATOR and linked invigilator profile
     const newUser = await prisma.user.create({
       data: {
         name,
         email,
-        password,
-        role: "INVIGILATOR", // Make sure this matches your enum
+        password: hashedPassword,
+        role: "INVIGILATOR",
+        invigilator: {
+          create: {
+            department,
+            phone,
+            address,
+            gender,
+          },
+        },
+      },
+      include: {
+        invigilator: true, // include linked profile in the response
       },
     });
 
-    // 3. Create invigilator profile and link to user
-    const newInvigilator = await prisma.invigilator.create({
-      data: {
-        department,
-        phone,
-        address,
-        gender,
-        userId: newUser.id,
-      },
-    });
-
+    // 4. Success response
     res.status(201).json({
       success: true,
-      message: "Invigilator registered successfully",
-      user: newUser,
-      invigilator: newInvigilator,
+      message: "Invigilator added successfully",
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        invigilator: newUser.invigilator,
+      },
     });
 
   } catch (error) {
-    console.error("Register Invigilator Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    console.error("Error adding invigilator:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };
