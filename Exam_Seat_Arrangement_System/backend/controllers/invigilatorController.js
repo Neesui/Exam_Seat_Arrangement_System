@@ -5,6 +5,8 @@ import prisma from "../utils/db.js";
  * Admin-only: Add a new invigilator (creates a user + profile)
  */
 export const addInvigilatorController = async (req, res) => {
+  console.log("📥 Incoming request body:", req.body);
+
   try {
     const { name, email, password, department, phone, address, gender } = req.body;
 
