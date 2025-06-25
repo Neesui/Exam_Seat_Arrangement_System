@@ -76,3 +76,48 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch profile" });
   }
 };
+
+
+// Update own profile (invigilator)
+export const updateProfile = async (req, res) => {
+  const userId = req.user.id;
+  const { name, email, password, department, phone, address, gender } = req.body;
+
+  try {
+    // 1. Prepare user update data
+    const userData = {};
+    if (name) userData.name = name;
+    if (email) userData.email = email;
+    if (password) {
+      userData.password = await bcrypt.hash(password, 10);
+    }
+
+    // 2. Update user table
+    if (Object.keys(userData).length > 0) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: userData,
+      });
+    }
+
+    // 3. Prepare invigilator update data
+    const invigData = { department, phone, address, gender };
+    Object.keys(invigData).forEach((key) => invigData[key] === undefined && delete invigData[key]);
+
+    // 4. Update invigilator profile if data provided
+    if (Object.keys(invigData).length > 0) {
+      await prisma.invigilator.update({
+        where: { userId },
+        data: invigData,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ success: false, message: "Failed to update profile" });
+  }
+};
