@@ -58,3 +58,21 @@ export const addInvigilatorController = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
+
+// Get profile (invigilator)
+export const getProfile = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { invigilator: true },
+    });
+    res.json({ 
+      success: true,
+      message: "Invigilator profile fetch successfully", 
+      user 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to fetch profile" });
+  }
+};
