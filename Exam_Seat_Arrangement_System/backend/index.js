@@ -1,6 +1,7 @@
 import express from 'express';
 import prisma from './utils/db.js'; 
 import authRouter from './routes/authRoutes.js';
+import userROuter from './routes/userRoutes.js';
 import invigilatorRouter from './routes/invigilatorRoutes.js';
 import cookieParser from "cookie-parser";
 
@@ -14,6 +15,7 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/auth", authRouter);
+app.use("/api/user", userROuter)
 app.use("/api/invigilator", invigilatorRouter);
 
 // 404 Handler
