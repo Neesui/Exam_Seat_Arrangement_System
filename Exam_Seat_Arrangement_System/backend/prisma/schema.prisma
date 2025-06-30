@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,35 +7,163 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())  
-  name      String                                 
-  email     String   @unique                       
-  password  String                                 
-  role      Role     @default(INVIGILATOR)        
-  createdAt DateTime @default(now())               
-  updatedAt DateTime @updatedAt                    
+enum Role {
+  ADMIN
+  INVIGILATOR
+}
 
-  invigilator Invigilator?                         // Optional one-to-one relation: if user is an invigilator, link to Invigilator profile
+model User {
+  id          Int         @id @default(autoincrement())
+  name        String
+  email       String      @unique
+  password    String
+  role        Role        @default(INVIGILATOR)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  invigilator Invigilator?
 }
 
 model Invigilator {
-  id         Int     @id @default(autoincrement()) // Primary key, auto-incremented invigilator profile ID
-  department String                                
-  phone      String                                
-  address    String                                 
-  gender     String 
-  createdAt DateTime @default(now())               
-  updatedAt DateTime @updatedAt                                
+  id                    Int                      @id @default(autoincrement())
+  course                String
+  phone                 String
+  address               String
+  gender                String
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
 
-  userId     Int     @unique                        // Foreign key referencing the User ID, unique so one invigilator per user
-  user       User    @relation(fields: [userId], references: [id]) 
+  userId                Int                      @unique
+  user                  User                     @relation(fields: [userId], references: [id])
 
-  @@map("invigilators")                            // Maps this model to the "invigilators" table in the database
+  invigilatorAssignments InvigilatorAssignment[]
 }
 
-enum Role {
-  ADMIN        // Admin user role with elevated privileges
-  INVIGILATOR  // Invigilator user role (default)
+model Course {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  duration    Int         // total semesters, e.g., 8
+
+  semesters   Semester[]
+  students    Student[]
+  // removed subjects here to fix relation error
 }
 
+model Semester {
+  id          Int         @id @default(autoincrement())
+  number      Int         // 1, 2, 3, ..., 8
+  courseId    Int
+
+  course      Course      @relation(fields: [courseId], references: [id])
+  subjects    Subject[]
+  students    Student[]
+}
+
+model Subject {
+  id          Int         @id @default(autoincrement())
+  name        String
+  code        String      @unique
+  semesterId  Int
+
+  semester    Semester    @relation(fields: [semesterId], references: [id])
+  exams       Exam[]
+}
+
+model Student {
+  id           Int         @id @default(autoincrement())
+  name         String
+  symbolNumber String
+  regNumber    String
+  college      String
+  courseId     Int
+  semesterId   Int
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  course       Course      @relation(fields: [courseId], references: [id])
+  semester     Semester    @relation(fields: [semesterId], references: [id])
+  seat         Seat?
+
+  @@unique([symbolNumber, college])
+}
+
+model Exam {
+  id              Int             @id @default(autoincrement())
+  date            DateTime
+  startTime       String?
+  endTime         String?
+  subjectId       Int
+
+  subject         Subject         @relation(fields: [subjectId], references: [id])
+  roomAssignments RoomAssignment[]
+  seatingPlans    SeatingPlan[]
+}
+
+model Room {
+  id              Int             @id @default(autoincrement())
+  roomNumber      String          @unique
+  block           String?
+  floor           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  benches         Bench[]
+  roomAssignments RoomAssignment[]
+}
+
+model Bench {
+  id        Int       @id @default(autoincrement())
+  roomId    Int
+  benchNo   Int
+  capacity  Int       // 2 or 3 seats
+  createdAt DateTime  @default(now())
+
+  room      Room      @relation(fields: [roomId], references: [id])
+  seats     Seat[]
+}
+
+model Seat {
+  id             Int           @id @default(autoincrement())
+  benchId        Int
+  position       Int           // 1=Left, 2=Right, 3=Middle
+  studentId      Int           @unique
+  seatingPlanId  Int?
+
+  bench          Bench         @relation(fields: [benchId], references: [id])
+  student        Student       @relation(fields: [studentId], references: [id])
+  seatingPlan    SeatingPlan?  @relation(fields: [seatingPlanId], references: [id])
+}
+
+model RoomAssignment {
+  id                    Int                      @id @default(autoincrement())
+  roomId                Int
+  examId                Int
+  isActive              Boolean                  @default(true)
+  isCompleted           Boolean                  @default(false)
+  completedAt           DateTime?
+
+  room                  Room                     @relation(fields: [roomId], references: [id])
+  exam                  Exam                     @relation(fields: [examId], references: [id])
+  invigilatorAssignments InvigilatorAssignment[]
+}
+
+model InvigilatorAssignment {
+  id                Int       @id @default(autoincrement())
+  invigilatorId     Int
+  roomAssignmentId  Int
+  status            String    @default("ASSIGNED")
+  assignedAt        DateTime  @default(now())
+  completedAt       DateTime?
+
+  invigilator       Invigilator     @relation(fields: [invigilatorId], references: [id])
+  roomAssignment    RoomAssignment  @relation(fields: [roomAssignmentId], references: [id])
+}
+
+model SeatingPlan {
+  id          Int       @id @default(autoincrement())
+  examId      Int
+  createdAt   DateTime  @default(now())
+  isActive    Boolean   @default(true)
+  exam        Exam      @relation(fields: [examId], references: [id])
+  seats       Seat[]
+}
