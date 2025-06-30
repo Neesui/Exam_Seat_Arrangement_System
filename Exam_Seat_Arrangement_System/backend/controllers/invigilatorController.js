@@ -8,18 +8,15 @@ export const addInvigilatorController = async (req, res) => {
   console.log("📥 Incoming request body:", req.body);
 
   try {
-    const { name, email, password, department, phone, address, gender } = req.body;
+    const { name, email, password, course, phone, address, gender } = req.body;
 
-    // 1. Check if user already exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ success: false, message: "Email already in use" });
     }
 
-    // 2. Hash password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3. Create the user with role INVIGILATOR and linked invigilator profile
     const newUser = await prisma.user.create({
       data: {
         name,
@@ -28,7 +25,7 @@ export const addInvigilatorController = async (req, res) => {
         role: "INVIGILATOR",
         invigilator: {
           create: {
-            department,
+            course,
             phone,
             address,
             gender,
@@ -36,11 +33,10 @@ export const addInvigilatorController = async (req, res) => {
         },
       },
       include: {
-        invigilator: true, // include linked profile in the response
+        invigilator: true,
       },
     });
 
-    // 4. Success response
     res.status(201).json({
       success: true,
       message: "Invigilator added successfully",
@@ -55,36 +51,41 @@ export const addInvigilatorController = async (req, res) => {
 
   } catch (error) {
     console.error("Error adding invigilator:", error);
-    res.status(500).json({ success: false, message: "Server Error" });
+    res.status(500).json({ success: false, message: error.message || "Server Error" });
   }
 };
 
-// Get profile (invigilator)
+/**
+ * Get logged-in invigilator profile
+ */
 export const getProfile = async (req, res) => {
   const userId = req.user.id;
+
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: { invigilator: true },
     });
-    res.json({ 
+
+    res.json({
       success: true,
-      message: "Invigilator profile fetch successfully", 
-      user 
+      message: "Invigilator profile fetched successfully",
+      user,
     });
   } catch (error) {
+    console.error("Get profile error:", error);
     res.status(500).json({ success: false, message: "Failed to fetch profile" });
   }
 };
 
-
-// Update own profile (invigilator)
+/**
+ * Update logged-in invigilator profile
+ */
 export const updateProfile = async (req, res) => {
   const userId = req.user.id;
-  const { name, email, password, department, phone, address, gender } = req.body;
+  const { name, email, password, course, phone, address, gender } = req.body;
 
   try {
-    // 1. Prepare user update data
     const userData = {};
     if (name) userData.name = name;
     if (email) userData.email = email;
@@ -92,7 +93,6 @@ export const updateProfile = async (req, res) => {
       userData.password = await bcrypt.hash(password, 10);
     }
 
-    // 2. Update user table
     if (Object.keys(userData).length > 0) {
       await prisma.user.update({
         where: { id: userId },
@@ -100,11 +100,9 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // 3. Prepare invigilator update data
-    const invigData = { department, phone, address, gender };
+    const invigData = { course, phone, address, gender };
     Object.keys(invigData).forEach((key) => invigData[key] === undefined && delete invigData[key]);
 
-    // 4. Update invigilator profile if data provided
     if (Object.keys(invigData).length > 0) {
       await prisma.invigilator.update({
         where: { userId },
@@ -119,5 +117,106 @@ export const updateProfile = async (req, res) => {
   } catch (error) {
     console.error("Update profile error:", error);
     res.status(500).json({ success: false, message: "Failed to update profile" });
+  }
+};
+
+/**
+ * Get summary of exams and rooms assigned to the invigilator
+ */
+export const getInvigilatorExamMetaSummary = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const invigilator = await prisma.invigilator.findUnique({
+      where: { userId },
+    });
+
+    const assignments = await prisma.invigilatorAssignment.findMany({
+      where: { invigilatorId: invigilator.id },
+      include: {
+        roomAssignment: {
+          include: {
+            room: true,
+            exam: {
+              include: {
+                subject: true,
+                course: true,
+                semester: true,
+              },
+            },
+            invigilatorAssignments: {
+              include: {
+                invigilator: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const result = [];
+
+    for (const a of assignments) {
+      const { room, exam, invigilatorAssignments } = a.roomAssignment;
+
+      const benches = await prisma.bench.findMany({
+        where: { roomId: room.id },
+        include: {
+          seats: {
+            include: {
+              student: true,
+            },
+          },
+        },
+      });
+
+      const allStudents = benches.flatMap((b) => b.seats.map((s) => s.student));
+
+      const colleges = {};
+      for (const student of allStudents) {
+        if (!colleges[student.college]) colleges[student.college] = [];
+        colleges[student.college].push(student.symbolNumber);
+      }
+
+      const collegeSummary = Object.entries(colleges).map(([college, symbolNumbers]) => {
+        symbolNumbers.sort();
+        return {
+          college,
+          startSymbolNumber: symbolNumbers[0],
+          endSymbolNumber: symbolNumbers[symbolNumbers.length - 1],
+          studentCount: symbolNumbers.length,
+        };
+      });
+
+      const invigilators = invigilatorAssignments.map((ia) => ({
+        name: ia.invigilator.user.name,
+        email: ia.invigilator.user.email,
+      }));
+
+      result.push({
+        exam: {
+          subject: exam.subject,
+          examDate: exam.date.toISOString().split("T")[0],
+          startTime: exam.startTime,
+          endTime: exam.endTime,
+          course: exam.course,
+          semester: exam.semester,
+        },
+        room: {
+          roomNumber: room.roomNumber,
+          invigilators,
+        },
+        collegeSummary,
+      });
+    }
+
+    res.json({ success: true, message: "Exam meta summary fetched successfully", data: result });
+  } catch (error) {
+    console.error("Get Invigilator Exam Meta Summary error:", error);
+    res.status(500).json({ success: false, message: error.message || "Server Error" });
   }
 };
