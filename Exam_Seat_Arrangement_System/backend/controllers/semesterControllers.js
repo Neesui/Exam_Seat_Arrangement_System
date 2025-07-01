@@ -115,3 +115,26 @@ export const updateSemester = async (req, res) => {
       });
     }
   };
+
+  // Delete Semester
+export const deleteSemester = async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      await prisma.semester.delete({
+        where: { id: Number(id) },
+      });
+  
+      res.json({
+        success: true,
+        message: "Semester deleted successfully",
+      });
+    } catch (err) {
+      console.error("Failed to delete semester:", err);
+      res.status(404).json({
+        success: false,
+        message: "Semester not found",
+        error: err.message,
+      });
+    }
+  };
