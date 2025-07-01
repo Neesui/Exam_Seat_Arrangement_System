@@ -5,6 +5,7 @@ import authRouter from './routes/authRoutes.js';
 import userROuter from './routes/userRoutes.js';
 import invigilatorRouter from './routes/invigilatorRoutes.js';
 import courseRouter from './routes/courseRoutes.js'
+import semesterRouter from './routes/semesterRoutes.js'
 
 
 const app = express();
@@ -18,6 +19,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/user", userROuter)
 app.use("/api/invigilator", invigilatorRouter);
 app.use("/api/course", courseRouter)
+app.use("/api/semester", semesterRouter)
 
 // 404 Handler
 app.use((req, res) => {
