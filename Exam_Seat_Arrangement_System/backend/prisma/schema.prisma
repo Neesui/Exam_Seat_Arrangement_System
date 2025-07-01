@@ -51,7 +51,7 @@ model Course {
 
 model Semester {
   id          Int         @id @default(autoincrement())
-  number      Int         // 1, 2, 3, ..., 8
+  semesterNum      Int         // 1, 2, 3, ..., 8
   courseId    Int
 
   course      Course      @relation(fields: [courseId], references: [id])
