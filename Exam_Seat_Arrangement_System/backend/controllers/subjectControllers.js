@@ -160,3 +160,27 @@ export const updateSubject = async (req, res) => {
       });
     }
   };
+
+  // Delete Subject
+export const deleteSubject = async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      await prisma.subject.delete({
+        where: { id: Number(id) },
+      });
+  
+      res.json({
+        success: true,
+        message: "Subject deleted successfully",
+      });
+    } catch (err) {
+      console.error("Failed to delete subject:", err);
+      res.status(404).json({
+        success: false,
+        message: "Subject not found",
+        error: err.message,
+      });
+    }
+  };
+  
