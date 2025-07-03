@@ -76,3 +76,39 @@ export const getSubjects = async (req, res) => {
     });
   }
 }
+
+// get subject by id
+export const getSubjectById = async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      const subject = await prisma.subject.findUnique({
+        where: {
+          id: Number(id),
+        },
+        include: {
+          semester: true,
+        },
+      });
+  
+      if (!subject) {
+        return res.status(404).json({
+          success: false,
+          message: "Subject not found",   
+        })
+      }
+  
+      return res.status(200).json({
+        success: true,
+        message: "Subject fetched successfully",
+        data: subject,
+      });
+    } catch (err) {
+      console.error("Error fetching subject: ", err);
+      return res.status(500).json({
+        success: false,
+        message: "failed to fetch subject",
+        error: err.message,
+      });
+    }
+  }
