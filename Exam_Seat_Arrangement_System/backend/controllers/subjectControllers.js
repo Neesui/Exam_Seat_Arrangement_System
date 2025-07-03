@@ -49,3 +49,30 @@ export const addSubject = async (req, res) => {
     });
   }
 }
+
+// get all subjects
+export const getSubjects = async (req, res) => {
+  try {
+    const subjects = await prisma.subject.findMany({
+      include: {
+        semester: true,
+      },
+      orderBy: {
+        id: "asc",
+      },
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Subjects fetched successfully",
+      data: subjects,
+    });
+
+  } catch (err) {
+    console.error("Error fetching subjects: ", err);
+    return res.status(500).json({
+      success: false,
+      message: "failed to fetch subjects",
+      error: err.message,
+    });
+  }
+}
