@@ -2,9 +2,9 @@ import prisma from "@/lib/prisma";
 
 // create subject
 export const addSubject = async (req, res) => {
-  const { subjectName, code, semesterId } = req.body;
+  const { subjectsubjectName, code, semesterId } = req.body;
 
-  if(!subjectName || !code || !semesterId){
+  if(!subjectsubjectName || !code || !semesterId){
     return res.status(400).json({
       success: false,
       message: "Please fill all the fields",
@@ -29,7 +29,7 @@ export const addSubject = async (req, res) => {
     // create subject
     const subject = await prisma.subject.create({
       data: {
-        subjectName,
+        subjectsubjectName,
         code,
         semesterId: Number(semesterId),
       },
@@ -112,3 +112,51 @@ export const getSubjectById = async (req, res) => {
       });
     }
   }
+
+  // Update Subject
+export const updateSubject = async (req, res) => {
+    const { id } = req.params;
+    const { subjectName, code, semesterId } = req.body;
+  
+    if (!subjectName || !code || !semesterId) {
+      return res.status(400).json({
+        success: false,
+        message: "'subjectName', 'code', and 'semesterId' are required.",
+      });
+    }
+  
+    try {
+      const semester = await prisma.semester.findUnique({
+        where: { id: Number(semesterId) },
+      });
+  
+      if (!semester) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid semesterId: Semester not found.",
+        });
+      }
+  
+      const updatedSubject = await prisma.subject.update({
+        where: { id: Number(id) },
+        data: {
+          subjectName,
+          code,
+          semesterId: Number(semesterId),
+        },
+      });
+  
+      res.json({
+        success: true,
+        message: "Subject updated successfully",
+        subject: updatedSubject,
+      });
+    } catch (err) {
+      console.error("Failed to update subject:", err);
+      res.status(404).json({
+        success: false,
+        message: "Subject not found",
+        error: err.message,
+      });
+    }
+  };
