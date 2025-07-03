@@ -1,7 +1,7 @@
 import express from "express";
-import { authenticate } from "../middlewares/authenticate";
-import { authorizeRoles } from "../middlewares/authorize";
-import { addSemester, deleteSemester, getSemesters, updateSemester } from "../controllers/semesterControllers";
+import { authenticate } from "../middlewares/authenticate.js";
+import { authorizeRoles } from "../middlewares/authorize.js";
+import { addSemester, deleteSemester, getSemesters, updateSemester } from "../controllers/semesterControllers.js";
 const router = express.Router();
 
 router.post("/add", authenticate, authorizeRoles("ADMIN"), addSemester);
