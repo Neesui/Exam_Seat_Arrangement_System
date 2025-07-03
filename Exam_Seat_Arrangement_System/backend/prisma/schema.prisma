@@ -46,7 +46,6 @@ model Course {
 
   semesters   Semester[]
   students    Student[]
-  // removed subjects here to fix relation error
 }
 
 model Semester {
@@ -61,7 +60,7 @@ model Semester {
 
 model Subject {
   id          Int         @id @default(autoincrement())
-  name        String
+  subjectName        String
   code        String      @unique
   semesterId  Int
 
