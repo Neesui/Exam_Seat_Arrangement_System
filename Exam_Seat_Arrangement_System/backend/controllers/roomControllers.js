@@ -22,3 +22,24 @@ export const createRoom = async (req, res) => {
     });
   }
 };
+
+// Get all Rooms
+export const getRooms = async (req, res) => {
+    try {
+      const rooms = await prisma.room.findMany({
+        include: { benches: true },
+      });
+  
+      res.json({
+        success: true,
+        message: "Rooms retrieved successfully",
+        rooms,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch rooms",
+        error: error.message,
+      });
+    }
+  };
