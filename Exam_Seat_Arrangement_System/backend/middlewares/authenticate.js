@@ -1,34 +1,39 @@
 import jwt from "jsonwebtoken";
-
-export const authenticate = (req, res, next) => {
-  try {
+import prisma from "../utils/db.js";
+//  authenticate routes
+export const authenticate = async (req, res, next) => {
     let token;
+    console.log(req.cookies);
+    // Read the JWT from the cookie
+    token = req.cookies.jwt;
+    console.log(token);
 
-    // 1. Try to get token from cookies
-    if (req.cookies && req.cookies.token) {
-      token = req.cookies.token;
+    if (token) {
+        try {
+            const decode = jwt.verify(token, process.env.JWT_SECRET);
+            console.log(decode);
+            const user = await prisma.user.findUnique({
+              where: { id: decode.id },
+            });
+            console.log(user.role);
+            
+            if (user) {
+                req.user = user;
+                next();
+            } else {
+                res.status(401).json({
+                    message: "You are not authorized to access this route"
+                })
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(401).json({
+                message: "Not authorized , token failed"
+            });
+        }
+    } else {
+        res.status(401).json({
+            message: "Not authorized"
+        });
     }
-
-    // 2. If not in cookies, check Authorization header
-    else if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
-      token = req.headers.authorization.split(" ")[1];
-    }
-
-    // 3. If no token found
-    if (!token) {
-      return res.status(401).json({ success: false, message: "Not authenticated: Token missing" });
-    }
-
-    // 4. Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // 5. Attach decoded user to request
-    req.user = decoded;
-
-    // 6. Move to next middleware or controller
-    next();
-  } catch (err) {
-    console.error("JWT verification error:", err.message);
-    return res.status(401).json({ success: false, message: "Invalid or expired token" });
-  }
 };

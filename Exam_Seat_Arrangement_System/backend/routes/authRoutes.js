@@ -1,10 +1,9 @@
 import express from "express";
-import { adminLogin, invigilatorLogin, logoutController } from "../controllers/authCOntrollers.js";
+import { login, logout } from "../controllers/authCOntrollers.js";
 
 const router = express.Router();
 
-router.post("/admin-login", adminLogin);
-router.post("/invigilator-login", invigilatorLogin);
-router.get("/logout", logoutController);
+router.post("/login", login);
+router.get("/logout", logout);
 
 export default router;
