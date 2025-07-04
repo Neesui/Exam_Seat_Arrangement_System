@@ -1,8 +1,8 @@
-import { RouterProvider } from 'react-router-dom';
-import { router } from './router';
+import React from 'react';
+import LoginPage from './page/publicPage/LoginPage';
 
-function App() {
-  return <RouterProvider router={router} />;
-}
+const App = () => {
+  return <LoginPage />;
+};
 
 export default App;
