@@ -74,4 +74,28 @@ export const getRoomById = async (req, res) => {
       });
     }
   };
+
+  // Update Room
+export const updateRoom = async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { roomNumber, block, floor } = req.body;
   
+      const room = await prisma.room.update({
+        where: { id },
+        data: { roomNumber, block, floor },
+      });
+  
+      res.json({
+        success: true,
+        message: "Room updated successfully",
+        room,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to update room",
+        error: error.message,
+      });
+    }
+  };
