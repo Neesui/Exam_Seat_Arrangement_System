@@ -1,9 +1,5 @@
 import jwt from "jsonwebtoken";
 
-/**
- * Middleware to check if user is authenticated.
- * Supports token from both cookies and Authorization header.
- */
 export const authenticate = (req, res, next) => {
   try {
     let token;

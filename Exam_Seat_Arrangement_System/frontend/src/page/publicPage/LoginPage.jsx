@@ -16,7 +16,7 @@ const LoginPage = () => {
             className="w-40 h-auto object-contain mb-1"
           />
 
-          <p className="text-lg max-w-xs text-center mt-1 font-bold font-mer">
+          <p className="text-lg max-w-xs text-center mt-1 font-bold font-arimo">
             We're glad to see you again. Please login with your credentials to access your dashboard.
           </p>
         </div>
