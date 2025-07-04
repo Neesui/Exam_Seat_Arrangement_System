@@ -1,5 +1,6 @@
 // src/components/Sidebar.js
 import React, { useState } from 'react';
+import { logout as logoutAction} from '../../redux/features/authReduer'
 import { Link } from 'react-router-dom';
 import {
   FaTachometerAlt,
@@ -11,8 +12,11 @@ import {
   FaPlus,
   FaEye,
   FaBars,
-  FaTimes
+  FaTimes, 
+  FaSignOutAlt
 } from 'react-icons/fa';
+import { useLogoutMutation } from '../../redux/api/authApi';
+import { useDispatch } from 'react-redux';
 
 const Sidebar = () => {
   // Mobile sidebar open/close
@@ -37,6 +41,20 @@ const Sidebar = () => {
   const handleLinkClick = () => {
     if (sidebarOpen) setSidebarOpen(false);
   };
+  const [logout] = useLogoutMutation();
+  const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      dispatch(logoutAction());
+      // toast.success("Logged out successfully");
+      window.location.href = "/";
+    } catch (err) {
+      console.error(err);
+      // toast.error(err?.data?.message || "Logout failed");
+    }
+  };
 
   return (
     <>
@@ -185,6 +203,18 @@ const Sidebar = () => {
             )}
           </li>
         </ul>
+
+
+        {/* Logout */}
+        <div className="mb-4 px-4">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/20 transition w-full text-left"
+          >
+            <FaSignOutAlt />
+            <span>Logout</span>
+          </button>
+        </div>
       </nav>
 
       {/* Overlay for mobile when sidebar is open */}
@@ -195,6 +225,7 @@ const Sidebar = () => {
           aria-hidden="true"
         />
       )}
+      
     </>
   );
 };

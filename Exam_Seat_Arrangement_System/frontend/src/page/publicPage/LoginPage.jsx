@@ -1,15 +1,24 @@
-import React , { useState } from 'react';
-import LoginForm from '../../component/public/LoginForm'; 
+import React, { useState } from "react";
+import LoginForm from "../../component/public/LoginForm";
+import { useSelector } from "react-redux";
 const LoginPage = () => {
+  const { user } = useSelector((state) => state.auth || {} );
+
+  if (user?.role === "ADMIN") {
+    window.location.href = "/admin";
+  }
+
+  if (user?.role === "INVIGILATOR") {
+    window.location.href = "/invigilator";
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-100 to-blue-100">
       <div className="w-[50%] max-w-4xl min-h-[400px] bg-white shadow-lg rounded-lg overflow-hidden flex">
-        
         {/* Left welcome panel */}
         <div className="w-1/2 bg-purple-600 text-white flex flex-col justify-center items-center p-10 rounded-r-[100px]">
           <h1 className="text-4xl font-bold mb-1 text-center">Welcome Back!</h1>
-          
+
           <img
             src="/girl.png"
             alt="Welcome Illustration"
@@ -17,7 +26,8 @@ const LoginPage = () => {
           />
 
           <p className="text-lg max-w-xs text-center mt-1 font-bold font-arimo">
-            We're glad to see you again. Please login with your credentials to access your dashboard.
+            We're glad to see you again. Please login with your credentials to
+            access your dashboard.
           </p>
         </div>
 
