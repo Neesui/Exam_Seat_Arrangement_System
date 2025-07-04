@@ -19,7 +19,7 @@ const protectedRoutes = [
     ),
     children: adminRoutes.map((route) => ({
       ...route,
-      element: <RoleGuard allowedRoles={["admin"]}>{route.element}</RoleGuard>,
+      element: <RoleGuard allowedRoles={["ADMIN"]}>{route.element}</RoleGuard>,
     })),
   },
 
@@ -32,7 +32,7 @@ const protectedRoutes = [
     children: invigilatorRoutes.map((route) => ({
       ...route,
       element: (
-        <RoleGuard allowedRoles={["teacher"]}>{route.element}</RoleGuard>
+        <RoleGuard allowedRoles={["INVIGILATOR"]}>{route.element}</RoleGuard>
       ),
     })),
   },

@@ -1,7 +1,7 @@
-import React from 'react';
+import React , { useState } from 'react';
 import LoginForm from '../../component/public/LoginForm'; 
-
 const LoginPage = () => {
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-100 to-blue-100">
       <div className="w-[50%] max-w-4xl min-h-[400px] bg-white shadow-lg rounded-lg overflow-hidden flex">
