@@ -1,10 +1,16 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { RouterProvider } from 'react-router-dom';
-import router from './router';
+import { createBrowserRouter } from 'react-router-dom';
+import LoginPage from '../page/publicPage/LoginPage';
+import AdminDashboard from '../page/adminPage/AdminDashboard';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>
-);
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <LoginPage />,
+  },
+  {
+    path: '/admin',
+    element: <AdminDashboard />,
+  },
+]);
+
+export default router;
