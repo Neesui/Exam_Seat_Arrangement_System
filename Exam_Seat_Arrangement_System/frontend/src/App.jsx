@@ -5,7 +5,7 @@ import AdminDashboard from './page/adminPage/AdminDashboard';
 const App = () => {
  return(
   <>
-      <LoginPage />
+      {/* <LoginPage /> */}
       <AdminDashboard />
     </>
  )
