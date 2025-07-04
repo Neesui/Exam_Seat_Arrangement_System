@@ -43,3 +43,35 @@ export const getRooms = async (req, res) => {
       });
     }
   };
+
+  // Get Room by ID
+export const getRoomById = async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+  
+      const room = await prisma.room.findUnique({
+        where: { id },
+        include: { benches: true },
+      });
+  
+      if (!room) {
+        return res.status(404).json({
+          success: false,
+          message: "Room not found",
+        });
+      }
+  
+      res.json({
+        success: true,
+        message: "Room retrieved successfully",
+        room,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch room",
+        error: error.message,
+      });
+    }
+  };
+  
