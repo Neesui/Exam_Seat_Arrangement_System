@@ -99,3 +99,23 @@ export const updateRoom = async (req, res) => {
       });
     }
   };
+
+  // Delete Room
+export const deleteRoom = async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+  
+      await prisma.room.delete({ where: { id } });
+  
+      res.json({
+        success: true,
+        message: "Room deleted successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete room",
+        error: error.message,
+      });
+    }
+  };
