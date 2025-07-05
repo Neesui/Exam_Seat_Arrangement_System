@@ -7,8 +7,10 @@ import store from "./redux/store";
 const App = () => {
   return (
     <>
-      <Provider store={store}> //redux toolkit ko lagi
-        <RouterProvider router={router} /> // yo router ko lagi
+    {/* yo provider //redux toolkit ko lagi */}
+      <Provider store={store}> 
+        {/* yo // yo router ko lagi */}
+        <RouterProvider router={router} /> 
       </Provider>
     </>
   );

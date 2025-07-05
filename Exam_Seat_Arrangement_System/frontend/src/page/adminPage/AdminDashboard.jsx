@@ -1,9 +1,9 @@
 import React from "react";
-import Sidebar from "../../component/admin/SideBar";
+import AdminLayout from "../../layout/AdminLayout";
 
 const AdminDashboard = () => (
   <div>
-    <Sidebar />
+    {/* <AdminLayout /> */}
     <p>I am admin.</p>
   </div>
 );

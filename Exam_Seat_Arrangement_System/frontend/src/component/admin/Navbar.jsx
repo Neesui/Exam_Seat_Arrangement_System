@@ -14,8 +14,16 @@ const Navbar = () => {
     <>
       {/* Navbar */}
       <nav className="bg-white border-b border-gray-200 px-4 py-2.5 flex justify-between items-center">
-        {/* Left side - Empty or Logo if any */}
-        <div></div>
+        {/* Left side */}
+        {/* Mobile NC Admin */}
+        <div className="md:hidden text-lg font-bold text-gray-800">
+          NC Admin
+        </div>
+
+        {/* Desktop NC Admin */}
+        <div className="hidden md:block text-lg font-bold text-gray-800">
+          NC Admin
+        </div>
 
         {/* Right side */}
         <div className="flex items-center space-x-4 md:space-x-6">

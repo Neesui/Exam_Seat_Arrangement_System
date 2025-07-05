@@ -34,7 +34,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </button>
         </div>
 
-        <div className="p-5 text-lg ml-4 font-bold hidden md:block">EduAdmin</div>
+        <div className="p-5 text-lg ml-4 font-bold hidden md:block">NC Admin</div>
 
         <ul className="ml-4 mt-4 md:mt-0">
           <li className="p-4 hover:bg-gray-700 flex items-center">
