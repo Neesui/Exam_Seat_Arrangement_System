@@ -85,7 +85,7 @@ const Sidebar = () => {
           {/* Dashboard */}
           <li className="p-4 hover:bg-gray-700 flex items-center">
             <FaTachometerAlt className="mr-3" />
-            <Link to="/AdminDashboard" onClick={handleLinkClick}>Dashboard</Link>
+            <Link to="/admin" onClick={handleLinkClick}>Dashboard</Link>
           </li>
 
           {/* Students */}
