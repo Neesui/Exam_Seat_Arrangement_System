@@ -56,6 +56,35 @@ export const addInvigilatorController = async (req, res) => {
 };
 
 /**
+ * Admin-only: Get all invigilators
+ */
+export const getAllInvigilator = async (req, res) => {
+  try {
+    const invigilators = await prisma.user.findMany({
+      where: {
+        role: 'INVIGILATOR',
+      },
+      include: {
+        invigilator: true,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: 'All invigilators fetched successfully',
+      invigilators,
+    });
+  } catch (error) {
+    console.error('Error fetching all invigilators:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server Error',
+    });
+  }
+};
+
+
+/**
  * Get logged-in invigilator profile
  */
 export const getProfile = async (req, res) => {

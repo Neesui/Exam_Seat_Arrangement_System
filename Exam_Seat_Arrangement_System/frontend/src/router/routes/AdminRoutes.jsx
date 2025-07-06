@@ -2,6 +2,7 @@ import AddInvigilatorPage from "../../page/adminPage/AddInvigilatorPage";
 import AdminDashboard from "../../page/adminPage/AdminDashboard";
 import InvigilatorPage from "../../page/adminPage/InvigilatorPage";
 import StudentPage from "../../page/adminPage/StudentPage";
+import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
 
 
  const adminRoutes = [
@@ -13,9 +14,14 @@ import StudentPage from "../../page/adminPage/StudentPage";
     path: '/invigilator',
     element: <InvigilatorPage/>
   },
+  
   {
     path: '/addInvigilator',
     element: <AddInvigilatorPage />
+  },
+  {
+    path: '/viewInvigilator',
+    element: <ViewInvigilatorPage/>
   },
   {
     path: '/student',
