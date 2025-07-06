@@ -34,7 +34,7 @@ const AddInvigilatorPage = () => {
   };
 
   return (
-    <div className="ml-[5vh] w-[80vh] h-[105vh] bg-white p-6 rounded-lg shadow-md">
+    <div className="ml-[5vh] w-[80vh] h-[105vh] mt-15 bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4 text-gray-800">Add New Invigilator</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
