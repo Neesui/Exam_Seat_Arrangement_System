@@ -1,5 +1,5 @@
 import React from "react";
-import AddInvigilatorForm from "../../component/admin/invigilators/AddInvigilatorForm";
+import AddInvigilatorForm from "./AddInvigilatorPage";
 
 const InvigilatorPage = () => (
   <div>

@@ -7,7 +7,6 @@ const AdminL = () => {
     <>
       <Navbar />
       {/* <Sidebar /> */}
-      <Outlet />
     </>
   );
 };

@@ -4,6 +4,7 @@ import Sidebar from "./SideBar";
 import { logout as logoutAction} from '../../redux/features/authReduer'
 import { useLogoutMutation } from '../../redux/api/authApi';
 import { useDispatch } from 'react-redux';
+import { Outlet } from "react-router-dom";
 
 
 const Navbar = () => {
@@ -32,7 +33,7 @@ const Navbar = () => {
   return (
     <>
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 px-4 py-2.5 flex justify-between items-center z-50">
+      <nav className="bg-white border-b border-gray-200 px-4 py-2.5 flex justify-between items-center">
         {/* Left side */}
         {/* Mobile NC Admin */}
         <div className="md:hidden text-lg font-bold text-gray-800">
@@ -95,21 +96,13 @@ const Navbar = () => {
                 >
                   Settings
                 </a>
-                {/* <a
-                  href="/"
+                <a
+                  href="#"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   onClick={handleLogout}
                 >
                   Logout
-                </a> */}
-                <div className="mb-4 px-4">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/20 transition w-full text-left"
-          >
-            <span>Logout</span>
-          </button>
-        </div>
+                </a>
               </div>
             )}
           </div>
@@ -158,7 +151,15 @@ const Navbar = () => {
       </nav>
 
       {/* Sidebar */}
+      <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+
+      {/* Page Content */}
+      <div className="flex-1  ml-64 md:ml-64">
+        <Outlet />
+      </div>
+    </div>
     </>
   );
 };
