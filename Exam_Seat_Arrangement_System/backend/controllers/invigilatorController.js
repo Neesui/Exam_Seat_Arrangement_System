@@ -56,11 +56,10 @@ export const addInvigilatorController = async (req, res) => {
 };
 
 /**
- * Admin-only: Get all invigilators (flattened response)
+ * Admin-only: Get all invigilators
  */
 export const getAllInvigilator = async (req, res) => {
   try {
-    // Fetch all users with role 'INVIGILATOR' and include the related Invigilator data
     const invigilators = await prisma.user.findMany({
       where: {
         role: 'INVIGILATOR',
@@ -70,7 +69,6 @@ export const getAllInvigilator = async (req, res) => {
       },
     });
 
-    // Format the response as a flat structure
     const formattedInvigilators = invigilators.map((user) => ({
       id: user.id,
       name: user.name,
@@ -99,8 +97,6 @@ export const getAllInvigilator = async (req, res) => {
     });
   }
 };
-
-
 /**
  * Get logged-in invigilator profile
  */
