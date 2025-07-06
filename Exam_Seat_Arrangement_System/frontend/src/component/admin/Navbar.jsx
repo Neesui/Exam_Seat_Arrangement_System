@@ -32,7 +32,7 @@ const Navbar = () => {
   return (
     <>
       {/* Navbar */}
-      <nav className="bg-white border-b border-gray-200 px-4 py-2.5 flex justify-between items-center">
+      <nav className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 px-4 py-2.5 flex justify-between items-center z-50">
         {/* Left side */}
         {/* Mobile NC Admin */}
         <div className="md:hidden text-lg font-bold text-gray-800">
