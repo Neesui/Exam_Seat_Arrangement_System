@@ -2,14 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
-  useGetInvigilatorsQuery,
+    useGetAllInvigilatorsQuery,
   useDeleteInvigilatorMutation,
 } from '../../redux/api/invigilatorApi';
 
 const ViewInvigilatorPage = () => {
   const navigate = useNavigate();
-
-  const { data, error, isLoading } = useGetInvigilatorsQuery();
+  const { data, error, isLoading } = useGetAllInvigilatorsQuery();
   const [deleteInvigilator] = useDeleteInvigilatorMutation();
 
   // Delete handler
@@ -30,7 +29,7 @@ const ViewInvigilatorPage = () => {
 
   return (
     <>
-      <div className="ml-8 mt-5 bg-white p-6 rounded-lg shadow-md w-full max-w-screen-lg mx-auto">
+      <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md w-full max-w-screen-lg mx-auto">
         <h2 className="text-2xl font-bold mb-4 text-gray-800">View Invigilators</h2>
 
         {isLoading ? (

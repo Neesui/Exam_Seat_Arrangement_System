@@ -10,6 +10,10 @@ export const invigilatorApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["INVIGILATOR"],
     }),
+    getAllInvigilators: builder.query({
+        query: () => "/api/invigilator/all",
+        providesTags: ["INVIGILATOR"],
+      }),
 
     getInvigilators: builder.query({
       query: () => "/api/invigilator/profile",
@@ -41,6 +45,7 @@ export const invigilatorApi = apiSlice.injectEndpoints({
 
 export const {
   useGetInvigilatorsQuery,
+  useGetAllInvigilatorsQuery,
   useGetInvigilatorByIdQuery,
   useAddInvigilatorMutation,
   useUpdateInvigilatorMutation,

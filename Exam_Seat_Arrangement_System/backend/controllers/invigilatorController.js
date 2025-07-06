@@ -56,10 +56,11 @@ export const addInvigilatorController = async (req, res) => {
 };
 
 /**
- * Admin-only: Get all invigilators
+ * Admin-only: Get all invigilators (flattened response)
  */
 export const getAllInvigilator = async (req, res) => {
   try {
+    // Fetch all users with role 'INVIGILATOR' and include the related Invigilator data
     const invigilators = await prisma.user.findMany({
       where: {
         role: 'INVIGILATOR',
@@ -69,11 +70,27 @@ export const getAllInvigilator = async (req, res) => {
       },
     });
 
+    // Format the response as a flat structure
+    const formattedInvigilators = invigilators.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      course: user.invigilator?.course || '',
+      phone: user.invigilator?.phone || '',
+      address: user.invigilator?.address || '',
+      gender: user.invigilator?.gender || '',
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    }));
+
+    // Send response
     res.json({
       success: true,
       message: 'All invigilators fetched successfully',
-      invigilators,
+      invigilators: formattedInvigilators,
     });
+
   } catch (error) {
     console.error('Error fetching all invigilators:', error);
     res.status(500).json({
