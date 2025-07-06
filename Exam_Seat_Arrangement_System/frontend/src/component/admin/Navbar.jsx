@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { FaBell, FaSearch, FaBars, FaTimes } from "react-icons/fa";
 import Sidebar from "./SideBar";
+import { logout as logoutAction} from '../../redux/features/authReduer'
+import { useLogoutMutation } from '../../redux/api/authApi';
+import { useDispatch } from 'react-redux';
+
 
 const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -9,6 +13,21 @@ const Navbar = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const toggleMobileSearch = () => setMobileSearchOpen(!mobileSearchOpen);
+
+  const [logout] = useLogoutMutation();
+  const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      dispatch(logoutAction());
+      // toast.success("Logged out successfully");
+      window.location.href = "/";
+    } catch (err) {
+      console.error(err);
+      // toast.error(err?.data?.message || "Logout failed");
+    }
+  };
 
   return (
     <>
@@ -76,12 +95,21 @@ const Navbar = () => {
                 >
                   Settings
                 </a>
-                <a
-                  href="#"
+                {/* <a
+                  href="/"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={handleLogout}
                 >
                   Logout
-                </a>
+                </a> */}
+                <div className="mb-4 px-4">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/20 transition w-full text-left"
+          >
+            <span>Logout</span>
+          </button>
+        </div>
               </div>
             )}
           </div>

@@ -10,7 +10,6 @@ import {
   FaPlus,
   FaEye,
   FaTimes,
-  FaSignOutAlt,
 } from "react-icons/fa";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -152,13 +151,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             )}
           </li>
         </ul>
-
-        <div className="mb-4 px-4 mt-auto">
-          <button className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/20 transition w-full text-left">
-            <FaSignOutAlt />
-            <span>Logout</span>
-          </button>
-        </div>
       </div>
 
       {isOpen && (
