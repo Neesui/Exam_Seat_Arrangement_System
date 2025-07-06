@@ -9,6 +9,10 @@ import StudentPage from "../../page/adminPage/StudentPage";
     element: <AdminDashboard />
   },
   {
+    path: '/invigilator',
+    element: <InvigilatorPage/>
+  },
+  {
     path: '/student',
     element: <StudentPage />
   },

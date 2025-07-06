@@ -2,7 +2,6 @@ import { apiSlice } from "./apiSlice";
 
 export const invigilatorApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    // POST: Add new invigilator
     addInvigilator: builder.mutation({
       query: (newData) => ({
         url: "/api/invigilator/add",
@@ -12,31 +11,27 @@ export const invigilatorApi = apiSlice.injectEndpoints({
       invalidatesTags: ["INVIGILATOR"],
     }),
 
-    // GET: Fetch all invigilators
     getInvigilators: builder.query({
-        query: () => "/api/invigilator/profile",
-        providesTags: ["INVIGILATOR"],
-      }),
-  
-      // GET: Fetch one invigilator by ID
-      getInvigilatorById: builder.query({
-        query: (id) => `/api/invigilators/${id}`,
-      }),
+      query: () => "/api/invigilator/profile",
+      providesTags: ["INVIGILATOR"],
+    }),
 
-    // PUT: Update invigilator by ID
+    getInvigilatorById: builder.query({
+      query: (id) => `/api/invigilator/${id}`,
+    }),
+
     updateInvigilator: builder.mutation({
       query: ({ id, ...data }) => ({
-        url: `/api/invigilators/${id}`,
+        url: `/api/invigilator/${id}`,
         method: "PUT",
         body: data,
       }),
       invalidatesTags: ["INVIGILATOR"],
     }),
 
-    // DELETE: Remove invigilator by ID
     deleteInvigilator: builder.mutation({
       query: (id) => ({
-        url: `/api/invigilators/${id}`,
+        url: `/api/invigilator/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["INVIGILATOR"],
