@@ -4,9 +4,8 @@ import ViewInvigilatorPage from "./ViewInvigilatorPage";
 
 const InvigilatorPage = () => (
   <div>
-    <AddInvigilatorForm />
-    <ViewInvigilatorPage />
-    <p>I am admin.</p>
+    {/* <AddInvigilatorForm /> */}
+    {/* <ViewInvigilatorPage /> */}
   </div>
 );
 

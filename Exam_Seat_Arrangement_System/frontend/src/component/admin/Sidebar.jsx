@@ -27,7 +27,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         } md:translate-x-0`}
       >
         <div className="flex justify-between items-center p-4 md:hidden">
-          <div className="font-bold text-lg">EduAdmin</div>
+          <div className="font-bold text-lg">NC Admin</div>
           <button onClick={toggleSidebar} className="text-xl">
             <FaTimes />
           </button>
@@ -57,7 +57,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 </li>
                 <li className="p-4 hover:bg-gray-600 flex items-center">
                   <FaEye className="mr-3" />
-                  <Link to="/ViewStudentDetails">View Student Details</Link>
+                  <Link to="/ViewStudents">View Student Details</Link>
                 </li>
               </ul>
             )}
@@ -97,7 +97,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <ul className="pl-4 mt-2 bg-gray-700">
                 <li className="p-4 hover:bg-gray-600 flex items-center">
                   <FaPlus className="mr-3" />
-                  <Link to="/AddCourse">Add Courses</Link>
+                  <Link to="/addCourse">Add Courses</Link>
                 </li>
                 <li className="p-4 hover:bg-gray-600 flex items-center">
                   <FaEye className="mr-3" />
