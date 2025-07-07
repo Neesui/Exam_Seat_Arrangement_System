@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAddCoursesMutation } from '../../redux/api/courseApi';
+
 const AddCoursePage = () => {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
@@ -48,7 +49,7 @@ const AddCoursePage = () => {
 
   return (
     <>
-      <div className="ml-[20vh] w-[100vh] h-[70vh] mt-5 bg-white p-6 rounded-lg shadow-md">
+      <div className="ml-[20vh] w-[100vh] h-[45vh] mt-20 bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4 text-gray-800">Add New Course</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
