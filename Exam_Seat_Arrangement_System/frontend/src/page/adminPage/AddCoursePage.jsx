@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAddCoursesMutation } from '../../redux/api/CourseApi';
-
+import { useAddCoursesMutation } from '../../redux/api/courseApi';
 const AddCoursePage = () => {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
@@ -13,12 +12,23 @@ const AddCoursePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!name || !duration) {
       setError('All fields are required');
       return;
     }
 
-    const formData = { name, duration };
+    // ✅ Validate and convert duration to an integer
+    const parsedDuration = parseInt(duration, 10);
+    if (isNaN(parsedDuration)) {
+      setError('Duration must be a valid number');
+      return;
+    }
+
+    const formData = {
+      name,
+      duration: parsedDuration,
+    };
 
     try {
       await addCourse(formData).unwrap();
@@ -28,7 +38,7 @@ const AddCoursePage = () => {
       setError('');
 
       setTimeout(() => {
-        navigate('/admin/viewCourses');
+        navigate('/admin/viewCourses'); // Change this path according to your routing
       }, 1000);
     } catch (err) {
       console.error('Error adding course:', err);
@@ -38,7 +48,6 @@ const AddCoursePage = () => {
 
   return (
     <>
-      <Toaster />
       <div className="ml-[20vh] w-[100vh] h-[70vh] mt-5 bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-4 text-gray-800">Add New Course</h2>
         <form onSubmit={handleSubmit} className="space-y-4">

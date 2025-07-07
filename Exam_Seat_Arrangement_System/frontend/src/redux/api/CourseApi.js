@@ -8,33 +8,33 @@ export const courseApi = apiSlice.injectEndpoints({
         method: "POST",
         body: newData,
       }),
-      invalidatesTags: ["INVIGILATOR"],
+      invalidatesTags: ["COURSE"],
     }),
 
     getCourses: builder.query({
-      query: () => "/api/invigilator/profile",
-      providesTags: ["INVIGILATOR"],
+      query: () => "/api/course/all",
+      providesTags: ["COURSE"],
     }),
 
     getCoursesById: builder.query({
-      query: (id) => `/api/invigilator/${id}`,
+      query: (id) => `/api/course/${id}`,
     }),
 
     updateCourses: builder.mutation({
       query: ({ id, ...data }) => ({
-        url: `/api/invigilator/${id}`,
+        url: `/api/course/${id}`,
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["INVIGILATOR"],
+      invalidatesTags: ["COURSE"],
     }),
 
     deleteCourses: builder.mutation({
       query: (id) => ({
-        url: `/api/invigilator/${id}`,
+        url: `/api/course/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["INVIGILATOR"],
+      invalidatesTags: ["COURSE"],
     }),
   }),
 });
