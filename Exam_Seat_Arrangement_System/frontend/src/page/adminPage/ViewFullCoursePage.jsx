@@ -4,24 +4,37 @@ import { toast } from 'react-toastify';
 import {
   useGetCoursesQuery,
   useDeleteCoursesMutation,
-} from '../../redux/api/courseApi';
+} from '../../redux/api/courseApi';  
+import {
+  useDeleteSubjectMutation,
+} from '../../redux/api/subjectApi';
 
 const ViewCoursePage = () => {
   const navigate = useNavigate();
   const { data, error, isLoading } = useGetCoursesQuery();
   const [deleteCourse] = useDeleteCoursesMutation();
+  const [deleteSubject] = useDeleteSubjectMutation();
 
   const handleDelete = async (courseId) => {
+    if (!window.confirm('Are you sure you want to delete this course?')) return;
     try {
       await deleteCourse(courseId).unwrap();
       toast.success('Course deleted successfully!');
     } catch (err) {
-      console.error('Error deleting course:', err);
       toast.error(err?.data?.message || 'Failed to delete course.');
     }
   };
 
-  // FIX: Use courseId param correctly here
+  const handleDeleteSubject = async (subjectId) => {
+    if (!window.confirm('Are you sure you want to delete this subject?')) return;
+    try {
+      await deleteSubject(subjectId).unwrap();
+      toast.success('Subject deleted successfully!');
+    } catch (err) {
+      toast.error(err?.data?.message || 'Failed to delete subject.');
+    }
+  };
+
   const handleUpdate = (courseId) => {
     navigate(`/admin/UpdateCourse/${courseId}`);
   };
@@ -32,6 +45,11 @@ const ViewCoursePage = () => {
 
   const handleAddSubject = (semesterId) => {
     navigate(`/addSubject/${semesterId}`);
+  };
+
+  // New handler for subject update
+  const handleUpdateSubject = (subjectId) => {
+    navigate(`/updateSubject/${subjectId}`);
   };
 
   return (
@@ -67,9 +85,7 @@ const ViewCoursePage = () => {
                     {course.semesters.map((semester) => (
                       <div key={semester.id || semester._id} className="mb-4">
                         <div className="flex justify-between items-center mb-2">
-                          <h4 className="font-semibold">
-                            Semester {semester.semesterNum}
-                          </h4>
+                          <h4 className="font-semibold">Semester {semester.semesterNum}</h4>
                           <button
                             onClick={() => handleAddSubject(semester.id)}
                             className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
@@ -79,42 +95,45 @@ const ViewCoursePage = () => {
                         </div>
 
                         {semester.subjects?.length > 0 ? (
-                          <table className="w-full border-collapse border border-gray-200 mt-2">
+                          <table className="w-[70%] border-collapse border border-gray-200 mt-2">
                             <thead>
                               <tr className="bg-gray-100">
-                                <th className="border border-gray-300 px-3 py-1 text-left">
-                                  Subject Name
-                                </th>
-                                <th className="border border-gray-300 px-3 py-1 text-left">
-                                  Code
-                                </th>
+                                <th className="border border-gray-300 px-3 py-1 text-left">Subject Name</th>
+                                <th className="border border-gray-300 px-3 py-1 text-left">Code</th>
+                                <th className="border border-gray-300 px-3 py-1 text-left">Actions</th>
                               </tr>
                             </thead>
                             <tbody>
                               {semester.subjects.map((subject) => (
                                 <tr key={subject.id || subject._id}>
-                                  <td className="border border-gray-300 px-3 py-1">
-                                    {subject.subjectName}
-                                  </td>
-                                  <td className="border border-gray-300 px-3 py-1">
-                                    {subject.code}
+                                  <td className="border border-gray-300 px-3 py-1">{subject.subjectName}</td>
+                                  <td className="border border-gray-300 px-3 py-1">{subject.code}</td>
+                                  <td className="border border-gray-300 px-3 py-1 flex gap-4">
+                                    <button
+                                      className="text-blue-600 hover:text-blue-800"
+                                      onClick={() => handleUpdateSubject(subject.id || subject._id)}
+                                    >
+                                      Update
+                                    </button>
+                                    <button
+                                      className="text-red-600 hover:text-red-800"
+                                      onClick={() => handleDeleteSubject(subject.id || subject._id)}
+                                    >
+                                      Delete
+                                    </button>
                                   </td>
                                 </tr>
                               ))}
                             </tbody>
                           </table>
                         ) : (
-                          <p className="text-gray-500 italic ml-2">
-                            No subjects available.
-                          </p>
+                          <p className="text-gray-500 italic ml-2">No subjects available.</p>
                         )}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 italic ml-2 mt-2">
-                    No semesters available.
-                  </p>
+                  <p className="text-gray-500 italic ml-2 mt-2">No semesters available.</p>
                 )}
 
                 <div className="mt-4">
