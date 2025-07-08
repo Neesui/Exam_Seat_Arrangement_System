@@ -1,10 +1,10 @@
-import { apiSlice } from "./apiSlice";
+import { apiSlice } from "./apiSlice"; // Your base API slice setup
 
 export const courseApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     addCourses: builder.mutation({
       query: (newData) => ({
-        url: "/api/course/add",
+        url: "/api/course/add-full",    // match your backend route here
         method: "POST",
         body: newData,
       }),
@@ -18,6 +18,7 @@ export const courseApi = apiSlice.injectEndpoints({
 
     getCoursesById: builder.query({
       query: (id) => `/api/course/${id}`,
+      providesTags: (result, error, id) => [{ type: "COURSE", id }],
     }),
 
     updateCourses: builder.mutation({

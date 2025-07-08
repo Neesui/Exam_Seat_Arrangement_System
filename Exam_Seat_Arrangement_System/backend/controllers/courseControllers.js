@@ -48,12 +48,41 @@ export const createCourseFull = async (req, res) => {
 };
 
 // Get all courses
+// export const getCourses = async (req, res) => {
+//   try {
+//     const courses = await prisma.course.findMany();
+//     res.json({
+//       success: true,
+//       message: "Courses retrieved successfully",
+//       courses,
+//     });
+//   } catch (err) {
+//     console.error("Error retrieving courses:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to retrieve courses",
+//       error: err.message,
+//     });
+//   }
+// };
 export const getCourses = async (req, res) => {
   try {
-    const courses = await prisma.course.findMany();
+    const courses = await prisma.course.findMany({
+      include: {
+        semesters: {
+          orderBy: { semesterNum: 'asc' },  // optional sorting
+          include: {
+            subjects: {
+              orderBy: { subjectName: 'asc' }, // optional sorting
+            },
+          },
+        },
+      },
+    });
+
     res.json({
       success: true,
-      message: "Courses retrieved successfully",
+      message: "Courses with semesters and subjects retrieved successfully",
       courses,
     });
   } catch (err) {
@@ -65,6 +94,7 @@ export const getCourses = async (req, res) => {
     });
   }
 };
+
 
 // Get Course By ID
 export const getCourseById = async (req, res) => {
