@@ -6,12 +6,11 @@ import {
   useDeleteCoursesMutation,
 } from '../../redux/api/courseApi';
 
-const ViewFullCoursePage = () => {
+const ViewCoursePage = () => {
   const navigate = useNavigate();
   const { data, error, isLoading } = useGetCoursesQuery();
   const [deleteCourse] = useDeleteCoursesMutation();
 
-  // Delete handler
   const handleDelete = async (courseId) => {
     try {
       await deleteCourse(courseId).unwrap();
@@ -22,9 +21,12 @@ const ViewFullCoursePage = () => {
     }
   };
 
-  // Update handler
   const handleUpdate = (courseId) => {
     navigate(`/admin/UpdateCourse/${courseId}`);
+  };
+
+  const handleAddSemester = (courseId) => {
+    navigate(`/admin/AddSemester/${courseId}`);
   };
 
   return (
@@ -38,20 +40,28 @@ const ViewFullCoursePage = () => {
       ) : (
         <>
           {data?.courses?.length > 0 ? (
-            data.courses.map((course, courseIndex) => (
+            data.courses.map((course) => (
               <div
                 key={course.id || course._id}
                 className="mb-8 border border-gray-300 rounded p-4"
               >
-                <h3 className="text-xl font-semibold mb-2">
-                  {courseIndex + 1}. {course.name} (Duration: {course.duration})
-                </h3>
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-xl font-semibold">
+                    Course Name: {course.name} (Duration: {course.duration})
+                  </h3>
+                  <button
+                    onClick={() => handleAddSemester(course.id)}
+                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                  >
+                    + Add Semester
+                  </button>
+                </div>
 
                 {course.semesters?.length > 0 ? (
-                  <div className="ml-6">
+                  <div className="ml-6 mt-4">
                     {course.semesters.map((semester) => (
                       <div key={semester.id || semester._id} className="mb-4">
-                        <h4 className="font-semibold">
+                        <h4 className="font-semibold mb-2">
                           Semester {semester.semesterNum}
                         </h4>
                         {semester.subjects?.length > 0 ? (
@@ -88,7 +98,7 @@ const ViewFullCoursePage = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 italic ml-2">
+                  <p className="text-gray-500 italic ml-2 mt-2">
                     No semesters available.
                   </p>
                 )}
@@ -96,13 +106,13 @@ const ViewFullCoursePage = () => {
                 <div className="mt-4">
                   <button
                     className="text-blue-600 hover:text-blue-800 mr-4"
-                    onClick={() => handleUpdate(course.id || course._id)}
+                    onClick={() => handleUpdate(course.id)}
                   >
                     Update
                   </button>
                   <button
                     className="text-red-600 hover:text-red-800"
-                    onClick={() => handleDelete(course.id || course._id)}
+                    onClick={() => handleDelete(course.id)}
                   >
                     Delete
                   </button>
@@ -118,4 +128,4 @@ const ViewFullCoursePage = () => {
   );
 };
 
-export default ViewFullCoursePage;
+export default ViewCoursePage;
