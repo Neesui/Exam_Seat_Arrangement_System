@@ -4,9 +4,9 @@ export const semesterApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     addSemester: builder.mutation({
       query: ({ courseId, semesterNum, subjects }) => ({
-        url: `/semester/add/${courseId}`,
+        url: `/api/semester/add-with-subjects`,
         method: "POST",
-        body: { semesterNum, subjects },
+        body: { courseId, semesterNum, subjects },
       }),
     }),
 

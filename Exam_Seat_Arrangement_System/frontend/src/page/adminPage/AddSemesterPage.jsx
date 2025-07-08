@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAddSemesterMutation } from '../../redux/api/courseApi';
+import { useAddSemesterMutation } from '../../redux/api/semesterApi';
 
 const AddSemesterPage = () => {
   const { courseId } = useParams();
@@ -24,19 +24,48 @@ const AddSemesterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!semesterNum) return toast.error('Semester number is required');
+
+    if (!semesterNum) {
+      toast.error('Semester number is required');
+      return;
+    }
+
+    // Validate subjects - no empty names or codes allowed
+    const isSubjectsValid = subjects.every(
+      (sub) => sub.subjectName.trim() !== '' && sub.code.trim() !== ''
+    );
+    if (!isSubjectsValid) {
+      toast.error('Please fill all subject fields');
+      return;
+    }
+
+    const numericCourseId = Number(courseId);
+    if (isNaN(numericCourseId)) {
+      toast.error('Invalid course ID');
+      return;
+    }
+
+    // Clean subjects: trim all fields
+    const cleanedSubjects = subjects.map((sub) => ({
+      subjectName: sub.subjectName.trim(),
+      code: sub.code.trim(),
+    }));
+
+    const payload = {
+      courseId: numericCourseId,
+      semesterNum: Number(semesterNum),
+      subjects: cleanedSubjects,
+    };
+
+    console.log('Submitting semester payload:', payload); // Debug payload
 
     try {
-      await addSemester({
-        courseId,
-        semesterNum: parseInt(semesterNum, 10),
-        subjects,
-      }).unwrap();
+      await addSemester(payload).unwrap();
 
       toast.success('Semester added successfully!');
-      navigate('/admin/viewCourses');
+      navigate('/viewCourse'); // Adjust this route if needed
     } catch (err) {
-      console.error(err);
+      console.error('Error adding semester:', err);
       toast.error(err?.data?.message || 'Failed to add semester');
     }
   };
@@ -58,7 +87,7 @@ const AddSemesterPage = () => {
         </div>
 
         <div>
-          <h4 className="text-lg font-semibold">Subjects:</h4>
+          <h4 className="text-lg font-semibold mb-2">Subjects:</h4>
           {subjects.map((subject, index) => (
             <div key={index} className="flex gap-4 mb-2">
               <input

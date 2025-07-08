@@ -9,6 +9,7 @@ import userRouter from './routes/userRoutes.js';
 import invigilatorRouter from './routes/invigilatorRoutes.js';
 import courseRouter from './routes/courseRoutes.js';
 import semesterRouter from './routes/semesterRoutes.js';
+import subjectRouter from './routes/subjectRoutes.js';
 import roomRoutes from "./routes/roomRoutes.js";
 
 const app = express();
@@ -31,6 +32,7 @@ app.use("/api/user", userRouter);
 app.use("/api/invigilator", invigilatorRouter);
 app.use("/api/course", courseRouter);
 app.use("/api/semester", semesterRouter);
+app.use("/api/subject", subjectRouter);
 app.use("/api/rooms", roomRoutes);
 
 // 404 Handler

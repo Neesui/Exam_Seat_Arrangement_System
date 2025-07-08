@@ -1,5 +1,7 @@
 import AddCourseFullPage from "../../page/adminPage/AddCourseFullPage";
 import AddInvigilatorPage from "../../page/adminPage/AddInvigilatorPage";
+import AddSemesterPage from "../../page/adminPage/AddSemesterPage";
+import AddSubjectPage from "../../page/adminPage/AddSubjectPage";
 import AdminDashboard from "../../page/adminPage/AdminDashboard";
 import InvigilatorPage from "../../page/adminPage/InvigilatorPage";
 import StudentPage from "../../page/adminPage/StudentPage";
@@ -32,6 +34,14 @@ import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
   {
     path: '/viewCourse',
     element: <ViewCoursePage/>
+  },
+  {
+    path: '/addSemester/:courseId',
+    element: <AddSemesterPage />
+  },
+  {
+    path: '/addSubject/:semesterId',
+    element: <AddSubjectPage />
   },
   {
     path: '/student',

@@ -26,7 +26,11 @@ const ViewCoursePage = () => {
   };
 
   const handleAddSemester = (courseId) => {
-    navigate(`/admin/AddSemester/${courseId}`);
+    navigate(`/addSemester/${courseId}`);
+  };
+
+  const handleAddSubject = (semesterId) => {
+    navigate(`/addSubject/${semesterId}`);
   };
 
   return (
@@ -40,14 +44,14 @@ const ViewCoursePage = () => {
       ) : (
         <>
           {data?.courses?.length > 0 ? (
-            data.courses.map((course) => (
+            data.courses.map((course, courseIndex) => (
               <div
                 key={course.id || course._id}
                 className="mb-8 border border-gray-300 rounded p-4"
               >
-                <div className="flex justify-between items-center mb-2">
+                <div className="flex justify-between items-center">
                   <h3 className="text-xl font-semibold">
-                    Course Name: {course.name} (Duration: {course.duration})
+                    {courseIndex + 1}. {course.name} (Duration: {course.duration})
                   </h3>
                   <button
                     onClick={() => handleAddSemester(course.id)}
@@ -61,9 +65,18 @@ const ViewCoursePage = () => {
                   <div className="ml-6 mt-4">
                     {course.semesters.map((semester) => (
                       <div key={semester.id || semester._id} className="mb-4">
-                        <h4 className="font-semibold mb-2">
-                          Semester {semester.semesterNum}
-                        </h4>
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="font-semibold">
+                            Semester {semester.semesterNum}
+                          </h4>
+                          <button
+                            onClick={() => handleAddSubject(semester.id)}
+                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                          >
+                            + Add Subject
+                          </button>
+                        </div>
+
                         {semester.subjects?.length > 0 ? (
                           <table className="w-full border-collapse border border-gray-200 mt-2">
                             <thead>
