@@ -1,8 +1,7 @@
 import express from 'express';
 import { authenticate } from "../middlewares/authenticate.js";
 import { roleCheck } from "../middlewares/authorize.js";
-import {} from "../controllers/subjectController.js";
-import { addSubject } from '../controllers/subjectController.js';
+import { addSubject, getSubjects, getSubjectById, updateSubject, deleteSubject } from '../controllers/subjectControllers.js';
 
 const router = express.Router();
 
