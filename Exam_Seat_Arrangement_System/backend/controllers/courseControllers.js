@@ -1,29 +1,49 @@
 import prisma from "../utils/db.js";
+import { validateCoursePayload } from '../utils/validation.js';
 
-// Create Course
-export const addCourse = async (req, res) => {
-  const { name, duration } = req.body;
+// Create Course, Semester, and Subjects
+export const createCourseFull = async (req, res) => {
+  const { name, duration, semesters } = req.body;
+
+  const error = validateCoursePayload(name, duration, semesters);
+  if (error) {
+    return res.status(400).json({ success: false, message: error });
+  }
 
   try {
     const course = await prisma.course.create({
       data: {
         name,
-        duration,
+        duration: Number(duration),
+        semesters: {
+          create: semesters.map((sem) => ({
+            semesterNum: Number(sem.semesterNum),
+            subjects: {
+              create: sem.subjects.map((sub) => ({
+                subjectName: sub.subjectName,
+                code: sub.code,
+              })),
+            },
+          })),
+        },
+      },
+      include: {
+        semesters: {
+          include: {
+            subjects: true,
+          },
+        },
       },
     });
 
     res.status(201).json({
       success: true,
-      message: "Course created successfully",
+      message: 'Course with semesters and subjects created successfully',
       course,
     });
   } catch (err) {
-    console.error("Error creating course:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to create course",
-      error: err.message,
-    });
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -46,7 +66,6 @@ export const getCourses = async (req, res) => {
   }
 };
 
-
 // Get Course By ID
 export const getCourseById = async (req, res) => {
   const { id } = req.params;
@@ -54,6 +73,11 @@ export const getCourseById = async (req, res) => {
   try {
     const course = await prisma.course.findUnique({
       where: { id: Number(id) },
+      include: {
+        semesters: {
+          include: { subjects: true },
+        },
+      },
     });
 
     if (!course) {
@@ -78,25 +102,24 @@ export const getCourseById = async (req, res) => {
   }
 };
 
-
-// update courses
+// Update course
 export const updateCourse = async (req, res) => {
   const { name, duration } = req.body;
   const courseId = req.params.id;
 
   try {
     const updatedCourse = await prisma.course.update({
-      where: { id: courseId },
+      where: { id: Number(courseId) },
       data: {
         ...(name && { name }),
-        ...(duration !== undefined && { duration }),
+        ...(duration !== undefined && { duration: Number(duration) }),
       },
     });
 
     res.json({
       success: true,
       message: "Course updated successfully",
-      updatedCourse,    
+      updatedCourse,
     });
   } catch (err) {
     console.error("Error updating course:", err);
@@ -106,9 +129,9 @@ export const updateCourse = async (req, res) => {
       error: err.message,
     });
   }
-}
+};
 
-// delete course
+// Delete course
 export const deleteCourse = async (req, res) => {
   const { id } = req.params;
 
@@ -123,9 +146,17 @@ export const deleteCourse = async (req, res) => {
     });
   } catch (err) {
     console.error("Error deleting course:", err);
-    res.status(404).json({
+
+    if (err.code === 'P2025') {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    res.status(500).json({
       success: false,
-      message: "Course not found",
+      message: "Failed to delete course",
       error: err.message,
     });
   }

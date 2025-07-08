@@ -1,4 +1,4 @@
-import AddCoursePage from "../../page/adminPage/AddCoursePage";
+import AddCourseFullPage from "../../page/adminPage/AddCourseFullPage";
 import AddInvigilatorPage from "../../page/adminPage/AddInvigilatorPage";
 import AdminDashboard from "../../page/adminPage/AdminDashboard";
 import InvigilatorPage from "../../page/adminPage/InvigilatorPage";
@@ -26,8 +26,8 @@ import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
     element: <ViewInvigilatorPage/>
   },
   {
-    path: '/addCourse',
-    element: <AddCoursePage />
+    path: '/addfullCourse',
+    element: <AddCourseFullPage />
   },
   {
     path: '/viewCourse',
