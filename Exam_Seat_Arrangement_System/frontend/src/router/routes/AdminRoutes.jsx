@@ -5,6 +5,7 @@ import AddSubjectPage from "../../page/adminPage/AddSubjectPage";
 import AdminDashboard from "../../page/adminPage/AdminDashboard";
 import InvigilatorPage from "../../page/adminPage/InvigilatorPage";
 import StudentPage from "../../page/adminPage/StudentPage";
+import UpdateCoursePage from "../../page/adminPage/UpdateCoursePage";
 import ViewCoursePage from "../../page/adminPage/ViewFullCoursePage";
 import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
 
@@ -34,6 +35,10 @@ import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
   {
     path: '/viewCourse',
     element: <ViewCoursePage/>
+  },
+  {
+    path: "/admin/UpdateCourse/:courseId",
+    element: <UpdateCoursePage />
   },
   {
     path: '/addSemester/:courseId',

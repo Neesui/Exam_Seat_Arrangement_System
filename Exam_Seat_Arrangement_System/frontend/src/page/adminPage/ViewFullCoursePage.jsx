@@ -21,6 +21,7 @@ const ViewCoursePage = () => {
     }
   };
 
+  // FIX: Use courseId param correctly here
   const handleUpdate = (courseId) => {
     navigate(`/admin/UpdateCourse/${courseId}`);
   };
