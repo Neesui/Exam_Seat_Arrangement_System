@@ -16,7 +16,6 @@ const UpdateSubjectPage = () => {
 
   useEffect(() => {
     if (courseData?.courses) {
-      // Find the subject by ID in all courses and semesters
       for (const course of courseData.courses) {
         for (const semester of course.semesters || []) {
           const subject = semester.subjects?.find(
@@ -25,7 +24,7 @@ const UpdateSubjectPage = () => {
           if (subject) {
             setSubjectName(subject.subjectName);
             setCode(subject.code);
-            return; // stop after found
+            return;
           }
         }
       }
@@ -34,7 +33,9 @@ const UpdateSubjectPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
+      // Note: removed subjectId from body
       await updateSubject({ subjectId, subjectName, code }).unwrap();
       toast.success("Subject updated successfully!");
       navigate("/viewCourse");

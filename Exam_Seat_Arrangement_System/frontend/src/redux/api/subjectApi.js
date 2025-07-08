@@ -10,13 +10,13 @@ export const subjectApi = apiSlice.injectEndpoints({
         }),
       }),
 
-    updateSubject: builder.mutation({
-      query: ({ subjectId, subjectName, code, semesterId }) => ({
-        url: `/api/subject/${subjectId}`, // ✅ Matches your backend
-        method: "PUT",
-        body: { subjectName, code, semesterId },
+      updateSubject: builder.mutation({
+        query: ({ subjectId, subjectName, code }) => ({
+          url: `/api/subject/${subjectId}`,
+          method: "PUT",
+          body: { subjectName, code },
+        }),
       }),
-    }),
 
     deleteSubject: builder.mutation({
       query: (subjectId) => ({

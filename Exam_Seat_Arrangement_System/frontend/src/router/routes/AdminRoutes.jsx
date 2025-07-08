@@ -42,7 +42,7 @@ import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
     element: <UpdateCoursePage />
   },
   {
-    path: "/updateSubject/:semesterId",
+    path: "/updateSubject/:subjectId",
     element: <UpdateSubjectPage />
   },
   {

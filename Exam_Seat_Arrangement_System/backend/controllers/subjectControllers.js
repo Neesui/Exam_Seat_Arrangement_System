@@ -8,7 +8,7 @@ export const addSubject = async (req, res) => {
     const subject = await prisma.subject.create({
       data: {
         subjectName,
-        code: String(code), // ✅ Ensure code is string
+        code: String(code),
         semesterId: Number(semesterId),
       },
     });
@@ -83,33 +83,28 @@ export const getSubjectById = async (req, res) => {
   }
 };
 
-// Update subject
+// Update 
 export const updateSubject = async (req, res) => {
-  const id = Number(req.params.id);
-  const { subjectName, code, semesterId } = req.body;
-
   try {
+    const { id } = req.params;           
+    const { subjectName, code } = req.body;
+
+    if (!id || !subjectName || !code) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
     const updatedSubject = await prisma.subject.update({
-      where: { id },
+      where: { id: Number(id) },
       data: {
         subjectName,
-        code: String(code), // ✅ Ensure code is string
-        semesterId: Number(semesterId),
+        code,
       },
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Subject updated successfully",
-      subject: updatedSubject,
-    });
-  } catch (err) {
-    console.error("[updateSubject] Error:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update subject",
-      error: err.message,
-    });
+    res.status(200).json({ message: "Subject updated successfully", subject: updatedSubject });
+  } catch (error) {
+    console.error("[updateSubject] Error:", error);
+    res.status(500).json({ message: "Failed to update subject", error: error.message });
   }
 };
 
