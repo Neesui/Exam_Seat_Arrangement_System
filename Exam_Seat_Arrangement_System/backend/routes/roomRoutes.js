@@ -6,7 +6,7 @@ import { createRoom, deleteRoom, getRoomById, getRooms, updateRoom } from "../co
 
 const router = express.Router();
 
-router.post("/", authenticate, roleCheck(["ADMIN"]), createRoom);
+router.post("/add", authenticate, roleCheck(["ADMIN"]), createRoom);
 router.get("/get", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getRooms);
 router.get("/:id", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getRoomById);
 router.put("/:id", authenticate, roleCheck(["ADMIN"]), updateRoom);
