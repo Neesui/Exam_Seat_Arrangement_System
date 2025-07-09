@@ -10,6 +10,7 @@ import UpdateInvigilatorPage from "../../page/invigilatorPage/UpdateInvigilatorP
 import UpdateSubjectPage from "../../page/adminPage/UpdateSubjectPage";
 import ViewCoursePage from "../../page/adminPage/ViewFullCoursePage";
 import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
+import AddRoomPage from "../../page/adminPage/AddRoomPage";
 
 
  const adminRoutes = [
@@ -58,6 +59,10 @@ import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
   {
     path: '/addSubject/:semesterId',
     element: <AddSubjectPage />
+  },
+  {
+    path: '/addRoom',
+    element: <AddRoomPage />
   },
   {
     path: '/student',
