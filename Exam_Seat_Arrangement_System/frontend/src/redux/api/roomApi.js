@@ -4,7 +4,7 @@ export const roomApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     addRoom: builder.mutation({
       query: (newData) => ({
-        url: "/api/room/add", 
+        url: "/api/rooms/add", 
         method: "POST",
         body: newData,
       }),
@@ -12,18 +12,18 @@ export const roomApi = apiSlice.injectEndpoints({
     }),
 
     getRooms: builder.query({
-      query: () => "/api/room/get", 
+      query: () => "/api/rooms/get", 
       providesTags: ["ROOM"],
     }),
 
     getRoomById: builder.query({
-      query: (id) => `/api/room/${id}`,
+      query: (id) => `/api/rooms/${id}`,
       providesTags: (result, error, id) => [{ type: "ROOM", id }],
     }),
 
     updateRoom: builder.mutation({
       query: ({ id, ...data }) => ({
-        url: `/api/room/${id}`,
+        url: `/api/rooms/${id}`,
         method: "PUT",
         body: data,
       }),
@@ -32,7 +32,7 @@ export const roomApi = apiSlice.injectEndpoints({
 
     deleteRoom: builder.mutation({
       query: (id) => ({
-        url: `/api/room/${id}`,
+        url: `/api/rooms/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["ROOM"],

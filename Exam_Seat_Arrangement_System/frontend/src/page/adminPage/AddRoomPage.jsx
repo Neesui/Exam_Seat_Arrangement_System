@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
+import { useAddRoomMutation } from "../../redux/api/roomApi"; // adjust path as needed
 
 const AddRoomPage = () => {
   const [roomNumber, setRoomNumber] = useState("");
   const [block, setBlock] = useState("");
   const [floor, setFloor] = useState("");
   const navigate = useNavigate();
+
+  const [addRoom, { isLoading }] = useAddRoomMutation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,29 +20,17 @@ const AddRoomPage = () => {
     }
 
     try {
-      // You can replace the hard-coded token with your auth context / Redux auth state
-      const token = localStorage.getItem("token");
+      const result = await addRoom({ roomNumber, block, floor }).unwrap();
 
-      const { data } = await axios.post(
-        "http://localhost:3000/api/room",
-        { roomNumber, block, floor },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (data.success) {
+      if (result.success) {
         toast.success("Room added successfully!");
-        navigate("/rooms"); // Change path as per your routing
+        navigate("/rooms"); // Change this to your room list route
       } else {
-        toast.error(data.message || "Something went wrong");
+        toast.error(result.message || "Something went wrong");
       }
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Failed to add room");
+      toast.error(error?.data?.message || "Failed to add room");
     }
   };
 
@@ -83,9 +73,12 @@ const AddRoomPage = () => {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+          className={`w-full p-2 rounded text-white ${
+            isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+          }`}
+          disabled={isLoading}
         >
-          Add Room
+          {isLoading ? "Adding..." : "Add Room"}
         </button>
       </form>
     </div>
