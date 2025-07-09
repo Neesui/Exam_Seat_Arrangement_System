@@ -6,7 +6,7 @@ import AdminDashboard from "../../page/adminPage/AdminDashboard";
 import InvigilatorPage from "../../page/adminPage/InvigilatorPage";
 import StudentPage from "../../page/adminPage/StudentPage";
 import UpdateCoursePage from "../../page/adminPage/UpdateCoursePage";
-import UpdateInvigilatorPage from "../../page/adminPage/UpdateInvigilatorPage";
+import UpdateInvigilatorPage from "../../page/invigilatorPage/UpdateInvigilatorPage";
 import UpdateSubjectPage from "../../page/adminPage/UpdateSubjectPage";
 import ViewCoursePage from "../../page/adminPage/ViewFullCoursePage";
 import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
