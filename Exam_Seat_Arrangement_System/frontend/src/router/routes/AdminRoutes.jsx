@@ -6,6 +6,7 @@ import AdminDashboard from "../../page/adminPage/AdminDashboard";
 import InvigilatorPage from "../../page/adminPage/InvigilatorPage";
 import StudentPage from "../../page/adminPage/StudentPage";
 import UpdateCoursePage from "../../page/adminPage/UpdateCoursePage";
+import UpdateInvigilatorPage from "../../page/adminPage/UpdateInvigilatorPage";
 import UpdateSubjectPage from "../../page/adminPage/UpdateSubjectPage";
 import ViewCoursePage from "../../page/adminPage/ViewFullCoursePage";
 import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
@@ -29,6 +30,11 @@ import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
     path: '/viewInvigilator',
     element: <ViewInvigilatorPage/>
   },
+  {
+    path: "/updateInvigilator/:id", 
+    element: <UpdateInvigilatorPage />
+  },
+
   {
     path: '/addfullCourse',
     element: <AddCourseFullPage />

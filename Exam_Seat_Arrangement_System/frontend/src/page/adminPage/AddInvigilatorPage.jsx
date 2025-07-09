@@ -36,7 +36,7 @@ const AddInvigilatorPage = () => {
         gender: '',
       });
       setTimeout(() => {
-        navigate('/admin/ViewInvigilator');
+        navigate('/viewInvigilator');
       }, 1000);
     } catch (err) {
       toast.error(err.data?.message || 'Failed to add invigilator.');
