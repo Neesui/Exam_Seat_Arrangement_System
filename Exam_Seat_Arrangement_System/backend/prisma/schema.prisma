@@ -103,6 +103,8 @@ model Room {
   roomNumber      String          @unique
   block           String?
   floor           String?
+  maxColumns  Int       @default(2)
+
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -114,11 +116,16 @@ model Bench {
   id        Int       @id @default(autoincrement())
   roomId    Int
   benchNo   Int
+  row       Int       // Row number, starting from 1
+  column    Int       // Column number, starting from 0
   capacity  Int       // 2 or 3 seats
   createdAt DateTime  @default(now())
 
   room      Room      @relation(fields: [roomId], references: [id])
   seats     Seat[]
+
+    @@unique([roomId, row, column])
+
 }
 
 model Seat {
