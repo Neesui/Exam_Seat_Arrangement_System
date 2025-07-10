@@ -2,7 +2,7 @@ import React from 'react'
 
 const InvigilatorDashboard = () => {
   return (
-    <div>InvigilatorDashboard</div>
+    <div className='bg-red-600'>InvigilatorDashboard</div>
   )
 }
 

@@ -11,6 +11,8 @@ import UpdateSubjectPage from "../../page/adminPage/UpdateSubjectPage";
 import ViewCoursePage from "../../page/adminPage/ViewFullCoursePage";
 import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
 import AddRoomPage from "../../page/adminPage/AddRoomPage";
+import ViewRoomPage from "../../page/adminPage/ViewRoomPage";
+import UpdateRoomPage from "../../page/adminPage/UpdateRoomPage";
 
 
  const adminRoutes = [
@@ -63,6 +65,14 @@ import AddRoomPage from "../../page/adminPage/AddRoomPage";
   {
     path: '/addRoom',
     element: <AddRoomPage />
+  },
+  {
+    path: '/viewRoom',
+    element: <ViewRoomPage />
+  },
+  {
+    path: '/updateRoom/:roomId',
+    element: <UpdateRoomPage />
   },
   {
     path: '/student',

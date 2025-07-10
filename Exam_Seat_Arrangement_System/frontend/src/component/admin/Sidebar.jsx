@@ -123,7 +123,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 </li>
                 <li className="p-4 hover:bg-gray-600 flex items-center">
                   <FaEye className="mr-3" />
-                  <Link to="/ViewRooms">View Room Details</Link>
+                  <Link to="/viewRoom">View Room Details</Link>
                 </li>
               </ul>
             )}

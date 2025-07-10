@@ -24,7 +24,7 @@ const AddRoomPage = () => {
 
       if (result.success) {
         toast.success("Room added successfully!");
-        navigate("/rooms"); // Change this to your room list route
+        navigate("/viewRoom"); // Change this to your room list route
       } else {
         toast.error(result.message || "Something went wrong");
       }
@@ -35,7 +35,7 @@ const AddRoomPage = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded shadow">
+    <div className="max-w-lg mt-20 p-6 ml-6 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-4">Add New Room</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
