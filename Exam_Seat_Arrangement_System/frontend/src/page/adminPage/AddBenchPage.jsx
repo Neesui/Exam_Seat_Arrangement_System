@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAddBenchMutation } from "../../redux/api/benchApi";
-import { useGetRoomsQuery } from "../../redux/api/roomApi"; 
+import { useGetRoomsQuery } from "../../redux/api/roomApi";
 
 const AddBenchPage = () => {
   const navigate = useNavigate();
 
   const [roomId, setRoomId] = useState("");
-  const [benchNo, setBenchNo] = useState("");
   const [row, setRow] = useState("");
   const [column, setColumn] = useState("");
   const [capacity, setCapacity] = useState("");
@@ -22,7 +21,6 @@ const AddBenchPage = () => {
     try {
       const result = await addBench({
         roomId: Number(roomId),
-        benchNo: Number(benchNo),
         row: Number(row),
         column: Number(column),
         capacity: Number(capacity),
@@ -56,6 +54,7 @@ const AddBenchPage = () => {
               value={roomId}
               onChange={(e) => setRoomId(e.target.value)}
               className="w-full p-2 border rounded"
+              required
             >
               <option value="">Select Room</option>
               {roomData?.rooms?.map((room) => (
@@ -68,17 +67,6 @@ const AddBenchPage = () => {
         </div>
 
         <div>
-          <label className="block font-medium mb-1">Bench Number</label>
-          <input
-            type="number"
-            value={benchNo}
-            onChange={(e) => setBenchNo(e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="Enter Bench Number"
-          />
-        </div>
-
-        <div>
           <label className="block font-medium mb-1">Row</label>
           <input
             type="number"
@@ -86,6 +74,7 @@ const AddBenchPage = () => {
             onChange={(e) => setRow(e.target.value)}
             className="w-full p-2 border rounded"
             placeholder="Enter Row Number"
+            required
           />
         </div>
 
@@ -97,6 +86,7 @@ const AddBenchPage = () => {
             onChange={(e) => setColumn(e.target.value)}
             className="w-full p-2 border rounded"
             placeholder="Enter Column Number"
+            required
           />
         </div>
 
@@ -108,6 +98,7 @@ const AddBenchPage = () => {
             onChange={(e) => setCapacity(e.target.value)}
             className="w-full p-2 border rounded"
             placeholder="Enter Capacity"
+            required
           />
         </div>
 

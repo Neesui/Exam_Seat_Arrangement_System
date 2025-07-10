@@ -1,13 +1,36 @@
 import prisma from "../utils/db.js";
 
+// Create Bench — Auto-generate benchNo
 export const createBench = async (req, res) => {
   try {
-    const { roomId, benchNo, row, column, capacity } = req.body;
+    const { roomId, row, column, capacity } = req.body;
+
+    // Check for duplicate row/column in the same room
+    const existingBench = await prisma.bench.findUnique({
+      where: {
+        roomId_row_column: { roomId: Number(roomId), row: Number(row), column: Number(column) },
+      },
+    });
+
+    if (existingBench) {
+      return res.status(400).json({
+        success: false,
+        message: "A bench already exists at this row and column in the room.",
+      });
+    }
+
+    // Get the highest benchNo for this room
+    const lastBench = await prisma.bench.findFirst({
+      where: { roomId: Number(roomId) },
+      orderBy: { benchNo: "desc" },
+    });
+
+    const nextBenchNo = lastBench ? lastBench.benchNo + 1 : 1;
 
     const bench = await prisma.bench.create({
       data: {
         roomId: Number(roomId),
-        benchNo: Number(benchNo),
+        benchNo: nextBenchNo,
         row: Number(row),
         column: Number(column),
         capacity: Number(capacity),
@@ -20,10 +43,16 @@ export const createBench = async (req, res) => {
       bench,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to create bench", error: error.message });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create bench",
+      error: error.message,
+    });
   }
 };
 
+// Get all benches
 export const getBenches = async (req, res) => {
   try {
     const benches = await prisma.bench.findMany({
@@ -41,6 +70,7 @@ export const getBenches = async (req, res) => {
   }
 };
 
+// Get bench by ID
 export const getBenchById = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -63,44 +93,43 @@ export const getBenchById = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch bench", error: error.message });
   }
 };
-// Get benches by roomId, sorted by row and column
-export const getBenchesByRoom = async (req, res) => {
-    try {
-      const roomId = parseInt(req.params.roomId);
-  
-      const benches = await prisma.bench.findMany({
-        where: { roomId },
-        orderBy: [{ row: "asc" }, { column: "asc" }],
-        select: {
-          id: true,
-          benchNo: true,
-          row: true,
-          column: true,
-          capacity: true,
-        },
-      });
-  
-      res.json({
-        success: true,
-        message: `Benches for room ${roomId} retrieved successfully`,
-        benches,
-      });
-    } catch (error) {
-      res.status(500).json({ success: false, message: "Failed to fetch benches by room", error: error.message });
-    }
-  };
-  
 
+// Get benches by roomId
+export const getBenchesByRoom = async (req, res) => {
+  try {
+    const roomId = parseInt(req.params.roomId);
+
+    const benches = await prisma.bench.findMany({
+      where: { roomId },
+      orderBy: [{ row: "asc" }, { column: "asc" }],
+      select: {
+        id: true,
+        benchNo: true,
+        row: true,
+        column: true,
+        capacity: true,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: `Benches for room ${roomId} retrieved successfully`,
+      benches,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to fetch benches by room", error: error.message });
+  }
+};
+
+// Update bench — allow only row, column, capacity update
 export const updateBench = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { roomId, benchNo, row, column, capacity } = req.body;
+    const { row, column, capacity } = req.body;
 
     const bench = await prisma.bench.update({
       where: { id },
       data: {
-        roomId: Number(roomId),
-        benchNo: Number(benchNo),
         row: Number(row),
         column: Number(column),
         capacity: Number(capacity),
@@ -117,6 +146,7 @@ export const updateBench = async (req, res) => {
   }
 };
 
+// Delete bench
 export const deleteBench = async (req, res) => {
   try {
     const id = parseInt(req.params.id);

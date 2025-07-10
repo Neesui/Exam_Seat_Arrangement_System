@@ -115,17 +115,17 @@ model Room {
 model Bench {
   id        Int       @id @default(autoincrement())
   roomId    Int
-  benchNo   Int
-  row       Int       // Row number, starting from 1
-  column    Int       // Column number, starting from 0
-  capacity  Int       // 2 or 3 seats
+  benchNo   Int       
+  row       Int
+  column    Int
+  capacity  Int
   createdAt DateTime  @default(now())
 
   room      Room      @relation(fields: [roomId], references: [id])
   seats     Seat[]
 
-    @@unique([roomId, row, column])
-
+  @@unique([roomId, row, column])
+  @@unique([roomId, benchNo])  
 }
 
 model Seat {
