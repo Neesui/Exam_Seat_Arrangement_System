@@ -21,6 +21,11 @@ export const benchApi = apiSlice.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "BENCH", id }],
     }),
 
+    getBenchesByRoom: builder.query({
+        query: (roomId) => `/api/benches/get-by-room/${roomId}`,
+        providesTags: ["BENCH"],
+      }),
+
     updateBench: builder.mutation({
       query: ({ id, ...data }) => ({
         url: `/api/bench/${id}`,
@@ -43,6 +48,7 @@ export const benchApi = apiSlice.injectEndpoints({
 export const {
   useGetBenchesQuery,
   useGetBenchByIdQuery,
+  useGetBenchesByRoomQuery,
   useAddBenchMutation,
   useUpdateBenchMutation,
   useDeleteBenchMutation,

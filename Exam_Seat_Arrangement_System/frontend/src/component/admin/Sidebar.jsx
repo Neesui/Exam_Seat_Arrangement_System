@@ -145,7 +145,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 </li>
                 <li className="p-4 hover:bg-gray-600 flex items-center">
                   <FaEye className="mr-3" />
-                  <Link to="/ViewBench">View Bench Details</Link>
+                  <Link to="/viewBench">View Bench Details</Link>
                 </li>
               </ul>
             )}

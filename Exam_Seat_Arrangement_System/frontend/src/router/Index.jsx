@@ -15,7 +15,6 @@ const protectedRoutes = [
     element: (
       <AuthGuard>
         <AdminLayout />
-        <InvigilatorLayout />
       </AuthGuard>
     ),
     children: adminRoutes.map((route) => ({
