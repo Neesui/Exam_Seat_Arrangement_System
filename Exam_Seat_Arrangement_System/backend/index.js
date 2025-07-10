@@ -11,6 +11,7 @@ import courseRouter from './routes/courseRoutes.js';
 import semesterRouter from './routes/semesterRoutes.js';
 import subjectRouter from './routes/subjectRoutes.js';
 import roomRoutes from "./routes/roomRoutes.js";
+import benchRouter from "./routes/benchRoutes.js";
 
 const app = express();
 const port = 3000;
@@ -34,6 +35,7 @@ app.use("/api/course", courseRouter);
 app.use("/api/semester", semesterRouter);
 app.use("/api/subject", subjectRouter);
 app.use("/api/rooms", roomRoutes);
+app.use("/api/bench", benchRouter);
 
 // 404 Handler
 app.use((req, res) => {

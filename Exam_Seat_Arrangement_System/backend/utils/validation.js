@@ -59,3 +59,29 @@ export const validateCoursePayload = (name, duration, semesters) => {
     return null;
   };
   
+  // validation.js
+
+export const validateBenchData = (data) => {
+  const errors = [];
+
+  if (data.roomId === undefined || isNaN(Number(data.roomId))) {
+    errors.push("roomId is required and must be a number.");
+  }
+  if (data.benchNo === undefined || isNaN(Number(data.benchNo))) {
+    errors.push("benchNo is required and must be a number.");
+  }
+  if (data.row === undefined || isNaN(Number(data.row))) {
+    errors.push("row is required and must be a number.");
+  }
+  if (data.column === undefined || isNaN(Number(data.column))) {
+    errors.push("column is required and must be a number.");
+  }
+  if (data.capacity === undefined || isNaN(Number(data.capacity))) {
+    errors.push("capacity is required and must be a number.");
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
