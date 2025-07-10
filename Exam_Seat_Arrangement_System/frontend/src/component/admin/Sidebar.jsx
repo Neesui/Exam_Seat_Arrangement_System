@@ -141,7 +141,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <ul className="pl-4 mt-2 bg-gray-700">
                 <li className="p-4 hover:bg-gray-600 flex items-center">
                   <FaPlus className="mr-3" />
-                  <Link to="/AddBenchForm">Add Bench</Link>
+                  <Link to="/addBench">Add Bench</Link>
                 </li>
                 <li className="p-4 hover:bg-gray-600 flex items-center">
                   <FaEye className="mr-3" />

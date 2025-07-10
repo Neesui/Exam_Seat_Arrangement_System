@@ -13,6 +13,7 @@ import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
 import AddRoomPage from "../../page/adminPage/AddRoomPage";
 import ViewRoomPage from "../../page/adminPage/ViewRoomPage";
 import UpdateRoomPage from "../../page/adminPage/UpdateRoomPage";
+import AddBenchPage from "../../page/adminPage/AddBenchPage";
 
 
  const adminRoutes = [
@@ -73,6 +74,10 @@ import UpdateRoomPage from "../../page/adminPage/UpdateRoomPage";
   {
     path: '/updateRoom/:roomId',
     element: <UpdateRoomPage />
+  },
+  {
+    path: '/addBench',
+    element: <AddBenchPage />
   },
   {
     path: '/student',

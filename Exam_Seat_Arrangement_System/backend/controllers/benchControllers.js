@@ -63,6 +63,33 @@ export const getBenchById = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch bench", error: error.message });
   }
 };
+// Get benches by roomId, sorted by row and column
+export const getBenchesByRoom = async (req, res) => {
+    try {
+      const roomId = parseInt(req.params.roomId);
+  
+      const benches = await prisma.bench.findMany({
+        where: { roomId },
+        orderBy: [{ row: "asc" }, { column: "asc" }],
+        select: {
+          id: true,
+          benchNo: true,
+          row: true,
+          column: true,
+          capacity: true,
+        },
+      });
+  
+      res.json({
+        success: true,
+        message: `Benches for room ${roomId} retrieved successfully`,
+        benches,
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to fetch benches by room", error: error.message });
+    }
+  };
+  
 
 export const updateBench = async (req, res) => {
   try {
