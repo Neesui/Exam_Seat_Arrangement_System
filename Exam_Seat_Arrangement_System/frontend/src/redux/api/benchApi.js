@@ -22,7 +22,7 @@ export const benchApi = apiSlice.injectEndpoints({
     }),
 
     getBenchesByRoom: builder.query({
-        query: (roomId) => `/api/benches/get-by-room/${roomId}`,
+        query: (roomId) => `/api/bench/get-by-room/${roomId}`,
         providesTags: ["BENCH"],
       }),
 

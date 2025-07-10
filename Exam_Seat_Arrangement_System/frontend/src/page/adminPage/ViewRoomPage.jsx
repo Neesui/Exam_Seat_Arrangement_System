@@ -10,7 +10,7 @@ const ViewRoomPage = () => {
 
   const handleDelete = async (roomId) => {
     try {
-      await deleteRoom(Number(roomId)).unwrap(); // ✔️ convert to number
+      await deleteRoom(Number(roomId)).unwrap();
       toast.success('Room deleted successfully!');
     } catch (err) {
       toast.error(err?.data?.message || 'Failed to delete room.');
@@ -21,8 +21,12 @@ const ViewRoomPage = () => {
     navigate(`/updateRoom/${roomId}`);
   };
 
+  const handleViewBenches = (roomId) => {
+    navigate(`/viewBenchByRoom/${roomId}`);
+  };
+
   return (
-    <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md w-full max-w-screen-lg mx-auto">
+    <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md w-[60%] max-w-screen-lg mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-gray-800">View Rooms</h2>
 
       {isLoading ? (
@@ -56,10 +60,16 @@ const ViewRoomPage = () => {
                       Update
                     </button>
                     <button
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 mr-2"
                       onClick={() => handleDelete(room.id)}
                     >
                       Delete
+                    </button>
+                    <button
+                      className="text-green-500 hover:text-green-700"
+                      onClick={() => handleViewBenches(room.id)}
+                    >
+                      View Benches
                     </button>
                   </td>
                 </tr>

@@ -15,6 +15,7 @@ import ViewRoomPage from "../../page/adminPage/ViewRoomPage";
 import UpdateRoomPage from "../../page/adminPage/UpdateRoomPage";
 import AddBenchPage from "../../page/adminPage/AddBenchPage";
 import ViewBenchPage from "../../page/adminPage/ViewBenchPage";
+import ViewBenchByRoomPage from "../../page/adminPage/ViewBenchByRoomPage";
 
 
  const adminRoutes = [
@@ -83,6 +84,10 @@ import ViewBenchPage from "../../page/adminPage/ViewBenchPage";
   {
     path: '/viewBench',
     element: <ViewBenchPage/>
+  },
+  {
+    path: '/viewBenchByRoom/:roomId',
+    element: <ViewBenchByRoomPage/>
   },
   {
     path: '/student',
