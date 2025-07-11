@@ -1,32 +1,43 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useAddBenchMutation } from "../../redux/api/benchApi";
+import {
+  useGetBenchesQuery,
+  useUpdateBenchMutation,
+} from "../../redux/api/benchApi";
 import { useGetRoomsQuery } from "../../redux/api/roomApi";
 
-const AddBenchPage = () => {
+const UpdateBenchPage = () => {
+  const { benchId } = useParams();
   const navigate = useNavigate();
-  const { roomId: roomIdParam } = useParams();
 
-  const [roomId, setRoomId] = useState(roomIdParam || "");
+  const { data: benchesData, isLoading: benchLoading, error: benchError } = useGetBenchesQuery();
+  const [updateBench, { isLoading: isUpdating }] = useUpdateBenchMutation();
+  const { data: roomData, error: roomError, isLoading: roomLoading } = useGetRoomsQuery();
+
+  const [roomId, setRoomId] = useState("");
   const [row, setRow] = useState("");
   const [column, setColumn] = useState("");
   const [capacity, setCapacity] = useState("");
 
-  const [addBench, { isLoading }] = useAddBenchMutation();
-  const { data: roomData, error: roomError, isLoading: roomLoading } = useGetRoomsQuery();
-
   useEffect(() => {
-    if (roomIdParam) {
-      setRoomId(roomIdParam);
+    if (benchesData?.benches) {
+      const bench = benchesData.benches.find((b) => String(b.id) === String(benchId));
+      if (bench) {
+        setRoomId(bench.roomId);
+        setRow(bench.row);
+        setColumn(bench.column);
+        setCapacity(bench.capacity);
+      }
     }
-  }, [roomIdParam]);
+  }, [benchesData, benchId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const result = await addBench({
+      const result = await updateBench({
+        id: Number(benchId),
         roomId: Number(roomId),
         row: Number(row),
         column: Number(column),
@@ -34,45 +45,42 @@ const AddBenchPage = () => {
       }).unwrap();
 
       if (result.success) {
-        toast.success("Bench added successfully!");
+        toast.success("Bench updated successfully!");
         navigate(`/viewBenchByRoom/${roomId}`);
       } else {
         toast.error(result.message || "Something went wrong");
       }
     } catch (error) {
       console.error(error);
-      toast.error(error?.data?.message || "Failed to add bench");
+      toast.error(error?.data?.message || "Failed to update bench");
     }
   };
+
+  if (benchLoading || roomLoading) return <p className="text-center mt-10">Loading...</p>;
+  if (benchError || roomError) return <p className="text-center mt-10 text-red-500">Failed to load data.</p>;
 
   return (
     <div className="h-screen w-full bg-gray-100 flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-2xl bg-white p-10 rounded-lg shadow-xl">
-        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Add New Bench</h2>
+        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Update Bench</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Room Selection */}
           <div>
             <label className="block text-sm font-semibold mb-1">Room</label>
-            {roomLoading ? (
-              <p>Loading rooms...</p>
-            ) : roomError ? (
-              <p className="text-red-500">Failed to load rooms</p>
-            ) : (
-              <select
-                value={roomId}
-                onChange={(e) => setRoomId(e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              >
-                <option value="">Select Room</option>
-                {roomData?.rooms?.map((room) => (
-                  <option key={room.id} value={room.id}>
-                    {room.roomNumber} (Block {room.block || "N/A"}, Floor {room.floor || "N/A"})
-                  </option>
-                ))}
-              </select>
-            )}
+            <select
+              value={roomId}
+              onChange={(e) => setRoomId(e.target.value)}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="">Select Room</option>
+              {roomData?.rooms?.map((room) => (
+                <option key={room.id} value={room.id}>
+                  {room.roomNumber} (Block {room.block || "N/A"}, Floor {room.floor || "N/A"})
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Row */}
@@ -121,11 +129,11 @@ const AddBenchPage = () => {
           <button
             type="submit"
             className={`w-full p-3 rounded text-white font-semibold transition ${
-              isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+              isUpdating ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
             }`}
-            disabled={isLoading || roomLoading}
+            disabled={isUpdating}
           >
-            {isLoading ? "Adding..." : "Add Bench"}
+            {isUpdating ? "Updating..." : "Update Bench"}
           </button>
         </form>
       </div>
@@ -133,4 +141,4 @@ const AddBenchPage = () => {
   );
 };
 
-export default AddBenchPage;
+export default UpdateBenchPage;

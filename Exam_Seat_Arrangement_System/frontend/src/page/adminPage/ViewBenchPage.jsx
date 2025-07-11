@@ -23,7 +23,7 @@ const ViewBenchPage = () => {
 
   return (
     <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md w-full max-w-screen-lg mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">View Benches</h2>
+      <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">View Benches</h2>
 
       {isLoading ? (
         <p>Loading benches...</p>

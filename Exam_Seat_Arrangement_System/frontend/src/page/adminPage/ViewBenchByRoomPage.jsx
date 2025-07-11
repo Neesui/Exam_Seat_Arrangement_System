@@ -23,10 +23,12 @@ const ViewBenchByRoomPage = () => {
         <p className="text-red-500">Failed to load room details.</p>
       ) : roomData ? (
         <div className="mb-4 text-gray-700 flex justify-center text-center">
-          <strong>Room Number: </strong> {roomData.room.roomNumber} &nbsp; | &nbsp;
-          <strong>Block:</strong> {roomData.room.block} &nbsp; | &nbsp;
-          <strong>Floor:</strong> {roomData.room.floor} &nbsp; | &nbsp;
-          <strong>Max Columns:</strong> {roomData.room.maxColumns}
+          <div>
+            <strong>Room Number: </strong> {roomData.room.roomNumber} &nbsp; | &nbsp;
+            <strong>Block:</strong> {roomData.room.block} &nbsp; | &nbsp;
+            <strong>Floor:</strong> {roomData.room.floor} &nbsp; | &nbsp;
+            <strong>Max Columns:</strong> {roomData.room.maxColumns}
+          </div>
         </div>
       ) : null}
 
