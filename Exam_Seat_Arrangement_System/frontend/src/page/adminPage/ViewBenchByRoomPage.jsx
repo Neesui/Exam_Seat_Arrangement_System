@@ -1,20 +1,41 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useGetBenchesByRoomQuery } from "../../redux/api/benchApi";
 import { useGetRoomByIdQuery } from "../../redux/api/roomApi";
 import BenchLayout from "../../layout/BenchLayout";
+import { FaArrowLeft } from "react-icons/fa";
 
 const ViewBenchByRoomPage = () => {
   const { roomId } = useParams();
+  const navigate = useNavigate();
 
-  const { data: benchesData, error: benchesError, isLoading: benchesLoading } = useGetBenchesByRoomQuery(Number(roomId));
-  const { data: roomData, error: roomError, isLoading: roomLoading } = useGetRoomByIdQuery(Number(roomId));
+  const {
+    data: benchesData,
+    error: benchesError,
+    isLoading: benchesLoading,
+  } = useGetBenchesByRoomQuery(Number(roomId));
+
+  const {
+    data: roomData,
+    error: roomError,
+    isLoading: roomLoading,
+  } = useGetRoomByIdQuery(Number(roomId));
 
   return (
     <div className="mt-20 bg-white p-6 rounded-lg shadow-md w-full max-w-screen-lg mx-auto">
-      <h2 className="text-3xl font-bold text-center underline mb-4 text-gray-800">
-        View Benches by Room
-      </h2>
+      {/* Header with Back Button and Centered Title */}
+      <div className="relative mb-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center text-white bg-blue-700 px-4 py-2 rounded hover:bg-blue-800"
+        >
+          <FaArrowLeft className="mr-2" />
+          Back
+        </button>
+        <h2 className="text-3xl font-bold text-center underline text-gray-800">
+          View Benches by Room
+        </h2>
+      </div>
 
       {/* Room Details */}
       {roomLoading ? (
