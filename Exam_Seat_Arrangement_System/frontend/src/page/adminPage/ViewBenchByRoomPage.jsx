@@ -12,7 +12,9 @@ const ViewBenchByRoomPage = () => {
 
   return (
     <div className="mt-20 bg-white p-6 rounded-lg shadow-md w-full max-w-screen-lg mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">View Benches by Room</h2>
+      <h2 className="text-3xl font-bold text-center underline mb-4 text-gray-800">
+        View Benches by Room
+      </h2>
 
       {/* Room Details */}
       {roomLoading ? (
@@ -20,8 +22,8 @@ const ViewBenchByRoomPage = () => {
       ) : roomError ? (
         <p className="text-red-500">Failed to load room details.</p>
       ) : roomData ? (
-        <div className="mb-4 text-gray-700">
-          <strong>Room Number:</strong> {roomData.room.roomNumber} &nbsp; | &nbsp;
+        <div className="mb-4 text-gray-700 flex justify-center text-center">
+          <strong>Room Number: </strong> {roomData.room.roomNumber} &nbsp; | &nbsp;
           <strong>Block:</strong> {roomData.room.block} &nbsp; | &nbsp;
           <strong>Floor:</strong> {roomData.room.floor} &nbsp; | &nbsp;
           <strong>Max Columns:</strong> {roomData.room.maxColumns}

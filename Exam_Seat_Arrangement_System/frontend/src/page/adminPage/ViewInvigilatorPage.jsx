@@ -25,7 +25,7 @@ const ViewInvigilatorPage = () => {
   };
 
   return (
-    <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md w-full max-w-screen-lg mx-auto">
+    <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md max-w-[90%]-lg mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-gray-800">View Invigilators</h2>
 
       {isLoading ? (

@@ -26,8 +26,8 @@ const ViewRoomPage = () => {
   };
 
   return (
-    <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md w-[60%] max-w-screen-lg mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">View Rooms</h2>
+    <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md w-[99%] max-w-screen-lg mx-auto">
+      <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">View Rooms</h2>
 
       {isLoading ? (
         <p>Loading rooms...</p>

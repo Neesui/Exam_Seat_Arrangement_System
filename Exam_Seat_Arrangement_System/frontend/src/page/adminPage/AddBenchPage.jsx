@@ -39,81 +39,92 @@ const AddBenchPage = () => {
   };
 
   return (
-    <div className="max-w-lg mt-20 p-6 ml-6 bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">Add New Bench</h2>
+    <div className="h-screen w-full bg-gray-100 flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-2xl bg-white p-10 rounded-lg shadow-xl">
+        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Add New Bench</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block font-medium mb-1">Room</label>
-          {roomLoading ? (
-            <p>Loading rooms...</p>
-          ) : roomError ? (
-            <p className="text-red-500">Failed to load rooms</p>
-          ) : (
-            <select
-              value={roomId}
-              onChange={(e) => setRoomId(e.target.value)}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Room Selection */}
+          <div>
+            <label className="block text-sm font-semibold mb-1">Room</label>
+            {roomLoading ? (
+              <p>Loading rooms...</p>
+            ) : roomError ? (
+              <p className="text-red-500">Failed to load rooms</p>
+            ) : (
+              <select
+                value={roomId}
+                onChange={(e) => setRoomId(e.target.value)}
+                className="w-full p-2 border rounded"
+                required
+              >
+                <option value="">Select Room</option>
+                {roomData?.rooms?.map((room) => (
+                  <option key={room.id} value={room.id}>
+                    {room.roomNumber} (Block {room.block || "N/A"}, Floor {room.floor || "N/A"})
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          {/* Row */}
+          <div>
+            <label className="block text-sm font-semibold mb-1">Row</label>
+            <input
+              type="number"
+              value={row}
+              onChange={(e) => setRow(e.target.value)}
               className="w-full p-2 border rounded"
+              placeholder="Enter row number"
               required
-            >
-              <option value="">Select Room</option>
-              {roomData?.rooms?.map((room) => (
-                <option key={room.id} value={room.id}>
-                  {room.roomNumber} (Block {room.block}, Floor {room.floor})
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
+              min="1"
+            />
+          </div>
 
-        <div>
-          <label className="block font-medium mb-1">Row</label>
-          <input
-            type="number"
-            value={row}
-            onChange={(e) => setRow(e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="Enter Row Number"
-            required
-          />
-        </div>
+          {/* Column */}
+          <div>
+            <label className="block text-sm font-semibold mb-1">Column</label>
+            <input
+              type="number"
+              value={column}
+              onChange={(e) => setColumn(e.target.value)}
+              className="w-full p-2 border rounded"
+              placeholder="Enter column number"
+              required
+              min="1"
+            />
+          </div>
 
-        <div>
-          <label className="block font-medium mb-1">Column</label>
-          <input
-            type="number"
-            value={column}
-            onChange={(e) => setColumn(e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="Enter Column Number"
-            required
-          />
-        </div>
+          {/* Capacity */}
+          <div>
+            <label className="block text-sm font-semibold mb-1">Capacity</label>
+            <input
+              type="number"
+              value={capacity}
+              onChange={(e) => setCapacity(e.target.value)}
+              className="w-full p-2 border rounded"
+              placeholder="Enter bench capacity (e.g., 2, 3, 4)"
+              required
+              min="1"
+            />
+          </div>
 
-        <div>
-          <label className="block font-medium mb-1">Capacity</label>
-          <input
-            type="number"
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
-            className="w-full p-2 border rounded"
-            placeholder="Enter Capacity"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className={`w-full p-2 rounded text-white ${
-            isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-          }`}
-          disabled={isLoading || roomLoading}
-        >
-          {isLoading ? "Adding..." : "Add Bench"}
-        </button>
-      </form>
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className={`w-full p-3 rounded text-white font-semibold transition ${
+              isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+            }`}
+            disabled={isLoading || roomLoading}
+          >
+            {isLoading ? "Adding..." : "Add Bench"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
 
 export default AddBenchPage;
+ 
