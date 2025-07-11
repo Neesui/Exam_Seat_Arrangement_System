@@ -3,7 +3,6 @@ import AddInvigilatorPage from "../../page/adminPage/AddInvigilatorPage";
 import AddSemesterPage from "../../page/adminPage/AddSemesterPage";
 import AddSubjectPage from "../../page/adminPage/AddSubjectPage";
 import AdminDashboard from "../../page/adminPage/AdminDashboard";
-import InvigilatorPage from "../../page/adminPage/InvigilatorPage";
 import StudentPage from "../../page/adminPage/StudentPage";
 import UpdateCoursePage from "../../page/adminPage/UpdateCoursePage";
 import UpdateInvigilatorPage from "../../page/invigilatorPage/UpdateInvigilatorPage";
@@ -18,85 +17,79 @@ import ViewBenchPage from "../../page/adminPage/ViewBenchPage";
 import ViewBenchByRoomPage from "../../page/adminPage/ViewBenchByRoomPage";
 import UpdateBenchPage from "../../page/adminPage/UpdateBenchPage";
 
-
- const adminRoutes = [
+const adminRoutes = [
   {
-    path: '/admin',
-    element: <AdminDashboard />
+    path: "/admin",
+    element: <AdminDashboard />,
   },
   {
-    path: '/invigilator',
-    element: <InvigilatorPage/>
-  },
-  
-  {
-    path: '/addInvigilator',
-    element: <AddInvigilatorPage />
+    path: "/addInvigilator",
+    element: <AddInvigilatorPage />,
   },
   {
-    path: '/viewInvigilator',
-    element: <ViewInvigilatorPage/>
+    path: "/viewInvigilator",
+    element: <ViewInvigilatorPage />,
   },
   {
-    path: "/updateInvigilator/:id", 
-    element: <UpdateInvigilatorPage />
+    path: "/updateInvigilator/:id",
+    element: <UpdateInvigilatorPage />,
   },
 
   {
-    path: '/addfullCourse',
-    element: <AddCourseFullPage />
+    path: "/addfullCourse",
+    element: <AddCourseFullPage />,
   },
   {
-    path: '/viewCourse',
-    element: <ViewCoursePage/>
+    path: "/viewCourse",
+    element: <ViewCoursePage />,
   },
   {
     path: "/admin/UpdateCourse/:courseId",
-    element: <UpdateCoursePage />
+    element: <UpdateCoursePage />,
   },
   {
     path: "/updateSubject/:subjectId",
-    element: <UpdateSubjectPage />
+    element: <UpdateSubjectPage />,
   },
   {
-    path: '/addSemester/:courseId',
-    element: <AddSemesterPage />
+    path: "/addSemester/:courseId",
+    element: <AddSemesterPage />,
   },
   {
-    path: '/addSubject/:semesterId',
-    element: <AddSubjectPage />
+    path: "/addSubject/:semesterId",
+    element: <AddSubjectPage />,
   },
   {
-    path: '/addRoom',
-    element: <AddRoomPage />
+    path: "/addRoom",
+    element: <AddRoomPage />,
   },
   {
-    path: '/viewRoom',
-    element: <ViewRoomPage />
+    path: "/viewRoom",
+    element: <ViewRoomPage />,
   },
   {
-    path: '/updateRoom/:roomId',
-    element: <UpdateRoomPage />
+    path: "/updateRoom/:roomId",
+    element: <UpdateRoomPage />,
   },
   {
-    path: '/addBench',
-    element: <AddBenchPage />
+    path: "/addBench",
+    element: <AddBenchPage />,
   },
   {
-    path: '/viewBench',
-    element: <ViewBenchPage/>
+    path: "/viewBench",
+    element: <ViewBenchPage />,
   },
   {
-    path: '/viewBenchByRoom/:roomId',
-    element: <ViewBenchByRoomPage/>
+    path: "/viewBenchByRoom/:roomId",
+    element: <ViewBenchByRoomPage />,
   },
   {
     path: "/updateBench/:benchId",
     element: <UpdateBenchPage />,
   },
   {
-    path: '/student',
-    element: <StudentPage />
+    path: "/student",
+    element: <StudentPage />,
   },
 ];
 

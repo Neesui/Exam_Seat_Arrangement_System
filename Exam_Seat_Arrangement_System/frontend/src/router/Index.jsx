@@ -10,33 +10,32 @@ import invigilatorRoutes from "./routes/InvigilatorRoutes";
 import { publicRoutes } from "./routes/PublicRoutes";
 
 
+const admin = ["ADMIN"];
+const invigilator = ["INVIGILATOR"];
+
 const protectedRoutes = [
   {
     element: (
       <AuthGuard>
-        <AdminLayout />
+        <RoleGuard allowedRoles={admin}>
+          <AdminLayout />
+        </RoleGuard>
       </AuthGuard>
     ),
-    children: adminRoutes.map((route) => ({
-      ...route,
-      element: <RoleGuard allowedRoles={["ADMIN"]}>{route.element}</RoleGuard>,
-    })),
+    children: adminRoutes,
   },
-
   {
     element: (
       <AuthGuard>
-        <InvigilatorLayout />
+        <RoleGuard allowedRoles={invigilator}>
+          <InvigilatorLayout />
+        </RoleGuard>
       </AuthGuard>
     ),
-    children: invigilatorRoutes.map((route) => ({
-      ...route,
-      element: (
-        <RoleGuard allowedRoles={["INVIGILATOR"]}>{route.element}</RoleGuard>
-      ),
-    })),
+    children: invigilatorRoutes,
   },
 ];
+
 
 const router = createBrowserRouter([
   {
