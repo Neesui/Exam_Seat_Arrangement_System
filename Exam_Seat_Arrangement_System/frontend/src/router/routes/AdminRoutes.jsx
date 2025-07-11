@@ -19,6 +19,7 @@ import UpdateBenchPage from "../../page/adminPage/UpdateBenchPage";
 import AddExamPage from "../../page/adminPage/AddExamPage";
 import ViewExamPage from "../../page/adminPage/ViewExamPage";
 import UpdateExamPage from "../../page/adminPage/UpdateExamPage";
+import ViewExamDetailsPage from "../../page/adminPage/ViewExamDetailsPage";
 
 const adminRoutes = [
   {
@@ -101,6 +102,10 @@ const adminRoutes = [
   {
     path: "/updateExam/:examId",
     element: <UpdateExamPage />,
+  },
+  {
+    path: "/viewExamDetails/:examId",
+    element: <ViewExamDetailsPage />,
   },
   {
     path: "/student",
