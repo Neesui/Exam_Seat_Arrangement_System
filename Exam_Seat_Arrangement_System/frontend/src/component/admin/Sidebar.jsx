@@ -18,6 +18,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [isRoomOpen, setIsRoomOpen] = useState(false);
   const [isBenchOpen, setIsBenchOpen] = useState(false);
   const [isInvigilatorOpen, setIsInvigilatorOpen] = useState(false);
+  const [isExamOpen, setIsExamOpen] = useState(false); // NEW state for Exam section
 
   return (
     <>
@@ -41,6 +42,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <Link to="/admin">Dashboard</Link>
           </li>
 
+          {/* Students */}
           <li className="p-4 hover:bg-gray-700">
             <button
               onClick={() => setIsStudentDetailsOpen(!isStudentDetailsOpen)}
@@ -63,6 +65,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             )}
           </li>
 
+          {/* Invigilator */}
           <li className="p-4 hover:bg-gray-700">
             <button
               onClick={() => setIsInvigilatorOpen(!isInvigilatorOpen)}
@@ -85,6 +88,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             )}
           </li>
 
+          {/* Courses */}
           <li className="p-4 hover:bg-gray-700">
             <button
               onClick={() => setIsCoursesOpen(!isCoursesOpen)}
@@ -107,6 +111,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             )}
           </li>
 
+          {/* Room */}
           <li className="p-4 hover:bg-gray-700">
             <button
               onClick={() => setIsRoomOpen(!isRoomOpen)}
@@ -129,6 +134,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             )}
           </li>
 
+          {/* Bench */}
           <li className="p-4 hover:bg-gray-700">
             <button
               onClick={() => setIsBenchOpen(!isBenchOpen)}
@@ -146,6 +152,29 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 <li className="p-4 hover:bg-gray-600 flex items-center">
                   <FaEye className="mr-3" />
                   <Link to="/viewBench">View Bench Details</Link>
+                </li>
+              </ul>
+            )}
+          </li>
+
+          {/* Exam */}
+          <li className="p-4 hover:bg-gray-700">
+            <button
+              onClick={() => setIsExamOpen(!isExamOpen)}
+              className="w-full text-left flex items-center"
+            >
+              <FaBookOpen className="mr-3" />
+              Exam
+            </button>
+            {isExamOpen && (
+              <ul className="pl-4 mt-2 bg-gray-700">
+                <li className="p-4 hover:bg-gray-600 flex items-center">
+                  <FaPlus className="mr-3" />
+                  <Link to="/createExam">Create Exam</Link>
+                </li>
+                <li className="p-4 hover:bg-gray-600 flex items-center">
+                  <FaEye className="mr-3" />
+                  <Link to="/viewExam">View Exam</Link>
                 </li>
               </ul>
             )}

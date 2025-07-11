@@ -5,7 +5,7 @@ export const examApi = apiSlice.injectEndpoints({
     // Add new exam
     addExam: builder.mutation({
       query: (newExam) => ({
-        url: "/api/exams",
+        url: "/api/exam/add",
         method: "POST",
         body: newExam,
       }),
@@ -14,20 +14,20 @@ export const examApi = apiSlice.injectEndpoints({
 
     // Get all exams
     getExams: builder.query({
-      query: () => "/api/exams",
+      query: () => "/api/exam/all",
       providesTags: ["EXAM"],
     }),
 
     // Get exam by ID
     getExamById: builder.query({
-      query: (id) => `/api/exams/${id}`,
+      query: (id) => `/api/exam/${id}`,
       providesTags: (result, error, id) => [{ type: "EXAM", id }],
     }),
 
     // Update exam
     updateExam: builder.mutation({
       query: ({ id, ...data }) => ({
-        url: `/api/exams/${id}`,
+        url: `/api/exam/${id}`,
         method: "PUT",
         body: data,
       }),
@@ -37,7 +37,7 @@ export const examApi = apiSlice.injectEndpoints({
     // Delete exam
     deleteExam: builder.mutation({
       query: (id) => ({
-        url: `/api/exams/${id}`,
+        url: `/api/exam/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["EXAM"],

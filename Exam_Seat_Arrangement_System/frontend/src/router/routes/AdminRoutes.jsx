@@ -16,6 +16,8 @@ import AddBenchPage from "../../page/adminPage/AddBenchPage";
 import ViewBenchPage from "../../page/adminPage/ViewBenchPage";
 import ViewBenchByRoomPage from "../../page/adminPage/ViewBenchByRoomPage";
 import UpdateBenchPage from "../../page/adminPage/UpdateBenchPage";
+import AddExamPage from "../../page/adminPage/AddExamPage";
+import ViewExamPage from "../../page/adminPage/ViewExamPage";
 
 const adminRoutes = [
   {
@@ -86,6 +88,14 @@ const adminRoutes = [
   {
     path: "/updateBench/:benchId",
     element: <UpdateBenchPage />,
+  },
+  {
+    path: "/createExam",
+    element: <AddExamPage />,
+  },
+  {
+    path: "/viewExam",
+    element: <ViewExamPage />,
   },
   {
     path: "/student",
