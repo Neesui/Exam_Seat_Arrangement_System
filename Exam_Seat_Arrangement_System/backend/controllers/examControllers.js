@@ -77,3 +77,138 @@ export const getExams = async (req, res) => {
     }
   };
   
+  // Get Exam by ID
+export const getExamById = async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "Invalid exam ID" });
+      }
+  
+      const exam = await prisma.exam.findUnique({
+        where: { id },
+        include: {
+          subject: {
+            include: {
+              semester: {
+                include: {
+                  course: true,
+                },
+              },
+            },
+          },
+          roomAssignments: {
+            include: {
+              room: true,
+              invigilatorAssignments: {
+                include: {
+                  invigilator: {
+                    include: { user: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+  
+      if (!exam) {
+        return res.status(404).json({ success: false, message: "Exam not found" });
+      }
+  
+      res.json({
+        success: true,
+        message: "Exam retrieved successfully",
+        exam,
+      });
+    } catch (error) {
+      console.error("Get Exam By ID Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch exam",
+        error: error.message,
+      });
+    }
+  };
+
+  // Update Exam
+export const updateExam = async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "Invalid exam ID" });
+      }
+  
+      const { subjectId, date, startTime, endTime } = req.body;
+      if (!subjectId || !date) {
+        return res.status(400).json({
+          success: false,
+          message: "'subjectId' and 'date' are required.",
+        });
+      }
+  
+      const subjectIdNum = Number(subjectId);
+      if (isNaN(subjectIdNum)) {
+        return res.status(400).json({
+          success: false,
+          message: "'subjectId' must be a valid number.",
+        });
+      }
+  
+      // Prisma update will throw if record not found
+      const exam = await prisma.exam.update({
+        where: { id },
+        data: {
+          subjectId: subjectIdNum,
+          date: new Date(date),
+          startTime: startTime || null,
+          endTime: endTime || null,
+        },
+      });
+  
+      res.json({
+        success: true,
+        message: "Exam updated successfully",
+        exam,
+      });
+    } catch (error) {
+      console.error("Update Exam Error:", error);
+      if (error.code === 'P2025') {
+        // Record not found error code from Prisma
+        return res.status(404).json({ success: false, message: "Exam not found" });
+      }
+      res.status(500).json({
+        success: false,
+        message: "Failed to update exam",
+        error: error.message,
+      });
+    }
+  };
+
+  // Delete Exam
+export const deleteExam = async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "Invalid exam ID" });
+      }
+  
+      // Prisma delete will throw if record not found
+      await prisma.exam.delete({ where: { id } });
+  
+      res.json({
+        success: true,
+        message: "Exam deleted successfully",
+      });
+    } catch (error) {
+      console.error("Delete Exam Error:", error);
+      if (error.code === 'P2025') {
+        return res.status(404).json({ success: false, message: "Exam not found" });
+      }
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete exam",
+        error: error.message,
+      });
+    }
+  };
