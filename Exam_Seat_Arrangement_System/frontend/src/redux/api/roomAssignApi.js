@@ -5,7 +5,7 @@ export const roomAssignApi = apiSlice.injectEndpoints({
     // Create
     addRoomAssign: builder.mutation({
       query: (newData) => ({
-        url: "/api/room-assignment/add",
+        url: "/api/room-assignments/add",
         method: "POST",
         body: newData,
       }),
@@ -14,14 +14,14 @@ export const roomAssignApi = apiSlice.injectEndpoints({
 
     // Read - All assignments for an exam
     getRoomAssignByExam: builder.query({
-      query: (examId) => `/api/room-assignment/all/${examId}`,
+      query: (examId) => `/api/room-assignments/all/${examId}`,
       providesTags: ["ROOM_ASSIGN"],
     }),
 
     // Update
     updateRoomAssign: builder.mutation({
       query: ({ id, ...data }) => ({
-        url: `/api/room-assignment/${id}`,
+        url: `/api/room-assignments/${id}`,
         method: "PUT",
         body: data,
       }),
@@ -31,7 +31,7 @@ export const roomAssignApi = apiSlice.injectEndpoints({
     // Delete
     deleteRoomAssign: builder.mutation({
       query: (id) => ({
-        url: `/api/room-assignment/${id}`,
+        url: `/api/room-assignments/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["ROOM_ASSIGN"],

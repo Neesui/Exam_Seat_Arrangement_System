@@ -82,15 +82,16 @@ const AddRoomAssignPage = () => {
               >
                 <option value="">Select Exam</option>
                 {examData.exams.map((exam) => {
-                  const subjectName = exam.subject?.name || "Unknown Subject";
+                  const subjectName = exam.subject?.subjectName || "Unknown Subject";
                   const subjectCode = exam.subject?.code || "N/A";
-                  const semesterName = exam.subject?.semester?.name || "Unknown Semester";
+                  const semesterNum = exam.subject?.semester?.semesterNum || "N/A";
                   const courseName = exam.subject?.semester?.course?.name || "Unknown Course";
+
                   const formattedDate = exam.date
-                    ? new Date(exam.date).toISOString().split("T")[0]
+                    ? new Date(exam.date).toLocaleDateString()
                     : "No Date";
 
-                  const label = `${subjectName} (${subjectCode}) - ${courseName} (Semester ${semesterName}) on ${formattedDate}`;
+                  const label = `${subjectName} (${subjectCode}) - ${courseName} (Semester ${semesterNum}) on ${formattedDate}`;
 
                   return (
                     <option key={exam.id} value={exam.id}>
