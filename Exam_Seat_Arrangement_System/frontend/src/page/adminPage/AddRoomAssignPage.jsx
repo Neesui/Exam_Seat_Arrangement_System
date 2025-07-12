@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+
+// RTK Query hooks
 import { useAddRoomAssignMutation } from "../../redux/api/roomAssignApi";
 import { useGetRoomsQuery } from "../../redux/api/roomApi";
 import { useGetExamsQuery } from "../../redux/api/examApi";
@@ -29,7 +31,7 @@ const AddRoomAssignPage = () => {
         toast.error(result.message || "Something went wrong");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Assign Room Error:", error);
       toast.error(error?.data?.message || "Failed to assign room");
     }
   };
@@ -40,6 +42,7 @@ const AddRoomAssignPage = () => {
         <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Assign Room to Exam</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Room Selection */}
           <div>
             <label className="block text-sm font-semibold mb-1">Room</label>
             {roomLoading ? (
@@ -63,13 +66,14 @@ const AddRoomAssignPage = () => {
             )}
           </div>
 
+          {/* Exam Selection */}
           <div>
             <label className="block text-sm font-semibold mb-1">Exam</label>
             {examLoading ? (
               <p>Loading exams...</p>
             ) : examError ? (
               <p className="text-red-500">Failed to load exams</p>
-            ) : (
+            ) : examData?.exams?.length > 0 ? (
               <select
                 value={examId}
                 onChange={(e) => setExamId(e.target.value)}
@@ -77,22 +81,30 @@ const AddRoomAssignPage = () => {
                 required
               >
                 <option value="">Select Exam</option>
-                {examData?.exams?.map((exam) => {
-                  const subjectName = exam.subject?.name || "No Subject";
-                  const semesterName = exam.subject?.semester?.name || "No Semester";
-                  const courseName = exam.subject?.semester?.course?.name || "No Course";
-                  const formattedDate = new Date(exam.date).toLocaleDateString();
+                {examData.exams.map((exam) => {
+                  const subjectName = exam.subject?.name || "Unknown Subject";
+                  const subjectCode = exam.subject?.code || "N/A";
+                  const semesterName = exam.subject?.semester?.name || "Unknown Semester";
+                  const courseName = exam.subject?.semester?.course?.name || "Unknown Course";
+                  const formattedDate = exam.date
+                    ? new Date(exam.date).toISOString().split("T")[0]
+                    : "No Date";
+
+                  const label = `${subjectName} (${subjectCode}) - ${courseName} (Semester ${semesterName}) on ${formattedDate}`;
 
                   return (
                     <option key={exam.id} value={exam.id}>
-                      {subjectName} ({courseName} - {semesterName}) on {formattedDate}
+                      {label}
                     </option>
                   );
                 })}
               </select>
+            ) : (
+              <p>No exams available</p>
             )}
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             className={`w-full p-3 rounded text-white font-semibold transition ${
