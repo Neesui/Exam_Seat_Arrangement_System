@@ -13,6 +13,8 @@ import subjectRouter from './routes/subjectRoutes.js';
 import roomRoutes from "./routes/roomRoutes.js";
 import benchRouter from "./routes/benchRoutes.js";
 import examRouter from "./routes/examRoutes.js";
+import roomAssignmentRouter from "./routes/roomAssignmentRoutes.js";
+
 
 
 const app = express();
@@ -39,6 +41,8 @@ app.use("/api/subject", subjectRouter);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/bench", benchRouter);
 app.use("/api/exam", examRouter);
+app.use("/api/room-assignments", roomAssignmentRouter);
+
 
 
 // 404 Handler
