@@ -69,9 +69,14 @@ const ViewCoursePage = () => {
                   className="mb-10 border border-gray-300 rounded-lg p-6"
                 >
                   <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-xl font-semibold text-gray-700">
-                      {courseIndex + 1}. {course.name} ({course.duration} Semesters)
-                    </h3>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-700">
+                        {courseIndex + 1}. {course.name}
+                      </h3>
+                      <p className="text-gray-500 text-sm">
+                        Duration: {course.duration} semester(s) | Batch Year: {course.batchYear}
+                      </p>
+                    </div>
                     <button
                       onClick={() => handleAddSemester(course.id)}
                       className="bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700 text-sm"

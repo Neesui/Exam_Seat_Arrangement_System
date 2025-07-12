@@ -12,14 +12,17 @@ const UpdateCoursePage = () => {
 
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("");
+  const [batchYear, setBatchYear] = useState("");
 
   useEffect(() => {
     if (courseData?.courses) {
-      // Convert courseId to number if your IDs are numbers, else keep as string
-      const course = courseData.courses.find((c) => c.id === Number(courseId) || c.id === courseId);
+      const course = courseData.courses.find(
+        (c) => c.id === Number(courseId) || c.id === courseId
+      );
       if (course) {
         setName(course.name);
         setDuration(course.duration);
+        setBatchYear(course.batchYear);
       }
     }
   }, [courseData, courseId]);
@@ -27,10 +30,14 @@ const UpdateCoursePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // FIX: pass { id, name, duration }
-      await updateCourse({ id: Number(courseId), name, duration }).unwrap();
+      await updateCourse({
+        id: Number(courseId),
+        name,
+        duration: Number(duration),
+        batchYear: Number(batchYear),
+      }).unwrap();
       toast.success("Course updated successfully!");
-      navigate("/viewCourse");
+      navigate("/admin/viewCourses");
     } catch (err) {
       console.error("Update error:", err);
       toast.error(err?.data?.message || "Failed to update course.");
@@ -53,9 +60,18 @@ const UpdateCoursePage = () => {
         />
         <input
           className="w-full border p-2 rounded"
-          placeholder="Duration"
+          type="number"
+          placeholder="Duration (semesters)"
           value={duration}
           onChange={(e) => setDuration(e.target.value)}
+          required
+        />
+        <input
+          className="w-full border p-2 rounded"
+          type="number"
+          placeholder="Batch Year"
+          value={batchYear}
+          onChange={(e) => setBatchYear(e.target.value)}
           required
         />
         <button

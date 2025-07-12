@@ -38,6 +38,7 @@ const AddCourseFullPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validation
     if (!name.trim() || !duration.trim() || !batchYear.trim()) {
       setError('Course name, duration, and batch year are required.');
       return;
@@ -63,6 +64,7 @@ const AddCourseFullPage = () => {
       }
     }
 
+    // Submit
     try {
       await addCourse({
         name: name.trim(),
@@ -81,7 +83,7 @@ const AddCourseFullPage = () => {
       setTimeout(() => navigate('/admin/viewCourses'), 1000);
     } catch (err) {
       console.error('Failed to create course:', err);
-      toast.error(err.data?.message || 'Failed to create course');
+      toast.error(err?.data?.message || 'Failed to create course');
     }
   };
 
@@ -90,6 +92,7 @@ const AddCourseFullPage = () => {
       <h2 className="text-3xl font-bold mb-6 text-gray-800">Add Course with Semesters & Subjects</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Course Info */}
         <AddCourse
           name={name}
           setName={setName}
@@ -99,6 +102,7 @@ const AddCourseFullPage = () => {
           setBatchYear={setBatchYear}
         />
 
+        {/* Semester & Subjects */}
         <div>
           <h3 className="text-xl font-semibold mb-4">Semesters & Subjects</h3>
           <AddSemester
@@ -114,7 +118,7 @@ const AddCourseFullPage = () => {
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-0 w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700"
         >
           {isLoading ? 'Saving...' : 'Save Course'}
         </button>
