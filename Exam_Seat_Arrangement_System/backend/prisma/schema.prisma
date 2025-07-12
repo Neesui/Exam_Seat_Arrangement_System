@@ -43,9 +43,11 @@ model Course {
   id          Int         @id @default(autoincrement())
   name        String      @unique
   duration    Int         // total semesters, e.g., 8
+  batchYear   Int
 
   semesters   Semester[]
   students    Student[]
+  @@unique([name, batchYear]) 
 }
 
 model Semester {
@@ -70,7 +72,7 @@ model Subject {
 
 model Student {
   id           Int         @id @default(autoincrement())
-  name         String
+  studentName         String
   symbolNumber String
   regNumber    String
   college      String

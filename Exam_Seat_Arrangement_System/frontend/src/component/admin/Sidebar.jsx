@@ -10,6 +10,9 @@ import {
   FaPlus,
   FaEye,
   FaTimes,
+  FaClipboardList,
+  FaThLarge,
+  FaTable,
 } from "react-icons/fa";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -18,7 +21,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [isRoomOpen, setIsRoomOpen] = useState(false);
   const [isBenchOpen, setIsBenchOpen] = useState(false);
   const [isInvigilatorOpen, setIsInvigilatorOpen] = useState(false);
-  const [isExamOpen, setIsExamOpen] = useState(false); // NEW state for Exam section
+  const [isExamOpen, setIsExamOpen] = useState(false);
+  const [isRoomAssignOpen, setIsRoomAssignOpen] = useState(false);
+  const [isSeatOpen, setIsSeatOpen] = useState(false);
+  const [isSeatPlanOpen, setIsSeatPlanOpen] = useState(false);
 
   return (
     <>
@@ -43,142 +49,112 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </li>
 
           {/* Students */}
-          <li className="p-4 hover:bg-gray-700">
-            <button
-              onClick={() => setIsStudentDetailsOpen(!isStudentDetailsOpen)}
-              className="w-full text-left flex items-center"
-            >
-              <FaUserGraduate className="mr-3" />
-              Students
-            </button>
-            {isStudentDetailsOpen && (
-              <ul className="pl-4 mt-2 bg-gray-700">
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaPlus className="mr-3" />
-                  <Link to="/AddStudents">Add Students</Link>
-                </li>
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaEye className="mr-3" />
-                  <Link to="/ViewStudents">View Student Details</Link>
-                </li>
-              </ul>
-            )}
-          </li>
+          <SidebarSection
+            icon={<FaUserGraduate className="mr-3" />}
+            label="Students"
+            isOpen={isStudentDetailsOpen}
+            setIsOpen={setIsStudentDetailsOpen}
+            links={[
+              { path: "/AddStudents", label: "Add Students" },
+              { path: "/ViewStudents", label: "View Student Details" },
+            ]}
+          />
 
           {/* Invigilator */}
-          <li className="p-4 hover:bg-gray-700">
-            <button
-              onClick={() => setIsInvigilatorOpen(!isInvigilatorOpen)}
-              className="w-full text-left flex items-center"
-            >
-              <FaChalkboardTeacher className="mr-3" />
-              Invigilator
-            </button>
-            {isInvigilatorOpen && (
-              <ul className="pl-4 mt-2 bg-gray-700">
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaPlus className="mr-3" />
-                  <Link to="/addInvigilator">Add Invigilator</Link>
-                </li>
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaEye className="mr-3" />
-                  <Link to="/ViewInvigilator">View Invigilator</Link>
-                </li>
-              </ul>
-            )}
-          </li>
+          <SidebarSection
+            icon={<FaChalkboardTeacher className="mr-3" />}
+            label="Invigilator"
+            isOpen={isInvigilatorOpen}
+            setIsOpen={setIsInvigilatorOpen}
+            links={[
+              { path: "/addInvigilator", label: "Add Invigilator" },
+              { path: "/ViewInvigilator", label: "View Invigilator" },
+            ]}
+          />
 
           {/* Courses */}
-          <li className="p-4 hover:bg-gray-700">
-            <button
-              onClick={() => setIsCoursesOpen(!isCoursesOpen)}
-              className="w-full text-left flex items-center"
-            >
-              <FaBookOpen className="mr-3" />
-              Courses
-            </button>
-            {isCoursesOpen && (
-              <ul className="pl-4 mt-2 bg-gray-700">
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaPlus className="mr-3" />
-                  <Link to="/addfullCourse">Add Courses</Link>
-                </li>
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaEye className="mr-3" />
-                  <Link to="/viewCourse">View Courses</Link>
-                </li>
-              </ul>
-            )}
-          </li>
+          <SidebarSection
+            icon={<FaBookOpen className="mr-3" />}
+            label="Courses"
+            isOpen={isCoursesOpen}
+            setIsOpen={setIsCoursesOpen}
+            links={[
+              { path: "/addfullCourse", label: "Add Courses" },
+              { path: "/viewCourse", label: "View Courses" },
+            ]}
+          />
 
           {/* Room */}
-          <li className="p-4 hover:bg-gray-700">
-            <button
-              onClick={() => setIsRoomOpen(!isRoomOpen)}
-              className="w-full text-left flex items-center"
-            >
-              <FaDoorOpen className="mr-3" />
-              Room
-            </button>
-            {isRoomOpen && (
-              <ul className="pl-4 mt-2 bg-gray-700">
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaPlus className="mr-3" />
-                  <Link to="/addRoom">Add Room</Link>
-                </li>
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaEye className="mr-3" />
-                  <Link to="/viewRoom">View Room Details</Link>
-                </li>
-              </ul>
-            )}
-          </li>
+          <SidebarSection
+            icon={<FaDoorOpen className="mr-3" />}
+            label="Room"
+            isOpen={isRoomOpen}
+            setIsOpen={setIsRoomOpen}
+            links={[
+              { path: "/addRoom", label: "Add Room" },
+              { path: "/viewRoom", label: "View Room Details" },
+            ]}
+          />
 
           {/* Bench */}
-          <li className="p-4 hover:bg-gray-700">
-            <button
-              onClick={() => setIsBenchOpen(!isBenchOpen)}
-              className="w-full text-left flex items-center"
-            >
-              <FaChair className="mr-3" />
-              Bench
-            </button>
-            {isBenchOpen && (
-              <ul className="pl-4 mt-2 bg-gray-700">
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaPlus className="mr-3" />
-                  <Link to="/addBench">Add Bench</Link>
-                </li>
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaEye className="mr-3" />
-                  <Link to="/viewBench">View Bench Details</Link>
-                </li>
-              </ul>
-            )}
-          </li>
+          <SidebarSection
+            icon={<FaChair className="mr-3" />}
+            label="Bench"
+            isOpen={isBenchOpen}
+            setIsOpen={setIsBenchOpen}
+            links={[
+              { path: "/addBench", label: "Add Bench" },
+              { path: "/viewBench", label: "View Bench Details" },
+            ]}
+          />
 
           {/* Exam */}
-          <li className="p-4 hover:bg-gray-700">
-            <button
-              onClick={() => setIsExamOpen(!isExamOpen)}
-              className="w-full text-left flex items-center"
-            >
-              <FaBookOpen className="mr-3" />
-              Exam
-            </button>
-            {isExamOpen && (
-              <ul className="pl-4 mt-2 bg-gray-700">
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaPlus className="mr-3" />
-                  <Link to="/createExam">Create Exam</Link>
-                </li>
-                <li className="p-4 hover:bg-gray-600 flex items-center">
-                  <FaEye className="mr-3" />
-                  <Link to="/viewExam">View Exam</Link>
-                </li>
-              </ul>
-            )}
-          </li>
+          <SidebarSection
+            icon={<FaBookOpen className="mr-3" />}
+            label="Exam"
+            isOpen={isExamOpen}
+            setIsOpen={setIsExamOpen}
+            links={[
+              { path: "/createExam", label: "Create Exam" },
+              { path: "/viewExam", label: "View Exam" },
+            ]}
+          />
+
+          {/* Room Assign */}
+          <SidebarSection
+            icon={<FaClipboardList className="mr-3" />}
+            label="Room Assign"
+            isOpen={isRoomAssignOpen}
+            setIsOpen={setIsRoomAssignOpen}
+            links={[
+              { path: "/assignRoom", label: "Assign Room" },
+              { path: "/viewRoomAssign", label: "View Room Assign" },
+            ]}
+          />
+
+          {/* Seat */}
+          <SidebarSection
+            icon={<FaThLarge className="mr-3" />}
+            label="Seat"
+            isOpen={isSeatOpen}
+            setIsOpen={setIsSeatOpen}
+            links={[
+              { path: "/addSeat", label: "Add Seat" },
+              { path: "/viewSeat", label: "View Seats" },
+            ]}
+          />
+
+          {/* Seat Plan */}
+          <SidebarSection
+            icon={<FaTable className="mr-3" />}
+            label="Seat Plan"
+            isOpen={isSeatPlanOpen}
+            setIsOpen={setIsSeatPlanOpen}
+            links={[
+              { path: "/createSeatPlan", label: "Create Seat Plan" },
+              { path: "/viewSeatPlan", label: "View Seat Plan" },
+            ]}
+          />
         </ul>
       </div>
 
@@ -192,5 +168,28 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     </>
   );
 };
+
+// Reusable Section Component
+const SidebarSection = ({ icon, label, isOpen, setIsOpen, links }) => (
+  <li className="p-4 hover:bg-gray-700">
+    <button
+      onClick={() => setIsOpen(!isOpen)}
+      className="w-full text-left flex items-center"
+    >
+      {icon}
+      {label}
+    </button>
+    {isOpen && (
+      <ul className="pl-4 mt-2 bg-gray-700">
+        {links.map((link, i) => (
+          <li key={i} className="p-4 hover:bg-gray-600 flex items-center">
+            {i === 0 ? <FaPlus className="mr-3" /> : <FaEye className="mr-3" />}
+            <Link to={link.path}>{link.label}</Link>
+          </li>
+        ))}
+      </ul>
+    )}
+  </li>
+);
 
 export default Sidebar;

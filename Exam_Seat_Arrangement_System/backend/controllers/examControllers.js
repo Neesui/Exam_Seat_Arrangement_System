@@ -46,36 +46,35 @@ export const createExam = async (req, res) => {
 
 // Get All Exams
 export const getExams = async (req, res) => {
-    try {
-      const exams = await prisma.exam.findMany({
-        include: {
-          subject: {
-            include: {
-              semester: {
-                include: {
-                  course: true,
-                },
+  try {
+    const exams = await prisma.exam.findMany({
+      include: {
+        subject: {
+          include: {
+            semester: {
+              include: {
+                course: true,
               },
             },
           },
-          roomAssignments: true,
         },
-      });
-  
-      res.json({
-        success: true,
-        message: "Exams retrieved successfully",
-        exams,
-      });
-    } catch (error) {
-      console.error("Get Exams Error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch exams",
-        error: error.message,
-      });
-    }
-  };
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Exams retrieved successfully",
+      exams,
+    });
+  } catch (error) {
+    console.error("Get Exams Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch exams",
+      error: error.message,
+    });
+  }
+};
   
   // Get Exam by ID
 export const getExamById = async (req, res) => {
