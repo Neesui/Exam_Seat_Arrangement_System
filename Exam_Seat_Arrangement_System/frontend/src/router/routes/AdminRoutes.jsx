@@ -20,6 +20,7 @@ import AddExamPage from "../../page/adminPage/AddExamPage";
 import ViewExamPage from "../../page/adminPage/ViewExamPage";
 import UpdateExamPage from "../../page/adminPage/UpdateExamPage";
 import ViewExamDetailsPage from "../../page/adminPage/ViewExamDetailsPage";
+import AddRoomAssignPage from "../../page/adminPage/AddRoomAssignPage";
 
 const adminRoutes = [
   {
@@ -106,6 +107,10 @@ const adminRoutes = [
   {
     path: "/viewExamDetails/:examId",
     element: <ViewExamDetailsPage />,
+  },
+  {
+    path: "/assignRoom",
+    element: <AddRoomAssignPage />,
   },
   {
     path: "/student",
