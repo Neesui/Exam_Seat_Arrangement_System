@@ -8,6 +8,7 @@ import AddSemester from '../../component/admin/AddSemester';
 const AddCourseFullPage = () => {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
+  const [batchYear, setBatchYear] = useState('');
   const [semester, setSemester] = useState({
     semesterNum: 1,
     subjects: [{ subjectName: '', code: '' }],
@@ -37,14 +38,16 @@ const AddCourseFullPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name.trim() || !duration.trim()) {
-      setError('Course name and duration are required.');
+    if (!name.trim() || !duration.trim() || !batchYear.trim()) {
+      setError('Course name, duration, and batch year are required.');
       return;
     }
 
     const parsedDuration = parseInt(duration, 10);
-    if (isNaN(parsedDuration)) {
-      setError('Duration must be a number.');
+    const parsedBatch = parseInt(batchYear, 10);
+
+    if (isNaN(parsedDuration) || isNaN(parsedBatch)) {
+      setError('Duration and batch year must be valid numbers.');
       return;
     }
 
@@ -64,12 +67,14 @@ const AddCourseFullPage = () => {
       await addCourse({
         name: name.trim(),
         duration: parsedDuration,
+        batchYear: parsedBatch,
         semesters: [semester],
       }).unwrap();
 
       toast.success('Course created successfully!');
       setName('');
       setDuration('');
+      setBatchYear('');
       setSemester({ semesterNum: 1, subjects: [{ subjectName: '', code: '' }] });
       setError('');
 
@@ -85,7 +90,14 @@ const AddCourseFullPage = () => {
       <h2 className="text-3xl font-bold mb-6 text-gray-800">Add Course with Semesters & Subjects</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <AddCourse name={name} setName={setName} duration={duration} setDuration={setDuration} />
+        <AddCourse
+          name={name}
+          setName={setName}
+          duration={duration}
+          setDuration={setDuration}
+          batchYear={batchYear}
+          setBatchYear={setBatchYear}
+        />
 
         <div>
           <h3 className="text-xl font-semibold mb-4">Semesters & Subjects</h3>

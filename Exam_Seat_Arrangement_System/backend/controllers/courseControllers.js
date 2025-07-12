@@ -1,11 +1,11 @@
 import prisma from "../utils/db.js";
 import { validateCoursePayload } from '../utils/validation.js';
 
-// Create Course, Semester, and Subjects
+// Create Course with Semesters and Subjects
 export const createCourseFull = async (req, res) => {
-  const { name, duration, semesters } = req.body;
+  const { name, duration, batchYear, semesters } = req.body;
 
-  const error = validateCoursePayload(name, duration, semesters);
+  const error = validateCoursePayload(name, duration, semesters, batchYear);
   if (error) {
     return res.status(400).json({ success: false, message: error });
   }
@@ -15,6 +15,7 @@ export const createCourseFull = async (req, res) => {
       data: {
         name,
         duration: Number(duration),
+        batchYear: Number(batchYear),
         semesters: {
           create: semesters.map((sem) => ({
             semesterNum: Number(sem.semesterNum),
@@ -43,40 +44,32 @@ export const createCourseFull = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+
+    if (err.code === 'P2002') {
+      return res.status(409).json({
+        success: false,
+        message: 'Course with the same name and batch year already exists.',
+      });
+    }
+
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// Get all courses
-// export const getCourses = async (req, res) => {
-//   try {
-//     const courses = await prisma.course.findMany();
-//     res.json({
-//       success: true,
-//       message: "Courses retrieved successfully",
-//       courses,
-//     });
-//   } catch (err) {
-//     console.error("Error retrieving courses:", err);
-//     res.status(500).json({
-//       success: false,
-//       message: "Failed to retrieve courses",
-//       error: err.message,
-//     });
-//   }
-// };
+// Get all courses with semesters and subjects
 export const getCourses = async (req, res) => {
   try {
     const courses = await prisma.course.findMany({
       include: {
         semesters: {
-          orderBy: { semesterNum: 'asc' },  // optional sorting
+          orderBy: { semesterNum: 'asc' },
           include: {
             subjects: {
-              orderBy: { subjectName: 'asc' }, // optional sorting
+              orderBy: { subjectName: 'asc' },
             },
           },
         },
+        students: true,
       },
     });
 
@@ -95,8 +88,7 @@ export const getCourses = async (req, res) => {
   }
 };
 
-
-// Get Course By ID
+// Get a specific course by ID
 export const getCourseById = async (req, res) => {
   const { id } = req.params;
 
@@ -105,8 +97,10 @@ export const getCourseById = async (req, res) => {
       where: { id: Number(id) },
       include: {
         semesters: {
+          orderBy: { semesterNum: 'asc' },
           include: { subjects: true },
         },
+        students: true,
       },
     });
 
@@ -132,9 +126,9 @@ export const getCourseById = async (req, res) => {
   }
 };
 
-// Update course
+// Update course name, duration, or batchYear
 export const updateCourse = async (req, res) => {
-  const { name, duration } = req.body;
+  const { name, duration, batchYear } = req.body;
   const courseId = req.params.id;
 
   try {
@@ -143,6 +137,7 @@ export const updateCourse = async (req, res) => {
       data: {
         ...(name && { name }),
         ...(duration !== undefined && { duration: Number(duration) }),
+        ...(batchYear !== undefined && { batchYear: Number(batchYear) }),
       },
     });
 
@@ -153,6 +148,14 @@ export const updateCourse = async (req, res) => {
     });
   } catch (err) {
     console.error("Error updating course:", err);
+
+    if (err.code === 'P2002') {
+      return res.status(409).json({
+        success: false,
+        message: "Course with this name and batchYear already exists",
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "Failed to update course",
@@ -161,7 +164,7 @@ export const updateCourse = async (req, res) => {
   }
 };
 
-// Delete course
+// Delete a course by ID
 export const deleteCourse = async (req, res) => {
   const { id } = req.params;
 
