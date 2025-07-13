@@ -2,6 +2,10 @@ import { apiSlice } from "./apiSlice";
 
 export const semesterApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    getSemesters: builder.query({
+      query: () => "/api/semester/all", // or your GET semesters API path
+    }),
+
     addSemester: builder.mutation({
       query: ({ courseId, semesterNum, subjects }) => ({
         url: `/api/semester/add-with-subjects`,
@@ -28,6 +32,7 @@ export const semesterApi = apiSlice.injectEndpoints({
 });
 
 export const {
+  useGetSemestersQuery,  // <-- add this here
   useAddSemesterMutation,
   useUpdateSemesterMutation,
   useDeleteSemesterMutation,

@@ -23,6 +23,8 @@ import ViewExamDetailsPage from "../../page/adminPage/ViewExamDetailsPage";
 import AddRoomAssignPage from "../../page/adminPage/AddRoomAssignPage";
 import ViewRoomAssignPage from "../../page/adminPage/ViewRoomAssignPage ";
 import ImportStudentData from "../../page/adminPage/ImportStudentData";
+import ViewStudentPage from "../../page/adminPage/ViewStudentPage";
+import AddStudentPage from "../../page/adminPage/AddStudentPage";
 
 const adminRoutes = [
   {
@@ -119,8 +121,16 @@ const adminRoutes = [
     element: <ViewRoomAssignPage />,
   },
   {
+    path: "/addStudents",
+    element: <AddStudentPage />,
+  },
+  {
     path: "/importStudent",
     element: <ImportStudentData />,
+  },
+  {
+    path: "/viewStudents",
+    element: <ViewStudentPage />,
   },
   {
     path: "/student",

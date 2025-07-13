@@ -55,8 +55,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={isStudentDetailsOpen}
             setIsOpen={setIsStudentDetailsOpen}
             links={[
-              { path: "/importStudent", label: "Add Students" },
-              { path: "/ViewStudents", label: "View Student Details" },
+              { path: "/addStudents", label: "Add Students" },
+              { path: "/viewStudents", label: "View Student Details" },
             ]}
           />
 
