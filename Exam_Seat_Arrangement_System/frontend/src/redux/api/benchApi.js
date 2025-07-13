@@ -1,4 +1,4 @@
-import { apiSlice } from "./apiSlice"; 
+import { apiSlice } from "./apiSlice";
 
 export const benchApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -8,7 +8,7 @@ export const benchApi = apiSlice.injectEndpoints({
         method: "POST",
         body: newData,
       }),
-      invalidatesTags: ["BENCH"],
+      invalidatesTags: ["BENCH", "ROOM"], // ✅ also invalidate ROOM
     }),
 
     getBenches: builder.query({
@@ -22,9 +22,9 @@ export const benchApi = apiSlice.injectEndpoints({
     }),
 
     getBenchesByRoom: builder.query({
-        query: (roomId) => `/api/bench/get-by-room/${roomId}`,
-        providesTags: ["BENCH"],
-      }),
+      query: (roomId) => `/api/bench/get-by-room/${roomId}`,
+      providesTags: ["BENCH"],
+    }),
 
     updateBench: builder.mutation({
       query: ({ id, ...data }) => ({
@@ -32,7 +32,7 @@ export const benchApi = apiSlice.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["BENCH"],
+      invalidatesTags: ["BENCH", "ROOM"], // ✅ also invalidate ROOM
     }),
 
     deleteBench: builder.mutation({
@@ -40,7 +40,7 @@ export const benchApi = apiSlice.injectEndpoints({
         url: `/api/bench/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["BENCH"],
+      invalidatesTags: ["BENCH", "ROOM"], // ✅ also invalidate ROOM
     }),
   }),
 });

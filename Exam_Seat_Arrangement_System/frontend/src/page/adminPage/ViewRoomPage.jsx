@@ -41,6 +41,8 @@ const ViewRoomPage = () => {
               <th className="border border-gray-300 px-4 py-2">Room Number</th>
               <th className="border border-gray-300 px-4 py-2">Block</th>
               <th className="border border-gray-300 px-4 py-2">Floor</th>
+              <th className="border border-gray-300 px-4 py-2">Total Benches</th>
+              <th className="border border-gray-300 px-4 py-2">Total Capacity</th>
               <th className="border border-gray-300 px-4 py-2">Action</th>
             </tr>
           </thead>
@@ -52,6 +54,8 @@ const ViewRoomPage = () => {
                   <td className="border px-4 py-2">{room.roomNumber}</td>
                   <td className="border px-4 py-2">{room.block}</td>
                   <td className="border px-4 py-2">{room.floor}</td>
+                  <td className="border px-4 py-2">{room.benches?.length || 0}</td>
+                  <td className="border px-4 py-2">{room.capacity || 0}</td>
                   <td className="border px-4 py-2">
                     <button
                       className="text-blue-500 hover:text-blue-700 mr-2"
@@ -76,7 +80,7 @@ const ViewRoomPage = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="border px-4 py-2 text-center">
+                <td colSpan="7" className="border px-4 py-2 text-center">
                   No rooms available.
                 </td>
               </tr>

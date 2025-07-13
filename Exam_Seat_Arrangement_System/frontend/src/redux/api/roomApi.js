@@ -1,10 +1,10 @@
-import { apiSlice } from "./apiSlice"; // Adjust path if needed
+import { apiSlice } from "./apiSlice";
 
 export const roomApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     addRoom: builder.mutation({
       query: (newData) => ({
-        url: "/api/rooms/add", 
+        url: "/api/rooms/add",
         method: "POST",
         body: newData,
       }),
@@ -12,7 +12,7 @@ export const roomApi = apiSlice.injectEndpoints({
     }),
 
     getRooms: builder.query({
-      query: () => "/api/rooms/get", 
+      query: () => "/api/rooms/get",
       providesTags: ["ROOM"],
     }),
 
