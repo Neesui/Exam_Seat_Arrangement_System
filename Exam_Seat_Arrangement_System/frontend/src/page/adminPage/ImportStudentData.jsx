@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { FiUpload } from "react-icons/fi";
 
@@ -6,6 +6,7 @@ const ImportStudentData = () => {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const mapExcelRowToStudent = (row) => ({
     studentName: (row["studentName"] || row["Student Name"] || "").trim(),
@@ -84,6 +85,7 @@ const ImportStudentData = () => {
             if (data.success) {
               setMessage(data.message || "✅ Students imported successfully!");
               setFile(null);
+              if (fileInputRef.current) fileInputRef.current.value = ""; // reset file input
             } else {
               setMessage(data.message || "❌ Import failed.");
             }
@@ -105,6 +107,7 @@ const ImportStudentData = () => {
     setFile(null);
     setMessage("");
     setLoading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleDownloadTemplate = () => {
@@ -129,17 +132,27 @@ const ImportStudentData = () => {
         </button>
       </div>
 
+      {/* Hidden file input */}
       <input
         type="file"
         accept=".xlsx,.xls,.csv"
         onChange={handleFileChange}
-        className="block w-full mb-4 border border-gray-300 rounded p-2"
+        ref={fileInputRef}
+        className="hidden"
       />
+
+      {/* Single button to open file picker */}
+      <button
+        onClick={() => fileInputRef.current && fileInputRef.current.click()}
+        className="w-full mb-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        {file ? `Selected: ${file.name}` : "Upload File"}
+      </button>
 
       <div className="flex gap-4">
         <button
           onClick={handleImport}
-          disabled={loading}
+          disabled={loading || !file}
           className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
         >
           {loading ? "Importing..." : "Import"}
