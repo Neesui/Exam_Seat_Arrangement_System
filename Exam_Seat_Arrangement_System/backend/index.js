@@ -13,6 +13,7 @@ import subjectRouter from './routes/subjectRoutes.js';
 import roomRoutes from "./routes/roomRoutes.js";
 import benchRouter from "./routes/benchRoutes.js";
 import examRouter from "./routes/examRoutes.js";
+import studentRouter from "./routes/studentRoutes.js";
 import roomAssignmentRouter from "./routes/roomAssignmentRoutes.js";
 
 
@@ -35,6 +36,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/invigilator", invigilatorRouter);
+app.use("/api/student", studentRouter);
 app.use("/api/course", courseRouter);
 app.use("/api/semester", semesterRouter);
 app.use("/api/subject", subjectRouter);
