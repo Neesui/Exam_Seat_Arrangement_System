@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import * as XLSX from "xlsx";
+import { FiUpload } from "react-icons/fi";
 
 const ImportStudentData = () => {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Map Excel/CSV row headers to student object keys
   const mapExcelRowToStudent = (row) => ({
     studentName: (row["studentName"] || row["Student Name"] || "").trim(),
     symbolNumber: (row["symbolNumber"] || row["Symbol Number"] || "").trim(),
@@ -25,7 +25,7 @@ const ImportStudentData = () => {
         selectedFile.type
       )
     ) {
-      setMessage("Invalid file type. Please upload XLSX, XLS or CSV file.");
+      setMessage("❌ Invalid file type. Please upload XLSX, XLS or CSV file.");
       setFile(null);
       return;
     }
@@ -36,9 +36,9 @@ const ImportStudentData = () => {
   const validateStudents = (students) => {
     const errors = [];
     students.forEach((s, idx) => {
-      if (!s.studentName) errors.push(`Row ${idx + 2}: studentName is required.`);
-      if (!s.courseId) errors.push(`Row ${idx + 2}: courseId is required and must be a number.`);
-      if (!s.semesterId) errors.push(`Row ${idx + 2}: semesterId is required and must be a number.`);
+      if (!s.studentName) errors.push(`Row ${idx + 2}: Student Name is required.`);
+      if (!s.courseId) errors.push(`Row ${idx + 2}: Course ID is required and must be a number.`);
+      if (!s.semesterId) errors.push(`Row ${idx + 2}: Semester ID is required and must be a number.`);
     });
     return errors;
   };
@@ -61,13 +61,12 @@ const ImportStudentData = () => {
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
         if (jsonData.length === 0) {
-          setMessage("No data found in file.");
+          setMessage("❗ No data found in file.");
           setLoading(false);
           return;
         }
 
         const students = jsonData.map(mapExcelRowToStudent);
-
         const validationErrors = validateStudents(students);
         if (validationErrors.length > 0) {
           setMessage(validationErrors.join(" "));
@@ -83,18 +82,18 @@ const ImportStudentData = () => {
           .then((res) => res.json())
           .then((data) => {
             if (data.success) {
-              setMessage(data.message || "Students imported successfully!");
+              setMessage(data.message || "✅ Students imported successfully!");
               setFile(null);
             } else {
-              setMessage(data.message || "Import failed.");
+              setMessage(data.message || "❌ Import failed.");
             }
           })
           .catch(() => {
-            setMessage("Error occurred during import.");
+            setMessage("❌ Error occurred during import.");
           })
           .finally(() => setLoading(false));
       } catch (err) {
-        setMessage("Failed to read file. Make sure it is a valid Excel or CSV file.");
+        setMessage("❌ Failed to read file. Make sure it is a valid Excel or CSV file.");
         setLoading(false);
       }
     };
@@ -108,27 +107,55 @@ const ImportStudentData = () => {
     setLoading(false);
   };
 
+  const handleDownloadTemplate = () => {
+    const headers = [
+      ["studentName", "symbolNumber", "regNumber", "college", "courseId", "semesterId", "imageUrl"],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(headers);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Template");
+    XLSX.writeFile(wb, "StudentImportTemplate.xlsx");
+  };
+
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h2 className="text-xl font-semibold mb-4">Import Students (Excel/CSV)</h2>
-      <input type="file" accept=".xlsx,.xls,.csv" onChange={handleFileChange} />
-      <div className="mt-4 flex space-x-2">
+    <div className="p-6 max-w-lg mx-auto bg-white rounded-lg shadow-md mt-20">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold text-gray-800">Import Students (Excel/CSV)</h2>
+        <button
+          onClick={handleDownloadTemplate}
+          className="flex items-center gap-2 text-sm px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          <FiUpload /> Download Template
+        </button>
+      </div>
+
+      <input
+        type="file"
+        accept=".xlsx,.xls,.csv"
+        onChange={handleFileChange}
+        className="block w-full mb-4 border border-gray-300 rounded p-2"
+      />
+
+      <div className="flex gap-4">
         <button
           onClick={handleImport}
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
         >
           {loading ? "Importing..." : "Import"}
         </button>
         <button
           onClick={handleReset}
           disabled={loading && !file}
-          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+          className="flex-1 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
         >
           Reset
         </button>
       </div>
-      {message && <p className="mt-4 text-center">{message}</p>}
+
+      {message && (
+        <p className="mt-6 text-center text-sm font-medium text-gray-700">{message}</p>
+      )}
     </div>
   );
 };

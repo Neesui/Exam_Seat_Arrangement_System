@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { FiUpload } from "react-icons/fi"; // ✅ Import Icon
 import { useAddStudentMutation } from "../../redux/api/studentApi";
 import { useGetCoursesQuery } from "../../redux/api/courseApi";
 import { useGetSemestersQuery } from "../../redux/api/semesterApi";
@@ -8,80 +9,43 @@ import { useGetSemestersQuery } from "../../redux/api/semesterApi";
 const AddStudentPage = () => {
   const navigate = useNavigate();
 
-  const [studentName, setStudentName] = useState("");
-  const [symbolNumber, setSymbolNumber] = useState("");
-  const [regNumber, setRegNumber] = useState("");
-  const [college, setCollege] = useState("");
-  const [courseId, setCourseId] = useState("");
-  const [semesterId, setSemesterId] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [uploading, setUploading] = useState(false);
+  const [formData, setFormData] = useState({
+    studentName: "",
+    symbolNumber: "",
+    regNumber: "",
+    college: "",
+    courseId: "",
+    semesterId: "",
+    imageUrl: "",
+  });
 
   const [addStudent, { isLoading }] = useAddStudentMutation();
+  const { data: coursesData, error: coursesError, isLoading: coursesLoading } = useGetCoursesQuery();
+  const { data: semestersData, error: semestersError, isLoading: semestersLoading } = useGetSemestersQuery();
 
-  const {
-    data: coursesData,
-    error: coursesError,
-    isLoading: coursesLoading,
-  } = useGetCoursesQuery();
-
-  const {
-    data: semestersData,
-    error: semestersError,
-    isLoading: semestersLoading,
-  } = useGetSemestersQuery();
-
-  // Image upload handler
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Optional: check file type/size here
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    setUploading(true);
-    try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("Image upload failed");
-
-      const data = await res.json();
-      setImageUrl(data.imageUrl); // Adjust based on your API response shape
-      toast.success("Image uploaded successfully!");
-    } catch (error) {
-      toast.error(error.message || "Failed to upload image");
-    } finally {
-      setUploading(false);
-    }
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!courseId || !semesterId) {
+    if (!formData.courseId || !formData.semesterId) {
       toast.error("Please select a course and a semester");
       return;
     }
 
     try {
       const result = await addStudent({
-        studentName,
-        symbolNumber,
-        regNumber,
-        college,
-        courseId: Number(courseId),
-        semesterId: Number(semesterId),
-        imageUrl: imageUrl.trim() === "" ? null : imageUrl.trim(),
+        ...formData,
+        courseId: Number(formData.courseId),
+        semesterId: Number(formData.semesterId),
+        imageUrl: formData.imageUrl.trim() === "" ? null : formData.imageUrl.trim(),
       }).unwrap();
 
       if (result.success) {
         toast.success("Student added successfully!");
-        navigate("/students"); // change as per your route to view students
+        // navigate("/students");
       } else {
         toast.error(result.message || "Failed to add student");
       }
@@ -91,146 +55,143 @@ const AddStudentPage = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-gray-100 mt-32 flex flex-col justify-center px-4">
-      <div className="w-full bg-white p-6 md:p-10 rounded-lg shadow-xl">
-        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
-          Add New Student
-        </h2>
+    <div className="mx-auto max-w-[95%] mt-20 bg-white p-8 rounded-lg shadow-md h-[75vh] flex flex-col">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-800">Add New Student</h2>
+        <Link
+          to="/importStudent"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          <FiUpload className="text-lg" /> Import File
+        </Link>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Student Name */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">Student Name</label>
-            <input
-              type="text"
-              value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
-              className="w-full p-2 border rounded"
-              placeholder="Enter student name"
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 sm:grid-cols-2 gap-5 overflow-y-auto"
+      >
+        <div>
+          <label className="block text-gray-600 mb-1">Student Name</label>
+          <input
+            type="text"
+            name="studentName"
+            value={formData.studentName}
+            onChange={handleChange}
+            placeholder="Enter student name"
+            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-600 mb-1">Symbol Number</label>
+          <input
+            type="text"
+            name="symbolNumber"
+            value={formData.symbolNumber}
+            onChange={handleChange}
+            placeholder="Enter symbol number"
+            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-600 mb-1">Registration Number</label>
+          <input
+            type="text"
+            name="regNumber"
+            value={formData.regNumber}
+            onChange={handleChange}
+            placeholder="Enter registration number"
+            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-600 mb-1">College</label>
+          <input
+            type="text"
+            name="college"
+            value={formData.college}
+            onChange={handleChange}
+            placeholder="Enter college name"
+            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-600 mb-1">Course</label>
+          {coursesLoading ? (
+            <p>Loading courses...</p>
+          ) : coursesError ? (
+            <p className="text-red-500">Failed to load courses</p>
+          ) : (
+            <select
+              name="courseId"
+              value={formData.courseId}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-            />
-          </div>
+            >
+              <option value="">Select Course</option>
+              {coursesData?.courses?.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.courseName} ({course.courseCode})
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
 
-          {/* Symbol Number */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">Symbol Number</label>
-            <input
-              type="text"
-              value={symbolNumber}
-              onChange={(e) => setSymbolNumber(e.target.value)}
-              className="w-full p-2 border rounded"
-              placeholder="Enter symbol number"
+        <div>
+          <label className="block text-gray-600 mb-1">Semester</label>
+          {semestersLoading ? (
+            <p>Loading semesters...</p>
+          ) : semestersError ? (
+            <p className="text-red-500">Failed to load semesters</p>
+          ) : (
+            <select
+              name="semesterId"
+              value={formData.semesterId}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-            />
-          </div>
+            >
+              <option value="">Select Semester</option>
+              {semestersData?.semesters?.map((sem) => (
+                <option key={sem.id} value={sem.id}>
+                  {sem.semesterName}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
 
-          {/* Registration Number */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">Registration Number</label>
-            <input
-              type="text"
-              value={regNumber}
-              onChange={(e) => setRegNumber(e.target.value)}
-              className="w-full p-2 border rounded"
-              placeholder="Enter registration number"
-              required
-            />
-          </div>
+        <div className="sm:col-span-2">
+          <label className="block text-gray-600 mb-1">Image</label>
+          <input
+            type="text"
+            name="imageUrl"
+            value={formData.imageUrl}
+            onChange={handleChange}
+            placeholder="Enter image URL"
+            className="w-full border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-          {/* College */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">College</label>
-            <input
-              type="text"
-              value={college}
-              onChange={(e) => setCollege(e.target.value)}
-              className="w-full p-2 border rounded"
-              placeholder="Enter college name"
-              required
-            />
-          </div>
-
-          {/* Course Selection */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">Course</label>
-            {coursesLoading ? (
-              <p>Loading courses...</p>
-            ) : coursesError ? (
-              <p className="text-red-500">Failed to load courses</p>
-            ) : (
-              <select
-                value={courseId}
-                onChange={(e) => setCourseId(e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              >
-                <option value="">Select Course</option>
-                {coursesData?.courses?.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.courseName} ({course.courseCode})
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          {/* Semester Selection */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">Semester</label>
-            {semestersLoading ? (
-              <p>Loading semesters...</p>
-            ) : semestersError ? (
-              <p className="text-red-500">Failed to load semesters</p>
-            ) : (
-              <select
-                value={semesterId}
-                onChange={(e) => setSemesterId(e.target.value)}
-                className="w-full p-2 border rounded"
-                required
-              >
-                <option value="">Select Semester</option>
-                {semestersData?.semesters?.map((sem) => (
-                  <option key={sem.id} value={sem.id}>
-                    {sem.semesterName}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          {/* Image Upload */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">Upload Image (optional)</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="w-full"
-            />
-            {uploading && <p className="text-blue-500 mt-1">Uploading image...</p>}
-            {imageUrl && (
-              <img
-                src={imageUrl}
-                alt="Uploaded"
-                className="mt-2 h-24 w-24 object-cover rounded border"
-              />
-            )}
-          </div>
-
-          {/* Submit Button */}
+        <div className="sm:col-span-2">
           <button
             type="submit"
-            className={`w-full p-3 rounded text-white font-semibold transition ${
-              isLoading || uploading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            }`}
-            disabled={isLoading || coursesLoading || semestersLoading || uploading}
+            disabled={isLoading || coursesLoading || semestersLoading}
+            className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {isLoading ? "Adding..." : "Add Student"}
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 };

@@ -169,7 +169,7 @@ export const deleteStudent = async (req, res) => {
 // ✅ Bulk Import Students - Fixed to accept array directly in req.body
 export const importStudents = async (req, res) => {
     try {
-      const students = req.body;  // <-- read req.body as array directly
+      const students = req.body;
   
       if (!Array.isArray(students) || students.length === 0) {
         return res.status(400).json({
@@ -178,25 +178,17 @@ export const importStudents = async (req, res) => {
         });
       }
   
-      const createdStudents = await prisma.student.createMany({
-        data: students.map((student) => ({
-          studentName: student.studentName,
-          symbolNumber: student.symbolNumber,
-          regNumber: student.regNumber,
-          college: student.college,
-          courseId: Number(student.courseId),
-          semesterId: Number(student.semesterId),
-          imageUrl: student.imageUrl || null,
-        })),
-        skipDuplicates: true,
+      await prisma.student.createMany({
+        data: students,
+        skipDuplicates: true, // prevents duplicates by unique constraint
       });
   
-      res.status(201).json({
+      res.status(200).json({
         success: true,
-        message: `${createdStudents.count} students imported successfully.`,
+        message: "Students imported successfully!",
       });
     } catch (error) {
-      console.error("Import Students Error:", error);
+      console.error("Import Error:", error);
       res.status(500).json({
         success: false,
         message: "Failed to import students.",
