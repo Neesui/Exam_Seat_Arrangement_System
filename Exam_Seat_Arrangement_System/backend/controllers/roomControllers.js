@@ -24,25 +24,39 @@ export const createRoom = async (req, res) => {
 };
 
 // Get all Rooms
+// Get all Rooms with total capacity from benches
 export const getRooms = async (req, res) => {
-    try {
-      const rooms = await prisma.room.findMany({
-        include: { benches: true },
-      });
-  
-      res.json({
-        success: true,
-        message: "Rooms retrieved successfully",
-        rooms,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch rooms",
-        error: error.message,
-      });
-    }
-  };
+  try {
+    const rooms = await prisma.room.findMany({
+      include: { benches: true },
+    });
+
+    const roomsWithCapacity = rooms.map((room) => {
+      const totalCapacity = room.benches.reduce((sum, bench) => sum + bench.capacity, 0);
+
+      return {
+        id: room.id,
+        roomNumber: room.roomNumber,
+        block: room.block,
+        floor: room.floor,
+        benches: room.benches,
+        capacity: totalCapacity, // 👈 calculated capacity added
+      };
+    });
+
+    res.json({
+      success: true,
+      message: "Rooms retrieved successfully",
+      rooms: roomsWithCapacity,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch rooms",
+      error: error.message,
+    });
+  }
+};
 
   // Get Room by ID
 export const getRoomById = async (req, res) => {
