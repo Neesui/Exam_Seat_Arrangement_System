@@ -88,6 +88,8 @@ model Student {
   seat         Seat?
 
   @@unique([symbolNumber, college])
+  @@map("student")
+
 }
 
 model Exam {
@@ -146,6 +148,8 @@ model Seat {
   bench          Bench         @relation(fields: [benchId], references: [id])
   student        Student       @relation(fields: [studentId], references: [id])
   seatingPlan    SeatingPlan?  @relation(fields: [seatingPlanId], references: [id])
+  @@map("seat")
+
 }
 
 model RoomAssignment {
