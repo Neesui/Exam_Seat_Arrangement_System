@@ -8,33 +8,35 @@ const UpdateExamPage = () => {
   const { examId } = useParams();
   const navigate = useNavigate();
 
-  // Fetch single exam data by ID
   const { data: examData, isLoading: isExamLoading, error: examError } = useGetExamByIdQuery(Number(examId));
-
-  // Fetch subjects for dropdown
   const {
     data: subjectData,
     isLoading: isSubjectsLoading,
     error: subjectError,
   } = useGetSubjectsQuery();
 
-  // Update mutation
   const [updateExam, { isLoading: isUpdating }] = useUpdateExamMutation();
 
-  // Form state
   const [subjectId, setSubjectId] = useState("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
 
-  // Initialize form fields once examData loads
   useEffect(() => {
     if (examData?.exam) {
-      setSubjectId(examData.exam.subjectId.toString());
-      // Format date to YYYY-MM-DD for input[type=date]
-      setDate(examData.exam.date.split("T")[0]);
-      setStartTime(examData.exam.startTime || "");
-      setEndTime(examData.exam.endTime || "");
+      const { subjectId, date, startTime, endTime } = examData.exam;
+      setSubjectId(subjectId.toString());
+      setDate(date?.split("T")[0] || "");
+
+      // Convert to HH:MM format
+      const toTimeOnly = (dateTimeStr) => {
+        if (!dateTimeStr) return "";
+        const d = new Date(dateTimeStr);
+        return d.toISOString().substr(11, 5); // HH:MM
+      };
+
+      setStartTime(toTimeOnly(startTime));
+      setEndTime(toTimeOnly(endTime));
     }
   }, [examData]);
 
@@ -46,13 +48,17 @@ const UpdateExamPage = () => {
       return;
     }
 
+    const toDateTime = (timeStr) => {
+      return timeStr ? new Date(`${date}T${timeStr}:00`).toISOString() : null;
+    };
+
     try {
       await updateExam({
         id: Number(examId),
         subjectId: Number(subjectId),
-        date,
-        startTime,
-        endTime,
+        date: new Date(date).toISOString(),
+        startTime: toDateTime(startTime),
+        endTime: toDateTime(endTime),
       }).unwrap();
 
       toast.success("Exam updated successfully!");
@@ -111,8 +117,7 @@ const UpdateExamPage = () => {
         <div>
           <label className="block mb-1 font-semibold">Start Time</label>
           <input
-            type="text"
-            placeholder="e.g. 09:00 AM"
+            type="time"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             className="w-full border p-2 rounded"
@@ -123,8 +128,7 @@ const UpdateExamPage = () => {
         <div>
           <label className="block mb-1 font-semibold">End Time</label>
           <input
-            type="text"
-            placeholder="e.g. 12:00 PM"
+            type="time"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
             className="w-full border p-2 rounded"

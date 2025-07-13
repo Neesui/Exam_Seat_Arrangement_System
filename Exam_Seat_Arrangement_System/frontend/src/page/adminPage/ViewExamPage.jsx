@@ -27,6 +27,12 @@ const ViewExamPage = () => {
     navigate(`/viewExamDetails/${examId}`);
   };
 
+  const formatTime = (dateTimeStr) => {
+    if (!dateTimeStr) return "-";
+    const date = new Date(dateTimeStr);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
     <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md w-[99%] max-w-screen-lg mx-auto">
       <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">View Exams</h2>
@@ -53,9 +59,9 @@ const ViewExamPage = () => {
                 <tr key={exam.id}>
                   <td className="border px-4 py-2">{index + 1}</td>
                   <td className="border px-4 py-2">{exam.subject?.subjectName || "N/A"}</td>
-                  <td className="border px-4 py-2">{exam.date.split('T')[0]}</td>
-                  <td className="border px-4 py-2">{exam.startTime || "-"}</td>
-                  <td className="border px-4 py-2">{exam.endTime || "-"}</td>
+                  <td className="border px-4 py-2">{exam.date?.split("T")[0]}</td>
+                  <td className="border px-4 py-2">{formatTime(exam.startTime)}</td>
+                  <td className="border px-4 py-2">{formatTime(exam.endTime)}</td>
                   <td className="border px-4 py-2">
                     <button
                       className="text-blue-500 hover:text-blue-700 mr-2"

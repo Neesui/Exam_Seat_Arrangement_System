@@ -132,6 +132,8 @@ model Bench {
 
   @@unique([roomId, row, column])
   @@unique([roomId, benchNo])
+  @@map("bench")
+
 }
 
 model Seat {
