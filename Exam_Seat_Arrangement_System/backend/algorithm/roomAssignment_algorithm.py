@@ -1,86 +1,61 @@
+# backend/algorithm/roomAssignment_algorithm.py
+
 import json
-from datetime import datetime
 from db_connection import get_db_connection
 
 def fetch_exams(conn):
     with conn.cursor() as cur:
-        # Assuming exams table has startTime and endTime columns (timestamp)
         cur.execute("SELECT id, startTime, endTime FROM exam ORDER BY startTime;")
         rows = cur.fetchall()
-        # Convert timestamps to datetime objects
-        return [
-            {"id": r[0], "start": r[1], "end": r[2]}
-            for r in rows
-        ]
+        return [{"id": r[0], "start": r[1], "end": r[2]} for r in rows]
 
 def fetch_rooms(conn):
     with conn.cursor() as cur:
-        # Assuming room table has capacity column (integer)
-        cur.execute("SELECT id, capacity FROM room ORDER BY id;")
+        cur.execute("""
+            SELECT r.id, r.roomNumber, COALESCE(SUM(b.capacity), 0) AS totalCapacity
+            FROM room r
+            LEFT JOIN bench b ON r.id = b.roomId
+            GROUP BY r.id
+            ORDER BY r.id;
+        """)
         rows = cur.fetchall()
-        return [
-            {"id": r[0], "capacity": r[1]}
-            for r in rows
-        ]
+        return [{"id": r[0], "roomNumber": r[1], "capacity": r[2]} for r in rows]
 
 def fetch_exam_student_counts(conn):
     with conn.cursor() as cur:
-        # Assuming a student table with examId foreign key
-        cur.execute("""
-            SELECT examId, COUNT(*) FROM student GROUP BY examId;
-        """)
-        rows = cur.fetchall()
-        return {r[0]: r[1] for r in rows}
+        cur.execute("SELECT examId, COUNT(*) FROM student GROUP BY examId;")
+        return {r[0]: r[1] for r in cur.fetchall()}
 
-def is_time_conflict(start1, end1, start2, end2):
-    # Return True if time intervals overlap
+def is_conflict(start1, end1, start2, end2):
     return max(start1, start2) < min(end1, end2)
 
-def schedule_exams_to_rooms(exams, rooms, exam_students_counts):
-    room_schedules = {room['id']: [] for room in rooms}  # roomId -> list of assigned exams with time
+def assign_rooms(exams, rooms, exam_students):
+    room_schedules = {room['id']: [] for room in rooms}
     assignments = []
 
     for exam in exams:
-        students_needed = exam_students_counts.get(exam['id'], 0)
-        assigned = False
-
+        students_needed = exam_students.get(exam['id'], 0)
         for room in rooms:
-            # Check if room capacity is enough
-            if room['capacity'] < students_needed:
-                continue
-
-            # Check for time conflicts in this room
-            conflicts = False
-            for assigned_exam in room_schedules[room['id']]:
-                if is_time_conflict(exam['start'], exam['end'], assigned_exam['start'], assigned_exam['end']):
-                    conflicts = True
+            if room['capacity'] >= students_needed:
+                conflict = False
+                for assigned in room_schedules[room['id']]:
+                    if is_conflict(exam['start'], exam['end'], assigned['start'], assigned['end']):
+                        conflict = True
+                        break
+                if not conflict:
+                    room_schedules[room['id']].append(exam)
+                    assignments.append({"examId": exam['id'], "roomId": room['id']})
                     break
-
-            if not conflicts:
-                # Assign room to exam
-                room_schedules[room['id']].append(exam)
-                assignments.append({"examId": exam['id'], "roomId": room['id']})
-                assigned = True
-                break  # assigned exam, break room loop
-
-        if not assigned:
-            # Could implement splitting exams across multiple rooms here
-            # For now just report failure to assign
-            print(f"Could not assign room for exam {exam['id']} due to capacity/time conflicts")
-
     return assignments
 
 def main():
-    conn = get_db_connection()
     try:
+        conn = get_db_connection()
         exams = fetch_exams(conn)
         rooms = fetch_rooms(conn)
-        exam_students_counts = fetch_exam_student_counts(conn)
-
-        assignments = schedule_exams_to_rooms(exams, rooms, exam_students_counts)
-
-        # Output JSON for Node.js
-        print(json.dumps(assignments))
+        exam_students = fetch_exam_student_counts(conn)
+        result = assign_rooms(exams, rooms, exam_students)
+        print(json.dumps(result))
     except Exception as e:
         print(json.dumps({"error": str(e)}))
     finally:

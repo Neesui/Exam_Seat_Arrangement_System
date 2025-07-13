@@ -25,34 +25,35 @@ model User {
 }
 
 model Invigilator {
-  id                    Int                      @id @default(autoincrement())
-  course                String
-  phone                 String
-  address               String
-  gender                String
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
+  id                     Int                      @id @default(autoincrement())
+  course                 String
+  phone                  String
+  address                String
+  gender                 String
+  imageUrl               String?                  // 👈 Profile image for Invigilator
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
 
-  userId                Int                      @unique
-  user                  User                     @relation(fields: [userId], references: [id])
+  userId                 Int                      @unique
+  user                   User                     @relation(fields: [userId], references: [id])
 
   invigilatorAssignments InvigilatorAssignment[]
 }
 
 model Course {
-  id          Int         @id @default(autoincrement())
-  name        String      @unique
-  duration    Int         // total semesters, e.g., 8
-  batchYear   Int
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  duration  Int       // total semesters, e.g., 8
+  batchYear Int
 
-  semesters   Semester[]
-  students    Student[]
-  @@unique([name, batchYear]) 
+  semesters Semester[]
+  students  Student[]
+  @@unique([name, batchYear])
 }
 
 model Semester {
   id          Int         @id @default(autoincrement())
-  semesterNum      Int         // 1, 2, 3, ..., 8
+  semesterNum Int         // 1, 2, 3, ..., 8
   courseId    Int
 
   course      Course      @relation(fields: [courseId], references: [id])
@@ -61,28 +62,29 @@ model Semester {
 }
 
 model Subject {
-  id          Int         @id @default(autoincrement())
-  subjectName        String
-  code        String      @unique
-  semesterId  Int
+  id         Int       @id @default(autoincrement())
+  subjectName String
+  code       String    @unique
+  semesterId Int
 
-  semester    Semester    @relation(fields: [semesterId], references: [id])
-  exams       Exam[]
+  semester   Semester  @relation(fields: [semesterId], references: [id])
+  exams      Exam[]
 }
 
 model Student {
   id           Int         @id @default(autoincrement())
-  studentName         String
+  studentName  String
   symbolNumber String
   regNumber    String
   college      String
   courseId     Int
   semesterId   Int
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  imageUrl     String?      // 👈 Profile image for Student
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
-  course       Course      @relation(fields: [courseId], references: [id])
-  semester     Semester    @relation(fields: [semesterId], references: [id])
+  course       Course       @relation(fields: [courseId], references: [id])
+  semester     Semester     @relation(fields: [semesterId], references: [id])
   seat         Seat?
 
   @@unique([symbolNumber, college])
@@ -98,20 +100,22 @@ model Exam {
   subject         Subject         @relation(fields: [subjectId], references: [id])
   roomAssignments RoomAssignment[]
   seatingPlans    SeatingPlan[]
+
+  @@map("exam")
 }
 
 model Room {
-  id              Int             @id @default(autoincrement())
-  roomNumber      String          @unique
-  block           String?
-  floor           String?
-  maxColumns  Int       @default(2)
-
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-
-  benches         Bench[]
+  id              Int      @id @default(autoincrement())
+  roomNumber      String
+  block           String
+  floor           String
+  benches         Bench[]  
   roomAssignments RoomAssignment[]
+
+  totalBench      Int      @default(0)
+  totalCapacity   Int      @default(0)
+
+  @@map("room") 
 }
 
 model Bench {
@@ -127,7 +131,7 @@ model Bench {
   seats     Seat[]
 
   @@unique([roomId, row, column])
-  @@unique([roomId, benchNo])  
+  @@unique([roomId, benchNo])
 }
 
 model Seat {
@@ -143,35 +147,36 @@ model Seat {
 }
 
 model RoomAssignment {
-  id                    Int                      @id @default(autoincrement())
-  roomId                Int
-  examId                Int
-  isActive              Boolean                  @default(true)
-  isCompleted           Boolean                  @default(false)
-  completedAt           DateTime?
+  id                     Int                      @id @default(autoincrement())
+  roomId                 Int
+  examId                 Int
+  isActive               Boolean                  @default(true)
+  isCompleted            Boolean                  @default(false)
+  completedAt            DateTime?
 
-  room                  Room                     @relation(fields: [roomId], references: [id])
-  exam                  Exam                     @relation(fields: [examId], references: [id])
+  room                   Room                     @relation(fields: [roomId], references: [id])
+  exam                   Exam                     @relation(fields: [examId], references: [id])
   invigilatorAssignments InvigilatorAssignment[]
 }
 
 model InvigilatorAssignment {
-  id                Int       @id @default(autoincrement())
-  invigilatorId     Int
-  roomAssignmentId  Int
-  status            String    @default("ASSIGNED")
-  assignedAt        DateTime  @default(now())
-  completedAt       DateTime?
+  id               Int       @id @default(autoincrement())
+  invigilatorId    Int
+  roomAssignmentId Int
+  status           String    @default("ASSIGNED")
+  assignedAt       DateTime  @default(now())
+  completedAt      DateTime?
 
-  invigilator       Invigilator     @relation(fields: [invigilatorId], references: [id])
-  roomAssignment    RoomAssignment  @relation(fields: [roomAssignmentId], references: [id])
+  invigilator      Invigilator     @relation(fields: [invigilatorId], references: [id])
+  roomAssignment   RoomAssignment  @relation(fields: [roomAssignmentId], references: [id])
 }
 
 model SeatingPlan {
-  id          Int       @id @default(autoincrement())
-  examId      Int
-  createdAt   DateTime  @default(now())
-  isActive    Boolean   @default(true)
-  exam        Exam      @relation(fields: [examId], references: [id])
-  seats       Seat[]
+  id        Int       @id @default(autoincrement())
+  examId    Int
+  createdAt DateTime  @default(now())
+  isActive  Boolean   @default(true)
+
+  exam      Exam      @relation(fields: [examId], references: [id])
+  seats     Seat[]
 }
