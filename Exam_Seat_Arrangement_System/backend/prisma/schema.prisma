@@ -93,8 +93,8 @@ model Student {
 model Exam {
   id              Int             @id @default(autoincrement())
   date            DateTime
-  startTime       String?
-  endTime         String?
+  startTime       DateTime?
+  endTime         DateTime?
   subjectId       Int
 
   subject         Subject         @relation(fields: [subjectId], references: [id])
