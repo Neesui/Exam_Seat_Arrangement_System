@@ -27,12 +27,17 @@ const AddExamPage = () => {
       return;
     }
 
+    const formatDateTime = (time) => {
+      if (!time) return null;
+      return new Date(`${date}T${time}:00`).toISOString(); // creates full ISO date string
+    };
+
     try {
       const result = await addExam({
         subjectId: Number(subjectId),
-        date,
-        startTime,
-        endTime,
+        date: new Date(date).toISOString(),
+        startTime: formatDateTime(startTime),
+        endTime: formatDateTime(endTime),
       }).unwrap();
 
       if (result.success) {
@@ -93,11 +98,10 @@ const AddExamPage = () => {
           <div>
             <label className="block text-sm font-semibold mb-1">Start Time</label>
             <input
-              type="text"
+              type="time"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
               className="w-full p-2 border rounded"
-              placeholder="e.g. 09:00 AM"
             />
           </div>
 
@@ -105,11 +109,10 @@ const AddExamPage = () => {
           <div>
             <label className="block text-sm font-semibold mb-1">End Time</label>
             <input
-              type="text"
+              type="time"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
               className="w-full p-2 border rounded"
-              placeholder="e.g. 12:00 PM"
             />
           </div>
 
