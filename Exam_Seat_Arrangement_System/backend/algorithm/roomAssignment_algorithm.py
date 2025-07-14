@@ -24,7 +24,13 @@ def fetch_rooms(conn):
 
 def fetch_exam_student_counts(conn):
     with conn.cursor() as cur:
-        cur.execute('SELECT "examId", COUNT(*) FROM "student" GROUP BY "examId";')
+        # FIXED: count students assigned to each exam via seating plan and seat
+        cur.execute('''
+            SELECT sp."examId", COUNT(s.id)
+            FROM "seat" s
+            JOIN "seatingPlan" sp ON s."seatingPlanId" = sp.id
+            GROUP BY sp."examId";
+        ''')
         return {r[0]: r[1] for r in cur.fetchall()}
 
 

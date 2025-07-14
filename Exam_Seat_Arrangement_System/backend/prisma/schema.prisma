@@ -185,4 +185,7 @@ model SeatingPlan {
 
   exam      Exam      @relation(fields: [examId], references: [id])
   seats     Seat[]
+
+    @@map("seatingPlan")
+
 }
