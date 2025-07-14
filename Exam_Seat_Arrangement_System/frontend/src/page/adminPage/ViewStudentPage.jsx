@@ -26,7 +26,7 @@ const ViewStudentPage = () => {
   };
 
   const handleUpdate = (studentId) => {
-    navigate(`/admin/updateStudent/${studentId}`); // Adjust route accordingly
+    navigate(`/updateStudent/${studentId}`); 
   };
 
   return (
