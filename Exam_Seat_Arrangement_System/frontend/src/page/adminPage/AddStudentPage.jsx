@@ -41,6 +41,7 @@ const AddStudentPage = () => {
 
       if (result.success) {
         toast.success("Student added successfully!");
+        // Optionally clear form here
       } else {
         toast.error(result.message || "Failed to add student");
       }
@@ -128,7 +129,7 @@ const AddStudentPage = () => {
               <option value="">Select Course</option>
               {coursesData?.courses?.map((course) => (
                 <option key={course.id} value={course.id}>
-                  {course.courseName} ({course.courseCode})
+                  {course.name} {/* Adjusted field */}
                 </option>
               ))}
             </select>
@@ -152,7 +153,7 @@ const AddStudentPage = () => {
               <option value="">Select Semester</option>
               {semestersData?.semesters?.map((sem) => (
                 <option key={sem.id} value={sem.id}>
-                  {sem.semesterName}
+                  Semester {sem.semesterNum} {/* Adjusted display */}
                 </option>
               ))}
             </select>
@@ -160,7 +161,7 @@ const AddStudentPage = () => {
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block text-gray-600 mb-1">Image</label>
+          <label className="block text-gray-600 mb-1">Image URL</label>
           <input
             type="text"
             name="imageUrl"
