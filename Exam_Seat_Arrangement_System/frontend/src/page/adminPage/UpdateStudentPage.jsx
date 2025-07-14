@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
-  useGetAllStudentsQuery,
   useUpdateStudentMutation,
+  useGetStudentByIdQuery,
 } from "../../redux/api/studentApi";
 import { useGetCoursesQuery } from "../../redux/api/courseApi";
 import { useGetSemestersQuery } from "../../redux/api/semesterApi";
@@ -12,7 +12,7 @@ const UpdateStudentPage = () => {
   const { studentId } = useParams();
   const navigate = useNavigate();
 
-  const { data: studentsData, isLoading, error } = useGetAllStudentsQuery();
+  const { data: studentData, isLoading, error } = useGetStudentByIdQuery(studentId);
   const [updateStudent, { isLoading: isUpdating }] = useUpdateStudentMutation();
   const { data: coursesData } = useGetCoursesQuery();
   const { data: semestersData } = useGetSemestersQuery();
@@ -28,23 +28,19 @@ const UpdateStudentPage = () => {
   });
 
   useEffect(() => {
-    if (studentsData?.students) {
-      const student = studentsData.students.find(
-        (s) => String(s.id) === String(studentId)
-      );
-      if (student) {
-        setFormData({
-          studentName: student.studentName || "",
-          symbolNumber: student.symbolNumber || "",
-          regNumber: student.regNumber || "",
-          college: student.college || "",
-          courseId: student.courseId?.toString() || "",
-          semesterId: student.semesterId?.toString() || "",
-          imageUrl: student.imageUrl || "",
-        });
-      }
+    if (studentData?.student) {
+      const student = studentData.student;
+      setFormData({
+        studentName: student.studentName || "",
+        symbolNumber: student.symbolNumber || "",
+        regNumber: student.regNumber || "",
+        college: student.college || "",
+        courseId: student.courseId?.toString() || "",
+        semesterId: student.semesterId?.toString() || "",
+        imageUrl: student.imageUrl || "",
+      });
     }
-  }, [studentsData, studentId]);
+  }, [studentData]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -126,7 +122,6 @@ const UpdateStudentPage = () => {
           className="w-full border p-3 rounded"
           required
         />
-
         <select
           name="courseId"
           value={formData.courseId}
@@ -141,7 +136,6 @@ const UpdateStudentPage = () => {
             </option>
           ))}
         </select>
-
         <select
           name="semesterId"
           value={formData.semesterId}
@@ -156,7 +150,6 @@ const UpdateStudentPage = () => {
             </option>
           ))}
         </select>
-
         <div className="sm:col-span-2">
           <input
             type="text"
@@ -167,7 +160,6 @@ const UpdateStudentPage = () => {
             className="w-full border p-3 rounded"
           />
         </div>
-
         <div className="sm:col-span-2">
           <button
             type="submit"

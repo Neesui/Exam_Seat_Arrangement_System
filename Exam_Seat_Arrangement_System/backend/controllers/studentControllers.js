@@ -105,6 +105,20 @@ export const getStudentById = async (req, res) => {
 export const updateStudent = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
+
+    // First, check if the student exists
+    const existingStudent = await prisma.student.findUnique({
+      where: { id },
+    });
+
+    if (!existingStudent) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
+    // Proceed with update if exists
     const {
       studentName,
       symbolNumber,
@@ -142,6 +156,7 @@ export const updateStudent = async (req, res) => {
     });
   }
 };
+
 
 // ✅ Delete Student
 export const deleteStudent = async (req, res) => {
