@@ -3,7 +3,6 @@ import { toast } from "react-toastify";
 import { useAddStudentMutation } from "../../redux/api/studentApi";
 import { useGetCoursesQuery } from "../../redux/api/courseApi";
 import { useGetSemestersQuery } from "../../redux/api/semesterApi";
-import ImportStudentData from "./ImportStudentData";
 
 const AddStudentPage = () => {
   const [formData, setFormData] = useState({
@@ -42,7 +41,6 @@ const AddStudentPage = () => {
 
       if (result.success) {
         toast.success("Student added successfully!");
-        // Optionally navigate or reset form
       } else {
         toast.error(result.message || "Failed to add student");
       }
@@ -55,7 +53,6 @@ const AddStudentPage = () => {
     <div className="mx-auto max-w-[95%] mt-20 bg-white p-8 rounded-lg shadow-md h-[75vh] flex flex-col">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-2xl font-bold text-gray-800">Add New Student</h2>
-        <ImportStudentData />
       </div>
 
       <form
