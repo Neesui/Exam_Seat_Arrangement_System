@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
@@ -8,9 +8,8 @@ import {
 
 const ViewRoomAssignPage = ({ examId }) => {
   const navigate = useNavigate();
-  const { data, error, isLoading, refetch } = useGetRoomAssignByExamQuery(examId);
-
-  const [deleteRoomAssign] = useDeleteRoomAssignMutation();
+  const { data, error, isLoading } = useGetRoomAssignByExamQuery(examId);
+  const [deleteRoomAssign, { isLoading: isDeleting }] = useDeleteRoomAssignMutation();
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this room assignment?")) return;
@@ -18,7 +17,7 @@ const ViewRoomAssignPage = ({ examId }) => {
     try {
       await deleteRoomAssign(id).unwrap();
       toast.success("Room assignment deleted successfully!");
-      refetch(); // Refresh the list
+      // RTK Query cache invalidation auto-refetches
     } catch (err) {
       toast.error(err?.data?.message || "Failed to delete room assignment.");
     }
@@ -67,12 +66,14 @@ const ViewRoomAssignPage = ({ examId }) => {
                     <button
                       className="text-blue-500 hover:text-blue-700 mr-2"
                       onClick={() => handleUpdate(assign.id)}
+                      disabled={isDeleting}
                     >
                       Update
                     </button>
                     <button
                       className="text-red-500 hover:text-red-700 mr-2"
                       onClick={() => handleDelete(assign.id)}
+                      disabled={isDeleting}
                     >
                       Delete
                     </button>
