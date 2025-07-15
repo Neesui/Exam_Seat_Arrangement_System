@@ -2,13 +2,14 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
-  useGetRoomAssignByExamQuery,
+  useGetAllRoomAssignmentsQuery, // ✅ updated
   useDeleteRoomAssignMutation,
 } from "../../redux/api/roomAssignApi";
 
-const ViewRoomAssignPage = ({ examId }) => {
+const ViewRoomAssignPage = () => {
   const navigate = useNavigate();
-  const { data, error, isLoading } = useGetRoomAssignByExamQuery(examId);
+  const { data, error, isLoading, refetch } = useGetAllRoomAssignmentsQuery(); // ✅ updated
+
   const [deleteRoomAssign, { isLoading: isDeleting }] = useDeleteRoomAssignMutation();
 
   const handleDelete = async (id) => {
@@ -17,7 +18,7 @@ const ViewRoomAssignPage = ({ examId }) => {
     try {
       await deleteRoomAssign(id).unwrap();
       toast.success("Room assignment deleted successfully!");
-      // RTK Query cache invalidation auto-refetches
+      refetch();
     } catch (err) {
       toast.error(err?.data?.message || "Failed to delete room assignment.");
     }
