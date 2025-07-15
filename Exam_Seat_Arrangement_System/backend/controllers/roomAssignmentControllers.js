@@ -84,24 +84,58 @@ export const getAllRoomAssignments = async (req, res) => {
 export const getRoomAssignmentsByExam = async (req, res) => {
   try {
     const examId = Number(req.params.examId);
-    if (isNaN(examId)) {
-      return res.status(400).json({ success: false, message: "Invalid examId parameter" });
-    }
 
+    // Fetch room assignments including room benches
     const assignments = await prisma.roomAssignment.findMany({
       where: { examId },
       include: {
-        room: true,
-        invigilatorAssignments: { include: { invigilator: true } },
+        room: {
+          include: { benches: true }, // Include benches to calculate totals
+        },
+        exam: {
+          include: {
+            subject: {
+              include: {
+                semester: {
+                  include: {
+                    course: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        invigilatorAssignments: {
+          include: {
+            invigilator: {
+              include: { user: true },
+            },
+          },
+        },
       },
+    });
+
+    // Add totalBench and totalCapacity to each room
+    const assignmentsWithCapacity = assignments.map((assignment) => {
+      const benches = assignment.room.benches || [];
+      return {
+        ...assignment,
+        room: {
+          ...assignment.room,
+          totalBench: benches.length,
+          totalCapacity: benches.reduce((sum, bench) => sum + bench.capacity, 0),
+          benches: undefined, // optionally remove benches from response to reduce size
+        },
+      };
     });
 
     res.json({
       success: true,
-      message: "Room assignments retrieved successfully",
-      assignments,
+      message: "Room assignments fetched successfully",
+      assignments: assignmentsWithCapacity,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch room assignments",
@@ -109,6 +143,8 @@ export const getRoomAssignmentsByExam = async (req, res) => {
     });
   }
 };
+
+
 
 // UPDATE ROOM ASSIGNMENT                                                  
 export const updateRoomAssignment = async (req, res) => {

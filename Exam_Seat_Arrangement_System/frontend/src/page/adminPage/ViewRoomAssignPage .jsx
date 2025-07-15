@@ -2,13 +2,13 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
-  useGetAllRoomAssignmentsQuery, // ✅ updated
+  useGetAllRoomAssignmentsQuery,
   useDeleteRoomAssignMutation,
 } from "../../redux/api/roomAssignApi";
 
 const ViewRoomAssignPage = () => {
   const navigate = useNavigate();
-  const { data, error, isLoading, refetch } = useGetAllRoomAssignmentsQuery(); // ✅ updated
+  const { data, error, isLoading, refetch } = useGetAllRoomAssignmentsQuery();
 
   const [deleteRoomAssign, { isLoading: isDeleting }] = useDeleteRoomAssignMutation();
 
@@ -28,8 +28,8 @@ const ViewRoomAssignPage = () => {
     navigate(`/updateRoomAssign/${id}`);
   };
 
-  const handleView = (id) => {
-    navigate(`/viewRoomAssignDetails/${id}`);
+  const handleView = (examId) => {
+    navigate(`/viewRoomAssignDetails/${examId}`); // ✅ examId instead of assignment.id
   };
 
   return (
@@ -57,30 +57,52 @@ const ViewRoomAssignPage = () => {
             {data?.assignments?.length > 0 ? (
               data.assignments.map((assign, index) => (
                 <tr key={assign.id}>
-                  <td className="border px-4 py-2">{index + 1}</td>
-                  <td className="border px-4 py-2">{assign.room?.roomNumber || "N/A"}</td>
-                  <td className="border px-4 py-2">{assign.room?.block || "-"}</td>
-                  <td className="border px-4 py-2">{assign.room?.floor || "-"}</td>
-                  <td className="border px-4 py-2">{assign.isActive ? "Yes" : "No"}</td>
-                  <td className="border px-4 py-2">{assign.isCompleted ? "Yes" : "No"}</td>
-                  <td className="border px-4 py-2">
+                  <td className="border px-4 py-2 text-center">{index + 1}</td>
+                  <td className="border px-4 py-2 text-center">
+                    {assign.room?.roomNumber || "N/A"}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {assign.room?.block || "-"}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {assign.room?.floor || "-"}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    <span
+                      className={`px-2 py-1 text-xs rounded font-semibold ${
+                        assign.isActive ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      {assign.isActive ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    <span
+                      className={`px-2 py-1 text-xs rounded font-semibold ${
+                        assign.isCompleted ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {assign.isCompleted ? "Yes" : "No"}
+                    </span>
+                  </td>
+                  <td className="border px-4 py-2 text-center space-x-2">
                     <button
-                      className="text-blue-500 hover:text-blue-700 mr-2"
+                      className="text-blue-600 hover:underline"
                       onClick={() => handleUpdate(assign.id)}
                       disabled={isDeleting}
                     >
                       Update
                     </button>
                     <button
-                      className="text-red-500 hover:text-red-700 mr-2"
+                      className="text-red-600 hover:underline"
                       onClick={() => handleDelete(assign.id)}
                       disabled={isDeleting}
                     >
                       Delete
                     </button>
                     <button
-                      className="text-green-500 hover:text-green-700"
-                      onClick={() => handleView(assign.id)}
+                      className="text-green-600 hover:underline"
+                      onClick={() => handleView(assign.exam?.id)} // ✅ Pass examId here
                     >
                       View
                     </button>
@@ -89,7 +111,7 @@ const ViewRoomAssignPage = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="border px-4 py-2 text-center">
+                <td colSpan="7" className="border px-4 py-4 text-center text-gray-500">
                   No room assignments available.
                 </td>
               </tr>
