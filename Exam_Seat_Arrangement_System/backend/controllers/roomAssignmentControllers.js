@@ -41,20 +41,46 @@ export const runAndSaveRoomAssignments = (req, res) => {
 
       await Promise.all(createPromises);
 
-      // Fetch newly created assignments
+      // Fetch newly created assignments with benches included
       const savedAssignments = await prisma.roomAssignment.findMany({
         include: {
-          room: true,
-          exam: true,
-          invigilatorAssignments: { include: { invigilator: true } },
+          room: { include: { benches: true } },  // include benches here
+          exam: {
+            include: {
+              subject: {
+                include: {
+                  semester: {
+                    include: {
+                      course: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          invigilatorAssignments: { include: { invigilator: { include: { user: true } } } },
         },
         orderBy: { examId: "asc" },
+      });
+
+      // Add totalBench and totalCapacity
+      const assignmentsWithCapacity = savedAssignments.map((assignment) => {
+        const benches = assignment.room.benches || [];
+        return {
+          ...assignment,
+          room: {
+            ...assignment.room,
+            totalBench: benches.length,
+            totalCapacity: benches.reduce((sum, bench) => sum + bench.capacity, 0),
+            benches: undefined, // omit benches to reduce response size
+          },
+        };
       });
 
       return res.json({
         success: true,
         message: "Room assignments saved and fetched successfully",
-        assignments: savedAssignments,
+        assignments: assignmentsWithCapacity,
       });
     } catch (dbErr) {
       return res.status(500).json({ success: false, message: "Database error", error: dbErr.message });
@@ -67,31 +93,7 @@ export const getAllRoomAssignments = async (req, res) => {
   try {
     const assignments = await prisma.roomAssignment.findMany({
       include: {
-        room: true,
-        exam: true,
-        invigilatorAssignments: { include: { invigilator: true } },
-      },
-      orderBy: [{ examId: "asc" }, { roomId: "asc" }],
-    });
-
-    res.json({ success: true, message: "All room assignments retrieved", assignments });
-  } catch (err) {
-    res.status(500).json({ success: false, message: "Failed to fetch room assignments", error: err.message });
-  }
-};
-
-// GET ROOM ASSIGNMENTS BY EXAM                                           
-export const getRoomAssignmentsByExam = async (req, res) => {
-  try {
-    const examId = Number(req.params.examId);
-
-    // Fetch room assignments including room benches
-    const assignments = await prisma.roomAssignment.findMany({
-      where: { examId },
-      include: {
-        room: {
-          include: { benches: true }, // Include benches to calculate totals
-        },
+        room: { include: { benches: true } },
         exam: {
           include: {
             subject: {
@@ -113,9 +115,9 @@ export const getRoomAssignmentsByExam = async (req, res) => {
           },
         },
       },
+      orderBy: [{ examId: "asc" }, { roomId: "asc" }],
     });
 
-    // Add totalBench and totalCapacity to each room
     const assignmentsWithCapacity = assignments.map((assignment) => {
       const benches = assignment.room.benches || [];
       return {
@@ -124,7 +126,56 @@ export const getRoomAssignmentsByExam = async (req, res) => {
           ...assignment.room,
           totalBench: benches.length,
           totalCapacity: benches.reduce((sum, bench) => sum + bench.capacity, 0),
-          benches: undefined, // optionally remove benches from response to reduce size
+          benches: undefined,
+        },
+      };
+    });
+
+    res.json({ success: true, message: "All room assignments retrieved", assignments: assignmentsWithCapacity });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Failed to fetch room assignments", error: err.message });
+  }
+};
+
+// GET ROOM ASSIGNMENTS BY EXAM                                           
+export const getRoomAssignmentsByExam = async (req, res) => {
+  try {
+    const examId = Number(req.params.examId);
+
+    const assignments = await prisma.roomAssignment.findMany({
+      where: { examId },
+      include: {
+        room: { include: { benches: true } },
+        exam: {
+          include: {
+            subject: {
+              include: {
+                semester: {
+                  include: { course: true },
+                },
+              },
+            },
+          },
+        },
+        invigilatorAssignments: {
+          include: {
+            invigilator: {
+              include: { user: true },
+            },
+          },
+        },
+      },
+    });
+
+    const assignmentsWithCapacity = assignments.map((assignment) => {
+      const benches = assignment.room.benches || [];
+      return {
+        ...assignment,
+        room: {
+          ...assignment.room,
+          totalBench: benches.length,
+          totalCapacity: benches.reduce((sum, bench) => sum + bench.capacity, 0),
+          benches: undefined,
         },
       };
     });
@@ -144,9 +195,7 @@ export const getRoomAssignmentsByExam = async (req, res) => {
   }
 };
 
-
-
-// UPDATE ROOM ASSIGNMENT                                                  
+// UPDATE ROOM ASSIGNMENT
 export const updateRoomAssignment = async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -180,7 +229,7 @@ export const updateRoomAssignment = async (req, res) => {
   }
 };
 
-//  DELETE ROOM ASSIGNMENT                                                  
+// DELETE ROOM ASSIGNMENT
 export const deleteRoomAssignment = async (req, res) => {
   try {
     const id = Number(req.params.id);
