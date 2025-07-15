@@ -2,62 +2,85 @@ import prisma from "../utils/db.js";
 import { exec } from "child_process";
 import path from "path";
 
-// Assign a room to an exam
-export const assignRoomToExam = async (req, res) => {
-  try {
-    const { roomId, examId } = req.body;
+// AUTO-GENERATE ROOM ASSIGNMENTS — call Python script and save to DB     
+export const runAndSaveRoomAssignments = (req, res) => {
+  const scriptPath = path.resolve(process.cwd(), "algorithm", "roomAssignment_algorithm.py");
 
-    if (!roomId || !examId) {
-      return res.status(400).json({ success: false, message: "roomId and examId are required" });
+  exec(`python "${scriptPath}"`, async (error, stdout, stderr) => {
+    if (error) {
+      return res.status(500).json({ success: false, message: "Algorithm execution failed", error: error.message });
     }
 
-    const roomExists = await prisma.room.findUnique({ where: { id: Number(roomId) } });
-    if (!roomExists) {
-      return res.status(404).json({ success: false, message: "Room not found" });
+    if (stderr) console.error("Python script stderr:", stderr);
+
+    let assignments;
+    try {
+      assignments = JSON.parse(stdout);
+      if (assignments.error) {
+        return res.status(500).json({ success: false, message: "Algorithm error", error: assignments.error });
+      }
+    } catch (parseErr) {
+      return res.status(500).json({ success: false, message: "Invalid output from Python", error: parseErr.message });
     }
 
-    const examExists = await prisma.exam.findUnique({ where: { id: Number(examId) } });
-    if (!examExists) {
-      return res.status(404).json({ success: false, message: "Exam not found" });
-    }
+    try {
+      // Delete all old assignments
+      await prisma.roomAssignment.deleteMany();
 
-    const existing = await prisma.roomAssignment.findFirst({
-      where: { roomId: Number(roomId), examId: Number(examId), isActive: true },
-    });
+      // Insert new assignments
+      const createPromises = assignments.map(({ examId, roomId }) =>
+        prisma.roomAssignment.create({
+          data: {
+            examId: Number(examId),
+            roomId: Number(roomId),
+            isActive: true,
+            isCompleted: false,
+          },
+        })
+      );
 
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: "Room is already assigned to this exam (active assignment)",
+      await Promise.all(createPromises);
+
+      // Fetch newly created assignments
+      const savedAssignments = await prisma.roomAssignment.findMany({
+        include: {
+          room: true,
+          exam: true,
+          invigilatorAssignments: { include: { invigilator: true } },
+        },
+        orderBy: { examId: "asc" },
       });
+
+      return res.json({
+        success: true,
+        message: "Room assignments saved and fetched successfully",
+        assignments: savedAssignments,
+      });
+    } catch (dbErr) {
+      return res.status(500).json({ success: false, message: "Database error", error: dbErr.message });
     }
+  });
+};
 
-    const assignment = await prisma.roomAssignment.create({
-      data: {
-        roomId: Number(roomId),
-        examId: Number(examId),
-        isActive: true,
-        isCompleted: false,
+// GET ALL ROOM ASSIGNMENTS                              
+export const getAllRoomAssignments = async (req, res) => {
+  try {
+    const assignments = await prisma.roomAssignment.findMany({
+      include: {
+        room: true,
+        exam: true,
+        invigilatorAssignments: { include: { invigilator: true } },
       },
-      include: { room: true, exam: true },
+      orderBy: [{ examId: "asc" }, { roomId: "asc" }],
     });
 
-    res.status(201).json({
-      success: true,
-      message: "Room assigned to exam successfully",
-      assignment,
-    });
-  } catch (error) {
-    console.error("Error in assignRoomToExam:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to assign room to exam",
-      error: error.message,
-    });
+    res.json({ success: true, message: "All room assignments retrieved", assignments });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Failed to fetch room assignments", error: err.message });
   }
 };
 
-// Get all room assignments for an exam
+// GET ROOM ASSIGNMENTS BY EXAM                                           
 export const getRoomAssignmentsByExam = async (req, res) => {
   try {
     const examId = Number(req.params.examId);
@@ -69,11 +92,7 @@ export const getRoomAssignmentsByExam = async (req, res) => {
       where: { examId },
       include: {
         room: true,
-        invigilatorAssignments: {
-          include: {
-            invigilator: true,
-          },
-        },
+        invigilatorAssignments: { include: { invigilator: true } },
       },
     });
 
@@ -83,7 +102,6 @@ export const getRoomAssignmentsByExam = async (req, res) => {
       assignments,
     });
   } catch (error) {
-    console.error("Error in getRoomAssignmentsByExam:", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch room assignments",
@@ -92,7 +110,7 @@ export const getRoomAssignmentsByExam = async (req, res) => {
   }
 };
 
-// Update a room assignment
+// UPDATE ROOM ASSIGNMENT                                                  
 export const updateRoomAssignment = async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -118,7 +136,6 @@ export const updateRoomAssignment = async (req, res) => {
       assignment,
     });
   } catch (error) {
-    console.error("Error in updateRoomAssignment:", error);
     res.status(500).json({
       success: false,
       message: "Failed to update room assignment",
@@ -127,7 +144,7 @@ export const updateRoomAssignment = async (req, res) => {
   }
 };
 
-// Delete a room assignment
+//  DELETE ROOM ASSIGNMENT                                                  
 export const deleteRoomAssignment = async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -142,86 +159,10 @@ export const deleteRoomAssignment = async (req, res) => {
       message: "Room assignment deleted successfully",
     });
   } catch (error) {
-    console.error("Error in deleteRoomAssignment:", error);
     res.status(500).json({
       success: false,
       message: "Failed to delete room assignment",
       error: error.message,
     });
   }
-};
-
-// Run Python room assignment algorithm and save results
-export const runAndSaveRoomAssignments = (req, res) => {
-  const scriptPath = path.resolve(process.cwd(), "algorithm", "roomAssignment_algorithm.py");
-
-  console.log("Running Python script at:", scriptPath);
-
-  exec(`python "${scriptPath}"`, async (error, stdout, stderr) => {
-    console.log("Python exec error:", error);
-    console.log("Python stdout:", stdout);
-    console.log("Python stderr:", stderr);
-
-    if (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Algorithm execution failed",
-        error: error.message,
-      });
-    }
-
-    if (stderr) {
-      // You can decide whether to treat stderr as an error or just log
-      console.error("Python script stderr:", stderr);
-    }
-
-    let assignments;
-    try {
-      assignments = JSON.parse(stdout);
-      if (assignments.error) {
-        return res.status(500).json({
-          success: false,
-          message: "Algorithm error",
-          error: assignments.error,
-        });
-      }
-    } catch (parseError) {
-      console.error("Failed to parse JSON output from Python:", parseError);
-      return res.status(500).json({
-        success: false,
-        message: "Invalid algorithm output format",
-      });
-    }
-
-    try {
-      // Delete old assignments
-      await prisma.roomAssignment.deleteMany();
-
-      // Create new assignments
-      const createPromises = assignments.map(({ examId, roomId }) =>
-        prisma.roomAssignment.create({
-          data: {
-            examId: Number(examId),
-            roomId: Number(roomId),
-            isActive: true,
-            isCompleted: false,
-          },
-        })
-      );
-
-      await Promise.all(createPromises);
-
-      return res.json({
-        success: true,
-        message: "Room assignments saved successfully",
-      });
-    } catch (dbError) {
-      console.error("Database error:", dbError);
-      return res.status(500).json({
-        success: false,
-        message: "Database error",
-        error: dbError.message,
-      });
-    }
-  });
 };
