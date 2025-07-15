@@ -20,7 +20,7 @@ import AddExamPage from "../../page/adminPage/AddExamPage";
 import ViewExamPage from "../../page/adminPage/ViewExamPage";
 import UpdateExamPage from "../../page/adminPage/UpdateExamPage";
 import ViewExamDetailsPage from "../../page/adminPage/ViewExamDetailsPage";
-import AddRoomAssignPage from "../../page/adminPage/AddRoomAssignPage";
+// import AddRoomAssignPage from "../../page/adminPage/AddRoomAssignPage";
 import ViewRoomAssignPage from "../../page/adminPage/ViewRoomAssignPage ";
 import ImportStudentData from "../../page/adminPage/ImportStudentData";
 import ViewStudentPage from "../../page/adminPage/ViewStudentPage";
@@ -113,10 +113,10 @@ const adminRoutes = [
     path: "/viewExamDetails/:examId",
     element: <ViewExamDetailsPage />,
   },
-  {
-    path: "/assignRoom",
-    element: <AddRoomAssignPage />,
-  },
+  // {
+  //   path: "/assignRoom",
+  //   element: <AddRoomAssignPage />,
+  // },
   {
     path: "/viewRoomAssign",
     element: <ViewRoomAssignPage />,
