@@ -22,6 +22,7 @@ model User {
   updatedAt   DateTime    @updatedAt
 
   invigilator Invigilator?
+  @@map("user")
 }
 
 model Invigilator {
@@ -38,6 +39,8 @@ model Invigilator {
   user                   User                     @relation(fields: [userId], references: [id])
 
   invigilatorAssignments InvigilatorAssignment[]
+
+  @@map("invigilator")
 }
 
 model Course {
@@ -49,6 +52,9 @@ model Course {
   semesters Semester[]
   students  Student[]
   @@unique([name, batchYear])
+
+    @@map("course")
+
 }
 
 model Semester {
@@ -59,6 +65,8 @@ model Semester {
   course      Course      @relation(fields: [courseId], references: [id])
   subjects    Subject[]
   students    Student[]
+    @@map("semester")
+
 }
 
 model Subject {
@@ -69,6 +77,9 @@ model Subject {
 
   semester   Semester  @relation(fields: [semesterId], references: [id])
   exams      Exam[]
+
+    @@map("subject")
+
 }
 
 model Student {
@@ -163,6 +174,8 @@ model RoomAssignment {
   room                   Room                     @relation(fields: [roomId], references: [id])
   exam                   Exam                     @relation(fields: [examId], references: [id])
   invigilatorAssignments InvigilatorAssignment[]
+
+    @@map("roomAssignment")
 }
 
 model InvigilatorAssignment {
@@ -175,6 +188,8 @@ model InvigilatorAssignment {
 
   invigilator      Invigilator     @relation(fields: [invigilatorId], references: [id])
   roomAssignment   RoomAssignment  @relation(fields: [roomAssignmentId], references: [id])
+
+    @@map("invigilatorAssignment")
 }
 
 model SeatingPlan {
