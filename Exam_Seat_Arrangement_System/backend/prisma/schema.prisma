@@ -22,6 +22,7 @@ model User {
   updatedAt   DateTime    @updatedAt
 
   invigilator Invigilator?
+
   @@map("user")
 }
 
@@ -31,7 +32,7 @@ model Invigilator {
   phone                  String
   address                String
   gender                 String
-  imageUrl               String?                  // 👈 Profile image for Invigilator
+  imageUrl               String?                  // Profile image for Invigilator
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
 
@@ -48,38 +49,42 @@ model Course {
   name      String    @unique
   duration  Int       // total semesters, e.g., 8
   batchYear Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   semesters Semester[]
   students  Student[]
+
   @@unique([name, batchYear])
-
-    @@map("course")
-
+  @@map("course")
 }
 
 model Semester {
   id          Int         @id @default(autoincrement())
   semesterNum Int         // 1, 2, 3, ..., 8
   courseId    Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   course      Course      @relation(fields: [courseId], references: [id])
   subjects    Subject[]
   students    Student[]
-    @@map("semester")
 
+  @@map("semester")
 }
 
 model Subject {
-  id         Int       @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   subjectName String
-  code       String    @unique
-  semesterId Int
+  code        String    @unique
+  semesterId  Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  semester   Semester  @relation(fields: [semesterId], references: [id])
-  exams      Exam[]
+  semester    Semester  @relation(fields: [semesterId], references: [id])
+  exams       Exam[]
 
-    @@map("subject")
-
+  @@map("subject")
 }
 
 model Student {
@@ -90,17 +95,16 @@ model Student {
   college      String
   courseId     Int
   semesterId   Int
-  imageUrl     String?      // 👈 Profile image for Student
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  imageUrl     String?     // Profile image for Student
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
-  course       Course       @relation(fields: [courseId], references: [id])
-  semester     Semester     @relation(fields: [semesterId], references: [id])
+  course       Course      @relation(fields: [courseId], references: [id])
+  semester     Semester    @relation(fields: [semesterId], references: [id])
   seat         Seat?
 
   @@unique([symbolNumber, college])
   @@map("student")
-
 }
 
 model Exam {
@@ -109,6 +113,8 @@ model Exam {
   startTime       DateTime?
   endTime         DateTime?
   subjectId       Int
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   subject         Subject         @relation(fields: [subjectId], references: [id])
   roomAssignments RoomAssignment[]
@@ -122,23 +128,26 @@ model Room {
   roomNumber      String
   block           String
   floor           String
-  benches         Bench[]  
-  roomAssignments RoomAssignment[]
-
   totalBench      Int      @default(0)
   totalCapacity   Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  @@map("room") 
+  benches         Bench[]
+  roomAssignments RoomAssignment[]
+
+  @@map("room")
 }
 
 model Bench {
   id        Int       @id @default(autoincrement())
   roomId    Int
-  benchNo   Int       
+  benchNo   Int
   row       Int
   column    Int
   capacity  Int
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   room      Room      @relation(fields: [roomId], references: [id])
   seats     Seat[]
@@ -146,21 +155,22 @@ model Bench {
   @@unique([roomId, row, column])
   @@unique([roomId, benchNo])
   @@map("bench")
-
 }
 
 model Seat {
-  id             Int           @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   benchId        Int
-  position       Int           // 1=Left, 2=Right, 3=Middle
-  studentId      Int           @unique
-  seatingPlanId  Int?
+  position       Int          // 1=Left, 2=Right, 3=Middle etc.
+  studentId      Int          @unique      // <---- Added unique here
+  seatingPlanId  Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
-  bench          Bench         @relation(fields: [benchId], references: [id])
-  student        Student       @relation(fields: [studentId], references: [id])
-  seatingPlan    SeatingPlan?  @relation(fields: [seatingPlanId], references: [id])
+  bench          Bench        @relation(fields: [benchId], references: [id])
+  student        Student      @relation(fields: [studentId], references: [id])
+  seatingPlan    SeatingPlan  @relation(fields: [seatingPlanId], references: [id])
+
   @@map("seat")
-
 }
 
 model RoomAssignment {
@@ -170,13 +180,14 @@ model RoomAssignment {
   isActive               Boolean                  @default(true)
   isCompleted            Boolean                  @default(false)
   completedAt            DateTime?
-  createdAt   DateTime @default(now())
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
 
   room                   Room                     @relation(fields: [roomId], references: [id])
   exam                   Exam                     @relation(fields: [examId], references: [id])
   invigilatorAssignments InvigilatorAssignment[]
 
-    @@map("roomAssignment")
+  @@map("roomAssignment")
 }
 
 model InvigilatorAssignment {
@@ -186,22 +197,24 @@ model InvigilatorAssignment {
   status           String    @default("ASSIGNED")
   assignedAt       DateTime  @default(now())
   completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   invigilator      Invigilator     @relation(fields: [invigilatorId], references: [id])
   roomAssignment   RoomAssignment  @relation(fields: [roomAssignmentId], references: [id])
 
-    @@map("invigilatorAssignment")
+  @@map("invigilatorAssignment")
 }
 
 model SeatingPlan {
   id        Int       @id @default(autoincrement())
   examId    Int
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   isActive  Boolean   @default(true)
 
   exam      Exam      @relation(fields: [examId], references: [id])
   seats     Seat[]
 
-    @@map("seatingPlan")
-
+  @@map("seatingPlan")
 }
