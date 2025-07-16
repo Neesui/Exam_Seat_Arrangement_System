@@ -1,10 +1,16 @@
 import prisma from "../utils/db.js";
 import { exec } from "child_process";
 import path from "path";
+import fs from "fs";
 
 // 📌 Auto-generate Invigilator Assignments using Python script
 export const runAndSaveInvigilatorAssignments = (req, res) => {
   const scriptPath = path.resolve(process.cwd(), "algorithm", "invigilatorAssignment_algorithm.py");
+
+  // Optional: Check if script exists
+  if (!fs.existsSync(scriptPath)) {
+    return res.status(500).json({ success: false, message: "Algorithm script not found" });
+  }
 
   exec(`python "${scriptPath}"`, async (error, stdout, stderr) => {
     if (error) {
@@ -12,6 +18,10 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
     }
 
     if (stderr) console.error("Python stderr:", stderr);
+
+    if (!stdout) {
+      return res.status(500).json({ success: false, message: "No output from Python script" });
+    }
 
     let assignments;
     try {
@@ -24,23 +34,30 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
     }
 
     try {
-      // Delete previous assignments (optional or filter with isActive flag)
+      // Delete previous assignments (you can add a filter for isActive if you want)
       await prisma.invigilatorAssignment.deleteMany();
 
-      // Insert new assignments
-      const validAssignments = assignments.filter(a => a.invigilatorId !== null);
+      // Filter valid assignments: invigilatorId should be number or string (not null or undefined)
+      const validAssignments = assignments.filter(a => a.invigilatorId != null);
+
       await Promise.all(
-        validAssignments.map((a) =>
-          prisma.invigilatorAssignment.create({
+        validAssignments.map((a) => {
+          // Safely parse assignedAt date or fallback to current date
+          let assignedAtDate = new Date(a.assignedAt);
+          if (isNaN(assignedAtDate.getTime())) {
+            assignedAtDate = new Date();
+          }
+
+          return prisma.invigilatorAssignment.create({
             data: {
               invigilatorId: a.invigilatorId,
               roomAssignmentId: a.roomAssignmentId,
               status: a.status,
-              assignedAt: new Date(a.assignedAt),
+              assignedAt: assignedAtDate,
               completedAt: null,
             },
-          })
-        )
+          });
+        })
       );
 
       res.json({
@@ -80,13 +97,18 @@ export const getAllInvigilatorAssignments = async (req, res) => {
     });
     res.json({ success: true, assignments: data });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to fetch", error: error.message });
+    res.status(500).json({ success: false, message: "Failed to fetch invigilator assignments", error: error.message });
   }
 };
 
 // 📥 Get assignments by roomAssignmentId
 export const getInvigilatorAssignmentsByRoom = async (req, res) => {
   const roomAssignmentId = Number(req.params.roomAssignmentId);
+
+  if (isNaN(roomAssignmentId)) {
+    return res.status(400).json({ success: false, message: "Invalid roomAssignmentId parameter" });
+  }
+
   try {
     const data = await prisma.invigilatorAssignment.findMany({
       where: { roomAssignmentId },
@@ -97,6 +119,6 @@ export const getInvigilatorAssignmentsByRoom = async (req, res) => {
     });
     res.json({ success: true, assignments: data });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to fetch", error: error.message });
+    res.status(500).json({ success: false, message: "Failed to fetch invigilator assignments for the room", error: error.message });
   }
 };

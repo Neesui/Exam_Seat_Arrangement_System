@@ -29,7 +29,11 @@ const ViewInvigilatorAssignPage = () => {
   };
 
   const handleView = (examId) => {
-    navigate(`/viewInvigilatorAssignDetails/${examId}`);
+    if (examId) {
+      navigate(`/viewInvigilatorAssignDetails/${examId}`);
+    } else {
+      toast.warning("Exam not found for this assignment");
+    }
   };
 
   return (
@@ -49,7 +53,7 @@ const ViewInvigilatorAssignPage = () => {
               <th className="border border-gray-300 px-4 py-2">S.N.</th>
               <th className="border border-gray-300 px-4 py-2">Invigilator Name</th>
               <th className="border border-gray-300 px-4 py-2">Email</th>
-              <th className="border border-gray-300 px-4 py-2">Exam Title</th>
+              <th className="border border-gray-300 px-4 py-2">Subject Name</th>
               <th className="border border-gray-300 px-4 py-2">Room Number</th>
               <th className="border border-gray-300 px-4 py-2">Actions</th>
             </tr>
@@ -59,10 +63,18 @@ const ViewInvigilatorAssignPage = () => {
               data.assignments.map((assign, index) => (
                 <tr key={assign.id}>
                   <td className="border px-4 py-2 text-center">{index + 1}</td>
-                  <td className="border px-4 py-2 text-center">{assign.invigilator?.name || "N/A"}</td>
-                  <td className="border px-4 py-2 text-center">{assign.invigilator?.email || "N/A"}</td>
-                  <td className="border px-4 py-2 text-center">{assign.exam?.title || "N/A"}</td>
-                  <td className="border px-4 py-2 text-center">{assign.room?.roomNumber || "N/A"}</td>
+                  <td className="border px-4 py-2 text-center">
+                    {assign.invigilator?.user?.name || "N/A"}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {assign.invigilator?.user?.email || "N/A"}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {assign.roomAssignment?.exam?.subject?.subjectName || "N/A"}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {assign.roomAssignment?.room?.roomNumber || "N/A"}
+                  </td>
                   <td className="border px-4 py-2 text-center space-x-2">
                     <button
                       className="text-blue-600 hover:underline"
@@ -80,7 +92,9 @@ const ViewInvigilatorAssignPage = () => {
                     </button>
                     <button
                       className="text-green-600 hover:underline"
-                      onClick={() => handleView(assign.exam?.id)}
+                      onClick={() =>
+                        handleView(assign.roomAssignment?.exam?.id)
+                      }
                     >
                       View
                     </button>

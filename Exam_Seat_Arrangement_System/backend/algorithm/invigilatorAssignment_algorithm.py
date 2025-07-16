@@ -57,9 +57,8 @@ def auto_assign_invigilators(room_assignments, invigilators, max_per_invigilator
 
     for room in room_assignments:
         start, end = room["start"], room["end"]
-        assigned = False
+        assigned_count = 0
 
-        # Try to find an available invigilator
         for inv in invigilators:
             if len(inv["assignments"]) >= max_per_invigilator:
                 continue
@@ -72,10 +71,12 @@ def auto_assign_invigilators(room_assignments, invigilators, max_per_invigilator
                     "assignedAt": datetime.now(timezone.utc).isoformat(),
                     "completedAt": None
                 })
-                assigned = True
+                assigned_count += 1
+
+            if assigned_count >= 2:
                 break
 
-        if not assigned:
+        while assigned_count < 2:
             assignments.append({
                 "invigilatorId": None,
                 "roomAssignmentId": room["id"],
@@ -83,6 +84,7 @@ def auto_assign_invigilators(room_assignments, invigilators, max_per_invigilator
                 "assignedAt": None,
                 "completedAt": None
             })
+            assigned_count += 1
 
     return assignments
 
