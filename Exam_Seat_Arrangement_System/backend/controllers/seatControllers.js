@@ -103,3 +103,52 @@ export const generateSeatingPlan = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// Get all seating plans
+export const getAllSeatingPlan = async (req, res) => {
+  try {
+    const seatingPlans = await prisma.seatingPlan.findMany({
+      include: {
+        exam: {
+          include: {
+            subject: {
+              include: {
+                semester: {
+                  include: {
+                    course: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        seats: {
+          include: {
+            student: true,
+            bench: {
+              include: {
+                room: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        id: "desc",
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Seating plans retrieved successfully",
+      data: seatingPlans,
+    });
+  } catch (error) {
+    console.error("Error fetching seating plans:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch seating plans",
+      error: error.message,
+    });
+  }
+};
