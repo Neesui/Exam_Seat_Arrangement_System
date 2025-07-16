@@ -25,6 +25,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [isRoomAssignOpen, setIsRoomAssignOpen] = useState(false);
   const [isSeatOpen, setIsSeatOpen] = useState(false);
   const [isSeatPlanOpen, setIsSeatPlanOpen] = useState(false);
+  const [isInvigilatorAssignOpen, setIsInvigilatorAssignOpen] = useState(false);
 
   return (
     <>
@@ -68,7 +69,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             setIsOpen={setIsInvigilatorOpen}
             links={[
               { path: "/addInvigilator", label: "Add Invigilator" },
-              { path: "/ViewInvigilator", label: "View Invigilator" },
+              { path: "/viewInvigilator", label: "View Invigilator" },
             ]}
           />
 
@@ -120,18 +121,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
-          {/* Room Assign */}
-          <SidebarSection
-            icon={<FaClipboardList className="mr-3" />}
-            label="Room Assign"
-            isOpen={isRoomAssignOpen}
-            setIsOpen={setIsRoomAssignOpen}
-            links={[
-              { path: "/assignRoom", label: "Assign Room" },
-              { path: "/viewRoomAssign", label: "View Room Assign" },
-            ]}
-          />
-
           {/* Seat */}
           <SidebarSection
             icon={<FaThLarge className="mr-3" />}
@@ -153,6 +142,30 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             links={[
               { path: "/createSeatPlan", label: "Create Seat Plan" },
               { path: "/viewSeatPlan", label: "View Seat Plan" },
+            ]}
+          />
+
+          {/* ✅ Room Assign (moved below Seat Plan) */}
+          <SidebarSection
+            icon={<FaClipboardList className="mr-3" />}
+            label="Room Assign"
+            isOpen={isRoomAssignOpen}
+            setIsOpen={setIsRoomAssignOpen}
+            links={[
+              { path: "/assignRoom", label: "Assign Room" },
+              { path: "/viewRoomAssign", label: "View Room Assign" },
+            ]}
+          />
+
+          {/* ✅ Invigilator Assign */}
+          <SidebarSection
+            icon={<FaClipboardList className="mr-3" />}
+            label="Invigilator Assign"
+            isOpen={isInvigilatorAssignOpen}
+            setIsOpen={setIsInvigilatorAssignOpen}
+            links={[
+              { path: "/assignInvigilator", label: "Assign Invigilator" },
+              { path: "/viewInvigilatorAssign", label: "View Invigilator Assignment" },
             ]}
           />
         </ul>

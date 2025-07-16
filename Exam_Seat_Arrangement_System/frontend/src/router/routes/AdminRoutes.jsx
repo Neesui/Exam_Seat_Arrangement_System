@@ -27,6 +27,7 @@ import ViewStudentPage from "../../page/adminPage/ViewStudentPage";
 import AddStudentPage from "../../page/adminPage/AddStudentPage";
 import UpdateStudentPage from "../../page/adminPage/UpdateStudentPage";
 import ViewRoomAssignDetailsPage from "../../page/adminPage/ViewRoomAssignDetailsPage";
+import ViewInvigilatorAssignPage from "../../page/publicPage/ViewInvigilatorAssignPage";
 
 const adminRoutes = [
   {
@@ -125,6 +126,10 @@ const adminRoutes = [
   {
     path: "/viewRoomAssignDetails/:examId",
     element: <ViewRoomAssignDetailsPage />,
+  },
+  {
+    path: "/viewInvigilator",
+    element: <ViewInvigilatorAssignPage />,
   },
   {
     path: "/addStudents",
