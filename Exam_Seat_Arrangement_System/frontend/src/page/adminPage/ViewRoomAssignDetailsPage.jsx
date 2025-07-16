@@ -33,6 +33,17 @@ const ViewRoomAssignDetailsPage = () => {
       </p>
     );
 
+  // Flatten all invigilator assignments with room info for invigilator table
+  const allInvigilatorAssignments = assignments.flatMap(
+    (assignment) =>
+      assignment.invigilatorAssignments?.map((inv) => ({
+        ...inv,
+        roomNumber: assignment.room?.roomNumber,
+        block: assignment.room?.block,
+        floor: assignment.room?.floor,
+      })) || []
+  );
+
   return (
     <div className="max-w-6xl mx-auto mt-20 p-4">
       <div className="bg-white shadow rounded border border-gray-200 p-6">
@@ -50,10 +61,9 @@ const ViewRoomAssignDetailsPage = () => {
           </h2>
         </div>
 
-        {/* Combined Exam Details + Room Assignment Table */}
+        {/* Exam Details */}
         {exam ? (
           <>
-            {/* Exam Details Box */}
             <div className="border border-gray-300 rounded p-4 mb-6 bg-gray-50">
               <h3 className="text-lg font-semibold text-gray-700 mb-4">
                 Exam Information
@@ -76,7 +86,7 @@ const ViewRoomAssignDetailsPage = () => {
                   </tr>
                   <tr>
                     <td className="font-semibold py-1">Batch</td>
-                    <td className="py-1">{exam.subject?.semester?.course?.batch || "N/A"}</td>
+                    <td className="py-1">{exam.subject?.semester?.course?.batchYear || "N/A"}</td>
                   </tr>
                   <tr>
                     <td className="font-semibold py-1">Date</td>
@@ -98,13 +108,13 @@ const ViewRoomAssignDetailsPage = () => {
               </table>
             </div>
 
-            {/* Room Assignment Table */}
+            {/* Room Assignments Table */}
             {assignments.length === 0 ? (
               <p className="text-center text-gray-600">No room assignments found.</p>
             ) : (
-              <div>
+              <div className="mb-10">
                 <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                  Room Assignments
+                  Room Informations
                 </h3>
                 <table className="w-full table-auto border border-gray-300 text-sm">
                   <thead className="bg-gray-100">
@@ -115,7 +125,7 @@ const ViewRoomAssignDetailsPage = () => {
                       <th className="border px-4 py-2">Total Benches</th>
                       <th className="border px-4 py-2">Total Capacity</th>
                       <th className="border px-4 py-2">Status</th>
-                      <th className="border px-4 py-2">Invigilators</th>
+                      {/* Removed Invigilators column */}
                     </tr>
                   </thead>
                   <tbody>
@@ -133,24 +143,47 @@ const ViewRoomAssignDetailsPage = () => {
                             ? "Active"
                             : "Inactive"}
                         </td>
-                        <td className="border px-4 py-2">
-                          {assignment.invigilatorAssignments?.length === 0
-                            ? "None"
-                            : assignment.invigilatorAssignments
-                                .map(
-                                  (inv) =>
-                                    `${inv.invigilator?.user?.name || "N/A"} (${
-                                      inv.invigilator?.user?.email || "-"
-                                    })`
-                                )
-                                .join(", ")}
-                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             )}
+
+            {/* Invigilator Assignments Table WITHOUT Room Number, Block, Floor */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                Invigilator Informations
+              </h3>
+              {allInvigilatorAssignments.length === 0 ? (
+                <p className="text-center text-gray-600">No invigilator assignments found.</p>
+              ) : (
+                <table className="w-full table-auto border border-gray-300 text-sm">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="border px-4 py-2">Invigilator Name</th>
+                      <th className="border px-4 py-2">Email</th>
+                      <th className="border px-4 py-2">Phone</th>
+                      <th className="border px-4 py-2">Status</th>
+                      <th className="border px-4 py-2">Assigned At</th>
+                      <th className="border px-4 py-2">Completed At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allInvigilatorAssignments.map((inv) => (
+                      <tr key={inv.id}>
+                        <td className="border px-4 py-2">{inv.invigilator?.user?.name || "N/A"}</td>
+                        <td className="border px-4 py-2">{inv.invigilator?.user?.email || "-"}</td>
+                        <td className="border px-4 py-2">{inv.invigilator?.phone || "-"}</td>
+                        <td className="border px-4 py-2">{inv.status || "-"}</td>
+                        <td className="border px-4 py-2">{formatDate(inv.assignedAt)}</td>
+                        <td className="border px-4 py-2">{formatDate(inv.completedAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </>
         ) : (
           <p className="text-center text-gray-600">No exam details found.</p>
