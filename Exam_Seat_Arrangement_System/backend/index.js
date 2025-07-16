@@ -15,6 +15,7 @@ import benchRouter from "./routes/benchRoutes.js";
 import examRouter from "./routes/examRoutes.js";
 import studentRouter from "./routes/studentRoutes.js";
 import roomAssignmentRouter from "./routes/roomAssignmentRoutes.js";
+import seatingRouter from "./routes/seatRoutes.js";
 
 
 
@@ -44,6 +45,7 @@ app.use("/api/rooms", roomRoutes);
 app.use("/api/bench", benchRouter);
 app.use("/api/exam", examRouter);
 app.use("/api/room-assignments", roomAssignmentRouter);
+app.use("/api/seating", seatingRouter);
 
 
 
