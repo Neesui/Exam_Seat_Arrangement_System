@@ -1,86 +1,53 @@
 import sys
 import json
 from collections import defaultdict
+import random
 
-def assign_seats_zigzag(data):
-    students = data["students"]
-    room_assignments = data["roomAssignments"]
+# Read input JSON from stdin
+input_data = sys.stdin.read()
+data = json.loads(input_data)
 
-    college_students = defaultdict(list)
-    for s in students:
-        college_students[s["college"]].append(s)
+students = data.get("students", [])
+room_assignments = data.get("roomAssignments", [])
 
-    colleges = list(college_students.keys())
-    college_indices = {college: 0 for college in colleges}
-    total_students = len(students)
-    assigned_students = []
+# Group students by college
+college_students = defaultdict(list)
+for student in students:
+    college_students[student["college"]].append(student)
 
-    while len(assigned_students) < total_students:
-        for college in colleges:
-            idx = college_indices[college]
-            if idx < len(college_students[college]):
-                assigned_students.append(college_students[college][idx])
-                college_indices[college] += 1
-            if len(assigned_students) == total_students:
+# Shuffle to randomize within colleges
+for col_students in college_students.values():
+    random.shuffle(col_students)
+
+# Create a list of all students interleaved from different colleges to spread them out
+interleaved_students = []
+while any(college_students.values()):
+    for college in list(college_students.keys()):
+        if college_students[college]:
+            interleaved_students.append(college_students[college].pop(0))
+
+# Now assign them to benches across rooms
+seat_assignments = []
+student_index = 0
+
+for assignment in room_assignments:
+    room = assignment["room"]
+    benches = sorted(room["benches"], key=lambda b: (b["row"], b["column"]))
+
+    for bench in benches:
+        for pos in range(1, bench["capacity"] + 1):
+            if student_index >= len(interleaved_students):
                 break
 
-    benches = []
-    for ra in room_assignments:
-        for bench in ra["room"]["benches"]:
-            benches.append({
+            student = interleaved_students[student_index]
+            seat_assignments.append({
+                "studentId": student["id"],
                 "benchId": bench["id"],
-                "row": bench["row"],
-                "capacity": bench["capacity"]
+                "position": pos
             })
+            student_index += 1
+        if student_index >= len(interleaved_students):
+            break
 
-    benches.sort(key=lambda b: b["row"])
-    benches_by_row = defaultdict(list)
-    for bench in benches:
-        benches_by_row[bench["row"]].append(bench)
-
-    for row in benches_by_row:
-        benches_by_row[row].sort(key=lambda b: b["benchId"])
-
-    sorted_rows = sorted(benches_by_row.keys())
-    output = []
-    student_idx = 0
-
-    for i, row in enumerate(sorted_rows):
-        benches_in_row = benches_by_row[row]
-        if (i + 1) % 2 == 0:
-            benches_in_row = list(reversed(benches_in_row))
-
-        for bench in benches_in_row:
-            bench_colleges = set()
-            seats_filled = 0
-
-            while seats_filled < bench["capacity"] and student_idx < total_students:
-                student = assigned_students[student_idx]
-
-                if student["college"] not in bench_colleges:
-                    seats_filled += 1
-                    bench_colleges.add(student["college"])
-                    output.append({
-                        "studentId": student["id"],
-                        "benchId": bench["benchId"],
-                        "position": seats_filled
-                    })
-                    student_idx += 1
-                else:
-                    found = False
-                    for lookahead in range(student_idx + 1, total_students):
-                        next_student = assigned_students[lookahead]
-                        if next_student["college"] not in bench_colleges:
-                            assigned_students[student_idx], assigned_students[lookahead] = \
-                                assigned_students[lookahead], assigned_students[student_idx]
-                            found = True
-                            break
-                    if not found:
-                        break
-
-    return output
-
-if __name__ == "__main__":
-    input_data = json.load(sys.stdin)
-    seating = assign_seats_zigzag(input_data)
-    print(json.dumps(seating))
+# Return the final seat assignment
+print(json.dumps(seat_assignments))
