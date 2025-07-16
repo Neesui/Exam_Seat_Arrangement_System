@@ -24,7 +24,6 @@ def fetch_rooms(conn):
 
 def fetch_exam_student_counts(conn):
     with conn.cursor() as cur:
-        # FIXED: count students assigned to each exam via seating plan and seat
         cur.execute('''
             SELECT sp."examId", COUNT(s.id)
             FROM "seat" s
@@ -34,29 +33,61 @@ def fetch_exam_student_counts(conn):
         return {r[0]: r[1] for r in cur.fetchall()}
 
 
+def fetch_existing_assignments(conn):
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT ra."examId", ra."roomId", e."startTime", e."endTime"
+            FROM "roomAssignment" ra
+            JOIN "exam" e ON ra."examId" = e.id
+            WHERE ra."isActive" = TRUE;
+        """)
+        rows = cur.fetchall()
+        return [
+            {"examId": r[0], "roomId": r[1], "start": r[2], "end": r[3]}
+            for r in rows
+        ]
+
+
 def is_conflict(start1, end1, start2, end2):
     if start1 is None or end1 is None or start2 is None or end2 is None:
         return False
     return max(start1, start2) < min(end1, end2)
 
 
-def assign_rooms(exams, rooms, exam_students):
+def assign_rooms(exams, rooms, exam_students, existing_assignments):
+    # Initialize schedules with existing assignments
     room_schedules = {room['id']: [] for room in rooms}
+    for assign in existing_assignments:
+        room_schedules[assign['roomId']].append({
+            "start": assign["start"],
+            "end": assign["end"]
+        })
+
     assignments = []
 
     for exam in exams:
         students_needed = exam_students.get(exam['id'], 0)
+        assigned = False
+
         for room in rooms:
             if room['capacity'] >= students_needed:
-                conflict = False
-                for assigned in room_schedules[room['id']]:
-                    if is_conflict(exam['start'], exam['end'], assigned['start'], assigned['end']):
-                        conflict = True
-                        break
+                conflict = any(
+                    is_conflict(exam['start'], exam['end'], scheduled['start'], scheduled['end'])
+                    for scheduled in room_schedules[room['id']]
+                )
+
                 if not conflict:
-                    room_schedules[room['id']].append(exam)
+                    room_schedules[room['id']].append({
+                        "start": exam["start"],
+                        "end": exam["end"]
+                    })
                     assignments.append({"examId": exam['id'], "roomId": room['id']})
+                    assigned = True
                     break
+
+        if not assigned:
+            print(f"⚠️ No available room for exam {exam['id']} at {exam['start']}")
+
     return assignments
 
 
@@ -66,7 +97,9 @@ def main():
         exams = fetch_exams(conn)
         rooms = fetch_rooms(conn)
         exam_students = fetch_exam_student_counts(conn)
-        result = assign_rooms(exams, rooms, exam_students)
+        existing_assignments = fetch_existing_assignments(conn)
+
+        result = assign_rooms(exams, rooms, exam_students, existing_assignments)
         print(json.dumps(result, default=str))
     except Exception as e:
         print(json.dumps({"error": str(e)}))

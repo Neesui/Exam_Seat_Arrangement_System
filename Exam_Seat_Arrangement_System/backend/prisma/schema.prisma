@@ -170,6 +170,7 @@ model RoomAssignment {
   isActive               Boolean                  @default(true)
   isCompleted            Boolean                  @default(false)
   completedAt            DateTime?
+  createdAt   DateTime @default(now())
 
   room                   Room                     @relation(fields: [roomId], references: [id])
   exam                   Exam                     @relation(fields: [examId], references: [id])
