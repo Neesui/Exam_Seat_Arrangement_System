@@ -6,7 +6,8 @@ import invigilatorReducer from "./features/invigilatorSlice";
 import courseReducer from "./features/courseSlice";
 import roomReducer from "./features/roomSlice";
 import benchReducer from "./features/benchSlice";
-import roomAssignReducer from "./features/roomAssignSlice"; // ✅ Import roomAssignSlice
+import roomAssignReducer from "./features/roomAssignSlice"; 
+import seatPlanReducer from "./features/seatPlanSlice";
 
 const store = configureStore({
   reducer: {
@@ -17,6 +18,8 @@ const store = configureStore({
     room: roomReducer,
     bench: benchReducer,
     roomAssign: roomAssignReducer, 
+    seatPlan: seatPlanReducer,
+
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(apiSlice.middleware), 

@@ -23,7 +23,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [isInvigilatorOpen, setIsInvigilatorOpen] = useState(false);
   const [isExamOpen, setIsExamOpen] = useState(false);
   const [isRoomAssignOpen, setIsRoomAssignOpen] = useState(false);
-  const [isSeatOpen, setIsSeatOpen] = useState(false);
   const [isSeatPlanOpen, setIsSeatPlanOpen] = useState(false);
   const [isInvigilatorAssignOpen, setIsInvigilatorAssignOpen] = useState(false);
 
@@ -49,7 +48,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <Link to="/admin">Dashboard</Link>
           </li>
 
-          {/* Students */}
           <SidebarSection
             icon={<FaUserGraduate className="mr-3" />}
             label="Students"
@@ -61,7 +59,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
-          {/* Invigilator */}
           <SidebarSection
             icon={<FaChalkboardTeacher className="mr-3" />}
             label="Invigilator"
@@ -73,7 +70,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
-          {/* Courses */}
           <SidebarSection
             icon={<FaBookOpen className="mr-3" />}
             label="Courses"
@@ -85,7 +81,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
-          {/* Room */}
           <SidebarSection
             icon={<FaDoorOpen className="mr-3" />}
             label="Room"
@@ -97,7 +92,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
-          {/* Bench */}
           <SidebarSection
             icon={<FaChair className="mr-3" />}
             label="Bench"
@@ -109,7 +103,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
-          {/* Exam */}
           <SidebarSection
             icon={<FaBookOpen className="mr-3" />}
             label="Exam"
@@ -121,50 +114,33 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
-          {/* Seat */}
-          <SidebarSection
-            icon={<FaThLarge className="mr-3" />}
-            label="Seat"
-            isOpen={isSeatOpen}
-            setIsOpen={setIsSeatOpen}
-            links={[
-              { path: "/addSeat", label: "Add Seat" },
-              { path: "/viewSeat", label: "View Seats" },
-            ]}
-          />
-
-          {/* Seat Plan */}
           <SidebarSection
             icon={<FaTable className="mr-3" />}
             label="Seat Plan"
             isOpen={isSeatPlanOpen}
             setIsOpen={setIsSeatPlanOpen}
             links={[
-              { path: "/createSeatPlan", label: "Create Seat Plan" },
-              { path: "/viewSeatPlan", label: "View Seat Plan" },
+              { path: "/generateSeatingPlan", label: "Generate Seat Plan" },
+              { path: "/viewSeatingPlan", label: "View Seat Plan" },
             ]}
           />
 
-          {/* ✅ Room Assign (moved below Seat Plan) */}
           <SidebarSection
             icon={<FaClipboardList className="mr-3" />}
             label="Room Assign"
             isOpen={isRoomAssignOpen}
             setIsOpen={setIsRoomAssignOpen}
             links={[
-              { path: "/assignRoom", label: "Assign Room" },
               { path: "/viewRoomAssign", label: "View Room Assign" },
             ]}
           />
 
-          {/* ✅ Invigilator Assign */}
           <SidebarSection
             icon={<FaClipboardList className="mr-3" />}
             label="Invigilator Assign"
             isOpen={isInvigilatorAssignOpen}
             setIsOpen={setIsInvigilatorAssignOpen}
             links={[
-              { path: "/assignInvigilator", label: "Assign Invigilator" },
               { path: "/viewInvigilatorAssign", label: "View Invigilator Assignment" },
             ]}
           />
@@ -182,7 +158,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   );
 };
 
-// Reusable Section Component
+// Reusable dropdown section
 const SidebarSection = ({ icon, label, isOpen, setIsOpen, links }) => (
   <li className="p-4 hover:bg-gray-700">
     <button
@@ -193,10 +169,10 @@ const SidebarSection = ({ icon, label, isOpen, setIsOpen, links }) => (
       {label}
     </button>
     {isOpen && (
-      <ul className="pl-4 mt-2 bg-gray-700">
+      <ul className="pl-4 mt-2 bg-gray-700 rounded-md">
         {links.map((link, i) => (
-          <li key={i} className="p-4 hover:bg-gray-600 flex items-center">
-            {i === 0 ? <FaPlus className="mr-3" /> : <FaEye className="mr-3" />}
+          <li key={i} className="p-3 hover:bg-gray-600 flex items-center">
+            {i === 0 ? <FaPlus className="mr-2" /> : <FaEye className="mr-2" />}
             <Link to={link.path}>{link.label}</Link>
           </li>
         ))}

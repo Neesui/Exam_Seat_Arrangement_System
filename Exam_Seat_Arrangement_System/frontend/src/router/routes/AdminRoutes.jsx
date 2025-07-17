@@ -28,6 +28,8 @@ import AddStudentPage from "../../page/adminPage/AddStudentPage";
 import UpdateStudentPage from "../../page/adminPage/UpdateStudentPage";
 import ViewRoomAssignDetailsPage from "../../page/adminPage/ViewRoomAssignDetailsPage";
 import ViewInvigilatorAssignPage from "../../page/publicPage/ViewInvigilatorAssignPage";
+import GenerateSeatingPlan from "../../page/adminPage/GenerateSeatingPlan";
+import ViewAllSeatingPlans from "../../page/adminPage/ViewAllSeatingPlans";
 
 const adminRoutes = [
   {
@@ -150,6 +152,15 @@ const adminRoutes = [
   {
     path: "/student",
     element: <StudentPage />,
+  },
+
+  {
+    path: "/generateSeatingPlan",
+    element: <GenerateSeatingPlan />,
+  },
+  {
+    path: "/viewSeatingPlan",
+    element: <ViewAllSeatingPlans />,
   },
 ];
 
