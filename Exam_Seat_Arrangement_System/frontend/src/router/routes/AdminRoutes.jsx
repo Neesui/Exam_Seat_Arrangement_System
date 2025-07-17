@@ -28,7 +28,6 @@ import AddStudentPage from "../../page/adminPage/AddStudentPage";
 import UpdateStudentPage from "../../page/adminPage/UpdateStudentPage";
 import ViewRoomAssignDetailsPage from "../../page/adminPage/ViewRoomAssignDetailsPage";
 import ViewInvigilatorAssignPage from "../../page/publicPage/ViewInvigilatorAssignPage";
-import ViewSeatPlanDetails from "../../page/adminPage/ViewSeatPlanDetails";
 
 const adminRoutes = [
   {
@@ -151,11 +150,6 @@ const adminRoutes = [
   {
     path: "/student",
     element: <StudentPage />,
-  },
-
-  {
-    path: "/viewSeatPlan",
-    element: <ViewSeatPlanDetails />,
   },
 ];
 
