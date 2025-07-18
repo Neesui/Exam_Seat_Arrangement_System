@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAddExamMutation } from "../../redux/api/examApi";
 import { useGetSubjectsQuery } from "../../redux/api/subjectApi";
+import Input from "../../component/public/Input";
 
 const AddExamPage = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const AddExamPage = () => {
 
     const formatDateTime = (time) => {
       if (!time) return null;
-      return new Date(`${date}T${time}:00`).toISOString(); // creates full ISO date string
+      return new Date(`${date}T${time}:00`).toISOString();
     };
 
     try {
@@ -55,7 +56,9 @@ const AddExamPage = () => {
   return (
     <div className="h-screen w-full bg-gray-100 flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-2xl bg-white p-10 rounded-lg shadow-xl">
-        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Add New Exam</h2>
+        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
+          Add New Exam
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Subject Selection */}
@@ -71,6 +74,7 @@ const AddExamPage = () => {
                 onChange={(e) => setSubjectId(e.target.value)}
                 className="w-full p-2 border rounded"
                 required
+                disabled={isLoading}
               >
                 <option value="">Select Subject</option>
                 {subjectData?.data?.map((subject) => (
@@ -83,38 +87,38 @@ const AddExamPage = () => {
           </div>
 
           {/* Date */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">Date</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
+          <Input
+            id="date"
+            label="Date"
+            type="date"
+            name="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            required
+            disabled={isLoading}
+          />
 
           {/* Start Time */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">Start Time</label>
-            <input
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              className="w-full p-2 border rounded"
-            />
-          </div>
+          <Input
+            id="startTime"
+            label="Start Time"
+            type="time"
+            name="startTime"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            disabled={isLoading}
+          />
 
           {/* End Time */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">End Time</label>
-            <input
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              className="w-full p-2 border rounded"
-            />
-          </div>
+          <Input
+            id="endTime"
+            label="End Time"
+            type="time"
+            name="endTime"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            disabled={isLoading}
+          />
 
           {/* Submit Button */}
           <button

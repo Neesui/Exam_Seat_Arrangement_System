@@ -1,46 +1,55 @@
 import React from 'react';
-import AddSubject from './AddSubject';
+import Input from '../../component/public/Input';
 
-const AddSemester = ({
-  semester,
-  onSemesterNumChange,
-  onAddSubject,
-  onSubjectChange,
-}) => {
+const AddSemester = ({ semester, onSemesterNumChange, onSubjectChange, onAddSubject }) => {
   return (
-    <div className="border p-4 rounded mb-6">
-      <div className="flex items-center mb-4 gap-4">
-        <label className="font-semibold">Semester Number:</label>
-        <input
-          type="number"
-          min={1}
-          value={semester.semesterNum}
-          onChange={(e) => onSemesterNumChange(Number(e.target.value))}
-          className="border p-2 rounded w-20"
-        />
-      </div>
+    <div className="space-y-4">
+      <Input
+        id="semester-num" 
+        label="Semester Number"
+        type="number"
+        name="semesterNum"
+        value={semester.semesterNum}
+        onChange={(e) => onSemesterNumChange(Number(e.target.value))}
+        required
+      />
 
-      <div>
-        <h4 className="font-semibold mb-2">Subjects</h4>
+      <div className="space-y-4">
+        {semester.subjects.map((subject, index) => (
+          <div
+            key={index}
+            className="border border-gray-200 p-4 rounded-md shadow-sm bg-gray-50"
+          >
+            <h4 className="font-semibold text-gray-700 mb-2">Subject {index + 1}</h4>
 
-        {semester.subjects.length === 0 && (
-          <p className="text-gray-500 mb-2">No subjects added yet.</p>
-        )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                id={`subject-${index}-name`}
+                label="Subject Name"
+                name={`subjectName-${index}`}
+                value={subject.subjectName}
+                onChange={(e) => onSubjectChange(index, 'subjectName', e.target.value)}
+                required
+              />
 
-        {semester.subjects.map((subject, idx) => (
-          <AddSubject
-            key={idx}
-            subject={subject}
-            onChange={(field, value) => onSubjectChange(idx, field, value)}
-          />
+              <Input
+                id={`subject-${index}-code`}
+                label="Subject Code"
+                name={`code-${index}`}
+                value={subject.code}
+                onChange={(e) => onSubjectChange(index, 'code', e.target.value)}
+                required
+              />
+            </div>
+          </div>
         ))}
 
         <button
           type="button"
           onClick={onAddSubject}
-          className="mt-2 bg-blue-600 text-white px-3 py-1 rounded"
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
         >
-          Add Subject
+          + Add Subject
         </button>
       </div>
     </div>
