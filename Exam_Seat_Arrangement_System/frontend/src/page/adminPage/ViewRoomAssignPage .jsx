@@ -9,7 +9,6 @@ import {
 const ViewRoomAssignPage = () => {
   const navigate = useNavigate();
   const { data, error, isLoading, refetch } = useGetAllRoomAssignmentsQuery();
-
   const [deleteRoomAssign, { isLoading: isDeleting }] = useDeleteRoomAssignMutation();
 
   const handleDelete = async (id) => {
@@ -29,11 +28,11 @@ const ViewRoomAssignPage = () => {
   };
 
   const handleView = (examId) => {
-    navigate(`/viewRoomAssignDetails/${examId}`); // ✅ examId instead of assignment.id
+    navigate(`/viewRoomAssignDetails/${examId}`);
   };
 
   return (
-    <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md w-[99%] max-w-screen-lg mx-auto">
+    <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-full overflow-x-auto">
       <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">Room Assignments</h2>
 
       {isLoading ? (
@@ -58,15 +57,9 @@ const ViewRoomAssignPage = () => {
               data.assignments.map((assign, index) => (
                 <tr key={assign.id}>
                   <td className="border px-4 py-2 text-center">{index + 1}</td>
-                  <td className="border px-4 py-2 text-center">
-                    {assign.room?.roomNumber || "N/A"}
-                  </td>
-                  <td className="border px-4 py-2 text-center">
-                    {assign.room?.block || "-"}
-                  </td>
-                  <td className="border px-4 py-2 text-center">
-                    {assign.room?.floor || "-"}
-                  </td>
+                  <td className="border px-4 py-2 text-center">{assign.room?.roomNumber || "N/A"}</td>
+                  <td className="border px-4 py-2 text-center">{assign.room?.block || "-"}</td>
+                  <td className="border px-4 py-2 text-center">{assign.room?.floor || "-"}</td>
                   <td className="border px-4 py-2 text-center">
                     <span
                       className={`px-2 py-1 text-xs rounded font-semibold ${
@@ -102,7 +95,7 @@ const ViewRoomAssignPage = () => {
                     </button>
                     <button
                       className="text-green-600 hover:underline"
-                      onClick={() => handleView(assign.exam?.id)} // ✅ Pass examId here
+                      onClick={() => handleView(assign.exam?.id)}
                     >
                       View
                     </button>
