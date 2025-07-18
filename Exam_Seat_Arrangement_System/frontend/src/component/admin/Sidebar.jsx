@@ -131,6 +131,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={isRoomAssignOpen}
             setIsOpen={setIsRoomAssignOpen}
             links={[
+              { path: "/assignRoom", label: "Assigen Room for Exam" },
               { path: "/viewRoomAssign", label: "View Room Assign" },
             ]}
           />
