@@ -7,7 +7,7 @@ const SeatingPlanVisual = ({ seats }) => {
   if (isLoading) return <p>Loading benches...</p>;
   if (error) return <p className="text-red-600">Failed to load benches</p>;
 
-  // Map students by bench and position (e.g., LEFT, RIGHT, or position number)
+  // Map students by bench and position (e.g., LEFT, RIGHT, Center or position number)
   const benchStudentMap = {};
   seats.forEach(({ bench, position, student }) => {
     if (!benchStudentMap[bench.id]) {

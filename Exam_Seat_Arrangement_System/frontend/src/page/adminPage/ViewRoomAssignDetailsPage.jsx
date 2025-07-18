@@ -62,7 +62,7 @@ const ViewRoomAssignDetailsPage = () => {
         </div>
 
         {/* Exam Details */}
-        {exam ? (
+        {exam   ? (
           <>
             <div className="border border-gray-300 rounded p-4 mb-6 bg-gray-50">
               <h3 className="text-lg font-semibold text-gray-700 mb-4">

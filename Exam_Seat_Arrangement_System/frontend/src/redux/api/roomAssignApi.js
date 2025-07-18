@@ -2,7 +2,7 @@ import { apiSlice } from "./apiSlice";
 
 export const roomAssignApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    // 🔁 Generate room assignments (via Python algorithm)
+    //  Generate room assignments (via Python algorithm)
     addRoomAssign: builder.mutation({
       query: () => ({
         url: "/api/room-assignments/generate",
@@ -11,7 +11,7 @@ export const roomAssignApi = apiSlice.injectEndpoints({
       invalidatesTags: [{ type: "ROOM_ASSIGN", id: "LIST" }],
     }),
 
-    // 📥 Get ALL room assignments (not filtered by exam)
+    //  Get ALL room assignments (not filtered by exam)
     getAllRoomAssignments: builder.query({
       query: () => `/api/room-assignments/all`,
       providesTags: (result) =>
@@ -26,7 +26,7 @@ export const roomAssignApi = apiSlice.injectEndpoints({
           : [{ type: "ROOM_ASSIGN", id: "LIST" }],
     }),
 
-    // 📥 Get assignments filtered by examId
+    //  Get assignments filtered by examId
     getRoomAssignByExam: builder.query({
       query: (examId) => `/api/room-assignments/all/${examId}`,
       providesTags: (result, error, examId) =>
@@ -41,7 +41,7 @@ export const roomAssignApi = apiSlice.injectEndpoints({
           : [{ type: "ROOM_ASSIGN", id: "LIST" }],
     }),
 
-    // ✏️ Update room assignment
+    // Update room assignment
     updateRoomAssign: builder.mutation({
       query: ({ id, ...data }) => ({
         url: `/api/room-assignments/${id}`,
@@ -54,7 +54,7 @@ export const roomAssignApi = apiSlice.injectEndpoints({
       ],
     }),
 
-    // ❌ Delete room assignment
+    // Delete room assignment
     deleteRoomAssign: builder.mutation({
       query: (id) => ({
         url: `/api/room-assignments/${id}`,
