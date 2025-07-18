@@ -2,11 +2,10 @@ import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import {
   useGetAllRoomAssignmentsQuery,
-  useAddRoomAssignMutation,
+  useGenerateRoomAssignmentsMutation,
 } from "../../redux/api/roomAssignApi";
 
 const AssignedRoomPage = () => {
-  // Fetch all room assignments
   const {
     data: assignmentsData,
     error,
@@ -14,8 +13,7 @@ const AssignedRoomPage = () => {
     refetch,
   } = useGetAllRoomAssignmentsQuery();
 
-  // Mutation to generate assignments (runs Python script and saves in DB)
-  const [generateAssignments, { isLoading: generating }] = useAddRoomAssignMutation();
+  const [generateAssignments, { isLoading: generating }] = useGenerateRoomAssignmentsMutation();
 
   useEffect(() => {
     if (error) {

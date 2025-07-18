@@ -201,7 +201,7 @@ model InvigilatorAssignment {
   updatedAt        DateTime  @updatedAt
 
   invigilator      Invigilator     @relation(fields: [invigilatorId], references: [id])
-  roomAssignment   RoomAssignment  @relation(fields: [roomAssignmentId], references: [id])
+  roomAssignment   RoomAssignment  @relation(fields: [roomAssignmentId], references: [id], onDelete: Cascade)
 
   @@map("invigilatorAssignment")
 }
