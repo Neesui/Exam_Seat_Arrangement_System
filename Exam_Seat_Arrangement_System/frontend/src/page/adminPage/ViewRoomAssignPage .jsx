@@ -36,7 +36,7 @@ const ViewRoomAssignPage = () => {
       <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">Room Assignments</h2>
 
       {isLoading ? (
-        <p>Loading room assignments...</p>
+        <p>Loading room assignments....</p>
       ) : error ? (
         <p className="text-red-500">Failed to load room assignments.</p>
       ) : (
