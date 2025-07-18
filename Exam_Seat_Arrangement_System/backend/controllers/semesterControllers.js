@@ -4,7 +4,7 @@ import {
   validateSemesterWithSubjects
 } from "../utils/validation.js";
 
-// ✅ Add semester with subjects
+// Add semester with subjects
 export const addSemesterWithSubjects = async (req, res) => {
   const { courseId, semesterNum, subjects } = req.body;
 
@@ -53,7 +53,7 @@ export const addSemesterWithSubjects = async (req, res) => {
   }
 };
 
-// ✅ Get all semesters
+// Get all semesters
 export const getSemesters = async (req, res) => {
   try {
     const semesters = await prisma.semester.findMany({
@@ -81,7 +81,7 @@ export const getSemesters = async (req, res) => {
   }
 };
 
-// ✅ Get semester by ID
+// Get semester by ID
 export const getSemesterById = async (req, res) => {
   const { id } = req.params;
 
@@ -113,7 +113,7 @@ export const getSemesterById = async (req, res) => {
   }
 };
 
-// ✅ Update semester
+// Update semester
 export const updateSemester = async (req, res) => {
   const { id } = req.params;
   const { semesterNum, courseId } = req.body;
@@ -158,7 +158,7 @@ export const updateSemester = async (req, res) => {
   }
 };
 
-// ✅ Delete semester
+// Delete semester
 export const deleteSemester = async (req, res) => {
   const { id } = req.params;
 

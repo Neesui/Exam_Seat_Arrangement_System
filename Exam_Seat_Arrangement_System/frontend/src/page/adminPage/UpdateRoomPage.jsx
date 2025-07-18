@@ -16,7 +16,7 @@ const UpdateRoomPage = () => {
 
   useEffect(() => {
     if (roomData?.rooms) {
-      const room = roomData.rooms.find((r) => String(r.id) === String(roomId)); // ✔️ fixed
+      const room = roomData.rooms.find((r) => String(r.id) === String(roomId)); 
       if (room) {
         setRoomNumber(room.roomNumber);
         setBlock(room.block);
@@ -34,7 +34,7 @@ const UpdateRoomPage = () => {
     }
 
     try {
-      await updateRoom({ id: Number(roomId), roomNumber, block, floor }).unwrap(); // ✔️ id as number
+      await updateRoom({ id: Number(roomId), roomNumber, block, floor }).unwrap(); 
       toast.success("Room updated successfully!");
       navigate("/viewRoom");
     } catch (err) {

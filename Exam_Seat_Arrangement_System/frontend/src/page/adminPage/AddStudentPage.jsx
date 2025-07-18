@@ -129,7 +129,7 @@ const AddStudentPage = () => {
               <option value="">Select Course</option>
               {coursesData?.courses?.map((course) => (
                 <option key={course.id} value={course.id}>
-                  {course.name} {/* Adjusted field */}
+                  {course.name} 
                 </option>
               ))}
             </select>
@@ -153,7 +153,7 @@ const AddStudentPage = () => {
               <option value="">Select Semester</option>
               {semestersData?.semesters?.map((sem) => (
                 <option key={sem.id} value={sem.id}>
-                  Semester {sem.semesterNum} {/* Adjusted display */}
+                  Semester {sem.semesterNum} 
                 </option>
               ))}
             </select>

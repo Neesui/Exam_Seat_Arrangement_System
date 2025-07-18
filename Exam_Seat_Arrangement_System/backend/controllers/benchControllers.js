@@ -1,11 +1,11 @@
 import prisma from "../utils/db.js";
 
-// Create Bench — Auto-generate benchNo
+// Create Bench — Auto-generate benchNo create garxa
 export const createBench = async (req, res) => {
   try {
     const { roomId, row, column, capacity } = req.body;
 
-    // Check for duplicate row/column in the same room
+    // check garxa duplicate row/column in the same room
     const existingBench = await prisma.bench.findUnique({
       where: {
         roomId_row_column: { roomId: Number(roomId), row: Number(row), column: Number(column) },

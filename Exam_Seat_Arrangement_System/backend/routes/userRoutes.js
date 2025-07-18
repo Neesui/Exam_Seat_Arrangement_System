@@ -5,7 +5,6 @@ import { roleCheck } from "../middlewares/authorize.js";
 
 const router = express.Router();
 
-// 👇 Only accessible by authenticated users with ADMIN role
 router.get("/all", authenticate, roleCheck(["ADMIN"]), getAllUsers);
 
 export default router;

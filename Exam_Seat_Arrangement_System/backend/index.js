@@ -22,18 +22,18 @@ import seatingRouter from "./routes/seatRoutes.js";
 const app = express();
 const port = 3000;
 
-// ✅ CORS Middleware BEFORE your routes
+// CORS Middleware BEFORE your routes
 app.use(cors({
-  origin: "http://localhost:5173",  // Your frontend origin
+  origin: "http://localhost:5173",  
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  credentials: true, // Allows cookies to be sent
+  credentials: true, 
 }));
 
-// ✅ Other Middlewares
+//Other Middlewares
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Routes
+// Routes
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/invigilator", invigilatorRouter);
@@ -57,7 +57,7 @@ app.use((req, res) => {
   });
 });
 
-// ✅ Start Server and Connect DB
+// Start Server and Connect DB
 app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
   try {

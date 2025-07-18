@@ -1,9 +1,6 @@
 import bcrypt from "bcrypt";
 import prisma from "../utils/db.js";
 
-/**
- * Admin-only: Add a new invigilator (creates a user + profile)
- */
 export const addInvigilatorController = async (req, res) => {
   console.log("📥 Incoming request body:", req.body);
 
@@ -55,9 +52,7 @@ export const addInvigilatorController = async (req, res) => {
   }
 };
 
-/**
- * Admin-only: Get all invigilators
- */
+
 export const getAllInvigilator = async (req, res) => {
   try {
     const invigilators = await prisma.user.findMany({
@@ -97,9 +92,8 @@ export const getAllInvigilator = async (req, res) => {
     });
   }
 };
-/**
- * Get logged-in invigilator profile
- */
+
+
 export const getProfile = async (req, res) => {
   const userId = req.user.id;
 
@@ -120,9 +114,7 @@ export const getProfile = async (req, res) => {
   }
 };
 
-/**
- * Update logged-in invigilator profile
- */
+
 export const updateProfile = async (req, res) => {
   const userId = req.user.id;
   const { name, email, password, course, phone, address, gender } = req.body;
@@ -162,9 +154,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-/**
- * Get summary of exams and rooms assigned to the invigilator
- */
+
 export const getInvigilatorExamMetaSummary = async (req, res) => {
   try {
     const userId = req.user.id;

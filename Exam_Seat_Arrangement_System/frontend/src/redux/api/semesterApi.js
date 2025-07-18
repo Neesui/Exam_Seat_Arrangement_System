@@ -3,7 +3,7 @@ import { apiSlice } from "./apiSlice";
 export const semesterApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getSemesters: builder.query({
-      query: () => "/api/semester/all", // or your GET semesters API path
+      query: () => "/api/semester/all", 
     }),
 
     addSemester: builder.mutation({
@@ -32,7 +32,7 @@ export const semesterApi = apiSlice.injectEndpoints({
 });
 
 export const {
-  useGetSemestersQuery,  // <-- add this here
+  useGetSemestersQuery, 
   useAddSemesterMutation,
   useUpdateSemesterMutation,
   useDeleteSemesterMutation,

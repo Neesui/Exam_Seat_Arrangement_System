@@ -32,7 +32,7 @@ const UpdateExamPage = () => {
       const toTimeOnly = (dateTimeStr) => {
         if (!dateTimeStr) return "";
         const d = new Date(dateTimeStr);
-        return d.toISOString().substr(11, 5); // HH:MM
+        return d.toISOString().substr(11, 5); 
       };
 
       setStartTime(toTimeOnly(startTime));

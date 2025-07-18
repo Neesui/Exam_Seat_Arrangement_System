@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import {
   useGetAllStudentsQuery,
   useDeleteStudentMutation,
-} from "../../redux/api/studentApi"; // Adjust the import path if needed
+} from "../../redux/api/studentApi"; 
 
 const ViewStudentPage = () => {
   const navigate = useNavigate();

@@ -57,13 +57,13 @@ const AddSemesterPage = () => {
       subjects: cleanedSubjects,
     };
 
-    console.log('Submitting semester payload:', payload); // Debug payload
+    console.log('Submitting semester payload:', payload);
 
     try {
       await addSemester(payload).unwrap();
 
       toast.success('Semester added successfully!');
-      navigate('/viewCourse'); // Adjust this route if needed
+      navigate('/viewCourse'); 
     } catch (err) {
       console.error('Error adding semester:', err);
       toast.error(err?.data?.message || 'Failed to add semester');

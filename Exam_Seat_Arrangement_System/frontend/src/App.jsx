@@ -13,7 +13,7 @@ const App = () => {
     <Provider store={store}> 
       <RouterProvider router={router} /> 
 
-      {/* ✅ Toast container to show notifications */}
+      {/*Toast container to show notifications */}
       <ToastContainer 
         position="top-right"
         autoClose={3000}

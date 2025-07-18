@@ -26,7 +26,6 @@ const ViewExamDetailsPage = () => {
     <div className="max-w-4xl mx-auto mt-20 p-4">
       <div className="bg-white rounded shadow-md border border-gray-200 p-6">
 
-        {/* Header with Back Button and Centered Title */}
         <div className="relative mb-6">
           <button
             onClick={() => navigate(-1)}

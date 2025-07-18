@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useAddRoomMutation } from "../../redux/api/roomApi"; // adjust path if needed
+import { useAddRoomMutation } from "../../redux/api/roomApi"; 
 import Input from "../../component/public/Input";
 
 const AddRoomPage = () => {

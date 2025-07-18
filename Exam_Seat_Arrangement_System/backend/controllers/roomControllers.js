@@ -40,7 +40,7 @@ export const getRooms = async (req, res) => {
         block: room.block,
         floor: room.floor,
         benches: room.benches,
-        capacity: totalCapacity, // 👈 calculated capacity added
+        capacity: totalCapacity, 
       };
     });
 

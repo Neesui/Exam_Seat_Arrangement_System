@@ -85,17 +85,17 @@ const ImportStudentData = () => {
             if (data.success) {
               setMessage(data.message || "✅ Students imported successfully!");
               setFile(null);
-              if (fileInputRef.current) fileInputRef.current.value = ""; // reset file input
+              if (fileInputRef.current) fileInputRef.current.value = "";
             } else {
-              setMessage(data.message || "❌ Import failed.");
+              setMessage(data.message || "Import failed.");
             }
           })
           .catch(() => {
-            setMessage("❌ Error occurred during import.");
+            setMessage("Error occurred during import.");
           })
           .finally(() => setLoading(false));
       } catch (err) {
-        setMessage("❌ Failed to read file. Make sure it is a valid Excel or CSV file.");
+        setMessage("Failed to read file. Make sure it is a valid Excel or CSV file.");
         setLoading(false);
       }
     };

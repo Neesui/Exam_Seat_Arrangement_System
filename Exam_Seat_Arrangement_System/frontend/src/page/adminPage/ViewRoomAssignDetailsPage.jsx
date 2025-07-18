@@ -33,7 +33,6 @@ const ViewRoomAssignDetailsPage = () => {
       </p>
     );
 
-  // Flatten all invigilator assignments with room info for invigilator table
   const allInvigilatorAssignments = assignments.flatMap(
     (assignment) =>
       assignment.invigilatorAssignments?.map((inv) => ({
@@ -125,7 +124,6 @@ const ViewRoomAssignDetailsPage = () => {
                       <th className="border px-4 py-2">Total Benches</th>
                       <th className="border px-4 py-2">Total Capacity</th>
                       <th className="border px-4 py-2">Status</th>
-                      {/* Removed Invigilators column */}
                     </tr>
                   </thead>
                   <tbody>
@@ -150,7 +148,6 @@ const ViewRoomAssignDetailsPage = () => {
               </div>
             )}
 
-            {/* Invigilator Assignments Table WITHOUT Room Number, Block, Floor */}
             <div>
               <h3 className="text-lg font-semibold text-gray-700 mb-4">
                 Invigilator Informations

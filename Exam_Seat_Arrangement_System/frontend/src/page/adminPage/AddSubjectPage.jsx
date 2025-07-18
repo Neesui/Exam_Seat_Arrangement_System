@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAddSubjectMutation } from '../../redux/api/subjectApi';  // ✅ Correct import
+import { useAddSubjectMutation } from '../../redux/api/subjectApi'; 
 
 const AddSubjectPage = () => {
   const { semesterId } = useParams();

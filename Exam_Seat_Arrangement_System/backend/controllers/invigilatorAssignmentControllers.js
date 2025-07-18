@@ -3,11 +3,9 @@ import { exec } from "child_process";
 import path from "path";
 import fs from "fs";
 
-// 📌 Auto-generate Invigilator Assignments using Python script
 export const runAndSaveInvigilatorAssignments = (req, res) => {
   const scriptPath = path.resolve(process.cwd(), "algorithm", "invigilatorAssignment_algorithm.py");
 
-  // Optional: Check if script exists
   if (!fs.existsSync(scriptPath)) {
     return res.status(500).json({ success: false, message: "Algorithm script not found" });
   }
@@ -34,10 +32,8 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
     }
 
     try {
-      // Delete previous assignments (you can add a filter for isActive if you want)
       await prisma.invigilatorAssignment.deleteMany();
 
-      // Filter valid assignments: invigilatorId should be number or string (not null or undefined)
       const validAssignments = assignments.filter(a => a.invigilatorId != null);
 
       await Promise.all(
@@ -72,7 +68,6 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
   });
 };
 
-// 📥 Get all invigilator assignments
 export const getAllInvigilatorAssignments = async (req, res) => {
   try {
     const data = await prisma.invigilatorAssignment.findMany({
@@ -101,7 +96,7 @@ export const getAllInvigilatorAssignments = async (req, res) => {
   }
 };
 
-// 📥 Get assignments by roomAssignmentId
+
 export const getInvigilatorAssignmentsByRoom = async (req, res) => {
   const roomAssignmentId = Number(req.params.roomAssignmentId);
 

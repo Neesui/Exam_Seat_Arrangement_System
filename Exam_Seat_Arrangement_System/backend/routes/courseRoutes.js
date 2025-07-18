@@ -11,7 +11,6 @@ import { roleCheck } from "../middlewares/authorize.js";
 
 const router = express.Router();
 
-// Create a course along with semesters and subjects
 router.post('/add-full', authenticate, roleCheck(['ADMIN']), createCourseFull);
 router.get("/all", authenticate, roleCheck(["ADMIN"]), getCourses);
 router.get("/:id", authenticate, roleCheck(["ADMIN"]), getCourseById);

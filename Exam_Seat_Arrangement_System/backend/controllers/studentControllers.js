@@ -1,6 +1,6 @@
 import prisma from "../utils/db.js";
 
-// ✅ Create Single Student
+//Create Single Student
 export const createStudent = async (req, res) => {
   try {
     const {
@@ -40,7 +40,7 @@ export const createStudent = async (req, res) => {
   }
 };
 
-// ✅ Get All Students
+//Get All Students
 export const getStudents = async (req, res) => {
   try {
     const students = await prisma.student.findMany({
@@ -68,7 +68,7 @@ export const getStudents = async (req, res) => {
   }
 };
 
-// ✅ Get Single Student
+// Get Single Student
 export const getStudentById = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -101,12 +101,11 @@ export const getStudentById = async (req, res) => {
   }
 };
 
-// ✅ Update Student
+//Update Student
 export const updateStudent = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
 
-    // First, check if the student exists
     const existingStudent = await prisma.student.findUnique({
       where: { id },
     });
@@ -118,7 +117,6 @@ export const updateStudent = async (req, res) => {
       });
     }
 
-    // Proceed with update if exists
     const {
       studentName,
       symbolNumber,
@@ -158,7 +156,7 @@ export const updateStudent = async (req, res) => {
 };
 
 
-// ✅ Delete Student
+// Delete Student
 export const deleteStudent = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);

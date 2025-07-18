@@ -8,7 +8,7 @@ export const benchApi = apiSlice.injectEndpoints({
         method: "POST",
         body: newData,
       }),
-      invalidatesTags: ["BENCH", "ROOM"], // ✅ also invalidate ROOM
+      invalidatesTags: ["BENCH", "ROOM"], 
     }),
 
     getBenches: builder.query({
@@ -32,7 +32,7 @@ export const benchApi = apiSlice.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["BENCH", "ROOM"], // ✅ also invalidate ROOM
+      invalidatesTags: ["BENCH", "ROOM"], 
     }),
 
     deleteBench: builder.mutation({
@@ -40,7 +40,7 @@ export const benchApi = apiSlice.injectEndpoints({
         url: `/api/bench/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["BENCH", "ROOM"], // ✅ also invalidate ROOM
+      invalidatesTags: ["BENCH", "ROOM"],
     }),
   }),
 });
