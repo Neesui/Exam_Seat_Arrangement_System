@@ -30,6 +30,7 @@ import ViewInvigilatorAssignPage from "../../page/publicPage/ViewInvigilatorAssi
 import GenerateSeatingPlan from "../../page/adminPage/GenerateSeatingPlan";
 import ViewAllSeatingPlans from "../../page/adminPage/ViewAllSeatingPlans";
 import AssignedRoomPage from "../../page/adminPage/AssignedRoomPage";
+import AssignedInvigilatorPage from "../../page/adminPage/AssignedInvigilatorPage";
 
 const adminRoutes = [
   {
@@ -128,6 +129,10 @@ const adminRoutes = [
   {
     path: "/viewRoomAssignDetails/:examId",
     element: <ViewRoomAssignDetailsPage />,
+  },
+  {
+    path: "/assignInvigilator",
+    element: <AssignedInvigilatorPage />,
   },
   {
     path: "/viewInvigilatorAssign",

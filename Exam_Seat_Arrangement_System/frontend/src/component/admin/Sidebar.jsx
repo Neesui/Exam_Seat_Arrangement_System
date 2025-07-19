@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import SidebarSection from "./SidebarSection";
 import {
   FaTachometerAlt,
   FaUserGraduate,
@@ -7,11 +8,8 @@ import {
   FaBookOpen,
   FaDoorOpen,
   FaChair,
-  FaPlus,
-  FaEye,
   FaTimes,
   FaClipboardList,
-  FaThLarge,
   FaTable,
 } from "react-icons/fa";
 
@@ -25,6 +23,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [isRoomAssignOpen, setIsRoomAssignOpen] = useState(false);
   const [isSeatPlanOpen, setIsSeatPlanOpen] = useState(false);
   const [isInvigilatorAssignOpen, setIsInvigilatorAssignOpen] = useState(false);
+  const [isAssignedInvigilatorOpen, setIsAssignedInvigilatorOpen] = useState(false); // ✅ New
 
   return (
     <>
@@ -131,7 +130,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={isRoomAssignOpen}
             setIsOpen={setIsRoomAssignOpen}
             links={[
-              { path: "/assignRoom", label: "Assigen Room for Exam" },
+              { path: "/assignRoom", label: "Assign Room for Exam" },
               { path: "/viewRoomAssign", label: "View Room Assign" },
             ]}
           />
@@ -142,6 +141,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={isInvigilatorAssignOpen}
             setIsOpen={setIsInvigilatorAssignOpen}
             links={[
+              { path: "/assignInvigilator", label: "Assign Invigilator" },
               { path: "/viewInvigilatorAssign", label: "View Invigilator Assignment" },
             ]}
           />
@@ -158,28 +158,5 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     </>
   );
 };
-
-// Reusable dropdown section
-const SidebarSection = ({ icon, label, isOpen, setIsOpen, links }) => (
-  <li className="p-4 hover:bg-gray-700">
-    <button
-      onClick={() => setIsOpen(!isOpen)}
-      className="w-full text-left flex items-center"
-    >
-      {icon}
-      {label}
-    </button>
-    {isOpen && (
-      <ul className="pl-4 mt-2 bg-gray-700 rounded-md">
-        {links.map((link, i) => (
-          <li key={i} className="p-3 hover:bg-gray-600 flex items-center">
-            {i === 0 ? <FaPlus className="mr-2" /> : <FaEye className="mr-2" />}
-            <Link to={link.path}>{link.label}</Link>
-          </li>
-        ))}
-      </ul>
-    )}
-  </li>
-);
 
 export default Sidebar;
