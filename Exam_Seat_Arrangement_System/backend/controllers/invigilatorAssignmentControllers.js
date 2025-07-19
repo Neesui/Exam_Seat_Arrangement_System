@@ -3,6 +3,8 @@ import { exec } from "child_process";
 import path from "path";
 import fs from "fs";
 
+import { v4 as uuidv4 } from "uuid";
+
 export const runAndSaveInvigilatorAssignments = (req, res) => {
   const scriptPath = path.resolve(process.cwd(), "algorithm", "invigilatorAssignment_algorithm.py");
 
@@ -32,13 +34,15 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
     }
 
     try {
-      await prisma.invigilatorAssignment.deleteMany();
+      // Generate new batch id for this run
+      const generationId = uuidv4();
+
+      // Optional: you can mark old assignments as inactive or keep them
 
       const validAssignments = assignments.filter(a => a.invigilatorId != null);
 
       await Promise.all(
         validAssignments.map((a) => {
-          // Safely parse assignedAt date or fallback to current date
           let assignedAtDate = new Date(a.assignedAt);
           if (isNaN(assignedAtDate.getTime())) {
             assignedAtDate = new Date();
@@ -51,6 +55,7 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
               status: a.status,
               assignedAt: assignedAtDate,
               completedAt: null,
+              generationId,  // Save generation batch id here
             },
           });
         })
@@ -59,6 +64,7 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
       res.json({
         success: true,
         message: "Invigilator assignments generated and saved",
+        generationId,
         totalAssigned: validAssignments.length,
         totalSkipped: assignments.length - validAssignments.length,
       });
@@ -68,9 +74,21 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
   });
 };
 
+
 export const getAllInvigilatorAssignments = async (req, res) => {
   try {
+    // Find the latest generationId by max assignedAt
+    const latest = await prisma.invigilatorAssignment.findFirst({
+      orderBy: { assignedAt: "desc" },
+      select: { generationId: true },
+    });
+
+    if (!latest) {
+      return res.json({ success: true, assignments: [] });
+    }
+
     const data = await prisma.invigilatorAssignment.findMany({
+      where: { generationId: latest.generationId },
       include: {
         invigilator: { include: { user: true } },
         roomAssignment: {
@@ -95,6 +113,7 @@ export const getAllInvigilatorAssignments = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch invigilator assignments", error: error.message });
   }
 };
+
 
 
 export const getInvigilatorAssignmentsByRoom = async (req, res) => {
