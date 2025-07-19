@@ -197,6 +197,7 @@ model InvigilatorAssignment {
   status           String    @default("ASSIGNED")
   assignedAt       DateTime  @default(now())
   completedAt      DateTime?
+  generationId     String    @default(uuid())
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 

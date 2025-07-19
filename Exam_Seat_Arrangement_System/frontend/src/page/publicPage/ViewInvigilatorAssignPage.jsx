@@ -8,15 +8,14 @@ import {
 
 const ViewInvigilatorAssignPage = () => {
   const navigate = useNavigate();
-
   const { data, error, isLoading, refetch } = useGetAllInvigilatorAssignmentsQuery();
   const [deleteAssign, { isLoading: isDeleting }] = useDeleteInvigilatorAssignMutation();
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this invigilator assignment?")) return;
+  const handleDelete = async (assignmentId) => {
+    if (!window.confirm("Are you sure you want to delete this room assignment (all invigilators)?")) return;
 
     try {
-      await deleteAssign(id).unwrap();
+      await deleteAssign(assignmentId).unwrap();
       toast.success("Invigilator assignment deleted successfully!");
       refetch();
     } catch (err) {
@@ -24,8 +23,8 @@ const ViewInvigilatorAssignPage = () => {
     }
   };
 
-  const handleUpdate = (id) => {
-    navigate(`/updateInvigilatorAssign/${id}`);
+  const handleUpdate = (assignmentId) => {
+    navigate(`/updateInvigilatorAssign/${assignmentId}`);
   };
 
   const handleView = (examId) => {
@@ -36,65 +35,85 @@ const ViewInvigilatorAssignPage = () => {
     }
   };
 
+  // Group assignments by roomAssignmentId
+  const groupedAssignments = data?.assignments?.reduce((acc, curr) => {
+    const roomAssignmentId = curr.roomAssignmentId;
+    if (!acc[roomAssignmentId]) {
+      acc[roomAssignmentId] = {
+        roomAssignmentId,
+        examId: curr.roomAssignment?.exam?.id,
+        subject: curr.roomAssignment?.exam?.subject?.subjectName,
+        room: curr.roomAssignment?.room?.roomNumber,
+        invigilators: [],
+      };
+    }
+    acc[roomAssignmentId].invigilators.push({
+      name: curr.invigilator?.user?.name || "N/A",
+      email: curr.invigilator?.user?.email || "N/A",
+      assignId: curr.id,
+    });
+    return acc;
+  }, {}) || {};
+
+  const groupedList = Object.values(groupedAssignments);
+
   return (
-    <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md w-[99%] max-w-screen-lg mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">
+    <div className="w-full px-4 py-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
         Invigilator Assignments
       </h2>
 
       {isLoading ? (
-        <p>Loading assignments...</p>
+        <p className="text-center">Loading assignments...</p>
       ) : error ? (
-        <p className="text-red-500">Failed to load assignments.</p>
+        <p className="text-center text-red-500">Failed to load assignments.</p>
       ) : (
-        <table className="w-full table-auto border-collapse border border-gray-200">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-4 py-2">S.N.</th>
-              <th className="border border-gray-300 px-4 py-2">Invigilator Name</th>
-              <th className="border border-gray-300 px-4 py-2">Email</th>
-              <th className="border border-gray-300 px-4 py-2">Subject Name</th>
-              <th className="border border-gray-300 px-4 py-2">Room Number</th>
-              <th className="border border-gray-300 px-4 py-2">Actions</th>
+        <table className="w-full table-auto border-collapse border border-gray-300">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border px-4 py-2">S.N.</th>
+              <th className="border px-4 py-2">Invigilator Names</th>
+              <th className="border px-4 py-2">Emails</th>
+              <th className="border px-4 py-2">Subject</th>
+              <th className="border px-4 py-2">Room</th>
+              <th className="border px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {data?.assignments?.length > 0 ? (
-              data.assignments.map((assign, index) => (
-                <tr key={assign.id}>
+            {groupedList.length > 0 ? (
+              groupedList.map((group, index) => (
+                <tr key={group.roomAssignmentId}>
                   <td className="border px-4 py-2 text-center">{index + 1}</td>
-                  <td className="border px-4 py-2 text-center">
-                    {assign.invigilator?.user?.name || "N/A"}
+                  <td className="border px-4 py-2 text-center whitespace-pre-line">
+                    {group.invigilators.map(i => i.name).join("\n")}
+                  </td>
+                  <td className="border px-4 py-2 text-center whitespace-pre-line">
+                    {group.invigilators.map(i => i.email).join("\n")}
                   </td>
                   <td className="border px-4 py-2 text-center">
-                    {assign.invigilator?.user?.email || "N/A"}
+                    {group.subject || "N/A"}
                   </td>
                   <td className="border px-4 py-2 text-center">
-                    {assign.roomAssignment?.exam?.subject?.subjectName || "N/A"}
-                  </td>
-                  <td className="border px-4 py-2 text-center">
-                    {assign.roomAssignment?.room?.roomNumber || "N/A"}
+                    {group.room || "N/A"}
                   </td>
                   <td className="border px-4 py-2 text-center space-x-2">
                     <button
                       className="text-blue-600 hover:underline"
-                      onClick={() => handleUpdate(assign.id)}
+                      onClick={() => handleUpdate(group.invigilators[0].assignId)}
                       disabled={isDeleting}
                     >
                       Update
                     </button>
                     <button
                       className="text-red-600 hover:underline"
-                      onClick={() => handleDelete(assign.id)}
+                      onClick={() => handleDelete(group.invigilators[0].assignId)}
                       disabled={isDeleting}
                     >
                       Delete
                     </button>
                     <button
                       className="text-green-600 hover:underline"
-                      onClick={() =>
-                        handleView(assign.roomAssignment?.exam?.id)
-                      }
+                      onClick={() => handleView(group.examId)}
                     >
                       View
                     </button>
@@ -103,7 +122,7 @@ const ViewInvigilatorAssignPage = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="border px-4 py-4 text-center text-gray-500">
+                <td colSpan="6" className="text-center text-gray-500 py-4">
                   No invigilator assignments found.
                 </td>
               </tr>
