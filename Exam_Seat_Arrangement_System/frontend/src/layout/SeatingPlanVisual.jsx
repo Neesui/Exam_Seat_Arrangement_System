@@ -22,14 +22,14 @@ const SeatingPlanVisual = ({ seatPlan }) => {
     groupedByRoom[roomNo][row][benchNo].push(seat);
   });
 
-  // Color helper matching bench capacity
+  // Return array of hex color codes for bench capacity
   const getColorsForCapacity = (capacity) => {
     const colors = {
-      2: ["bg-red-400", "bg-blue-400"],
-      3: ["bg-pink-300", "bg-purple-400", "bg-rose-400"],
-      4: ["bg-yellow-400", "bg-green-400", "bg-orange-400", "bg-indigo-400"],
+      2: ["#129990", "#000957"],
+      3: ["#129990", "#4A9782", "#000957"],
+      4: ["#129990", "#4A9782", "#687FE5", "#000957"],
     };
-    return colors[capacity] || ["bg-gray-400"];
+    return colors[capacity] || ["#CCCCCC"];
   };
 
   return (
@@ -44,8 +44,6 @@ const SeatingPlanVisual = ({ seatPlan }) => {
 
               return (
                 <div key={row} className="mb-10">
-                  <h3 className="text-lg font-semibold mb-4">Row: {row}</h3>
-
                   {/* Benches container */}
                   <div className="flex flex-wrap justify-center gap-8">
                     {benchNosSorted.map((benchNo) => {
@@ -71,24 +69,31 @@ const SeatingPlanVisual = ({ seatPlan }) => {
                         >
                           {/* Seats inside bench */}
                           <div className="flex">
-                            {fullBench.map((seat, idx) => (
-                              <div
-                                key={seat.id}
-                                className={`w-27 h-16 flex flex-col justify-center items-center text-black font-semibold text-xs ${
-                                  colors[idx % colors.length]
-                                }`}
-                                style={{ padding: 0, margin: 0, borderRadius: 0 }}
-                              >
-                                {seat.dummy ? (
-                                  <p className="text-center">DUMMY</p>
-                                ) : (
-                                  <>
-                                    <p className="text-center">{seat.student.college}</p>
-                                    <p className="text-center">{seat.student.symbolNumber}</p>
-                                  </>
-                                )}
-                              </div>
-                            ))}
+                            {fullBench.map((seat, idx) => {
+                              const bgColor = colors[idx % colors.length];
+
+                              return (
+                                <div
+                                  key={seat.id}
+                                  className="w-27 h-16 flex flex-col justify-center items-center text-white font-semibold text-xs"
+                                  style={{
+                                    padding: 0,
+                                    margin: 0,
+                                    borderRadius: 0,
+                                    backgroundColor: bgColor,
+                                  }}
+                                >
+                                  {seat.dummy ? (
+                                    <p className="text-center">DUMMY</p>
+                                  ) : (
+                                    <>
+                                      <p className="text-center">{seat.student.college}</p>
+                                      <p className="text-center">{seat.student.symbolNumber}</p>
+                                    </>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
 
                           <p className="text-gray-700 font-bold text-sm mt-2">Bench {benchNo}</p>

@@ -25,7 +25,7 @@ const ViewAllSeatingPlans = () => {
               key={plan.id}
               className="mb-10 border p-5 rounded-lg shadow-sm"
             >
-              <h3 className="text-lg font-semibold mb-2">
+              <h3 className="text-5lg font-semibold mb-2">
                 {idx + 1}. {plan.exam.subject.name} (
                 {plan.exam.subject.semester.course.name} -{" "}
                 {plan.exam.subject.semester.name})
