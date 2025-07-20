@@ -43,7 +43,7 @@ const SeatingPlanVisual = ({ seatPlan }) => {
               const benchNosSorted = Object.keys(benches).sort((a, b) => Number(a) - Number(b));
 
               return (
-                <div key={row} className="mb-10">
+                <div key={row} className="mb-3">
                   {/* Benches container */}
                   <div className="flex flex-wrap justify-center gap-8">
                     {benchNosSorted.map((benchNo) => {
