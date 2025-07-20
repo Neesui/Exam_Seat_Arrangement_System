@@ -123,10 +123,23 @@ export const getAllSeatingPlan = async (req, res) => {
         },
         seats: {
           include: {
-            student: true,
+            student: {
+              select: {
+                id: true,
+                college: true,
+                symbolNumber: true, // ✅ Ensure this is included
+              },
+            },
             bench: {
               include: {
-                room: true,
+                room: {
+                  select: {
+                    id: true,
+                    roomNumber: true,
+                    block: true,
+                    floor: true,
+                  },
+                },
               },
             },
           },
@@ -151,3 +164,4 @@ export const getAllSeatingPlan = async (req, res) => {
     });
   }
 };
+
