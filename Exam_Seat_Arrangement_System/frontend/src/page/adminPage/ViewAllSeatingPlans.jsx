@@ -13,6 +13,8 @@ const ViewAllSeatingPlans = () => {
         <p>Loading seating plans...</p>
       ) : error ? (
         <p className="text-red-600">Failed to load plans</p>
+      ) : data?.data?.length === 0 ? (
+        <p>No seating plans found.</p>
       ) : (
         data?.data?.map((plan, idx) => {
           const firstSeat = plan.seats[0];
@@ -23,21 +25,18 @@ const ViewAllSeatingPlans = () => {
               key={plan.id}
               className="mb-10 border p-5 rounded-lg shadow-sm"
             >
-              {/* Exam, Course, Semester */}
               <h3 className="text-lg font-semibold mb-2">
                 {idx + 1}. {plan.exam.subject.name} (
                 {plan.exam.subject.semester.course.name} -{" "}
                 {plan.exam.subject.semester.name})
               </h3>
 
-              {/* Room details */}
               <p className="text-sm text-gray-700 mb-4">
                 <strong>Room:</strong> {room?.roomNumber} | <strong>Block:</strong>{" "}
                 {room?.block} | <strong>Floor:</strong> {room?.floor}
               </p>
 
-              {/* Seating plan visualization */}
-              <SeatingPlanVisual seats={plan.seats} />
+              <SeatingPlanVisual seatPlan={plan.seats} />
             </div>
           );
         })

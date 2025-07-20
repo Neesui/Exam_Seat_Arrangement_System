@@ -1,76 +1,69 @@
 import React from "react";
-import { useGetBenchesQuery } from "../redux/api/benchApi";
 
-const SeatingPlanVisual = ({ seats }) => {
-  const { data: benchesData, isLoading, error } = useGetBenchesQuery();
+const SeatingPlanVisual = ({ seatPlan }) => {
+  if (!seatPlan || seatPlan.length === 0) {
+    return <p className="text-center text-gray-500 italic">No seating data available.</p>;
+  }
 
-  if (isLoading) return <p>Loading benches...</p>;
-  if (error) return <p className="text-red-600">Failed to load benches</p>;
+  const groupedByRoom = {};
 
-  // Map students by bench and position (e.g., LEFT, RIGHT, Center or position number)
-  const benchStudentMap = {};
-  seats.forEach(({ bench, position, student }) => {
-    if (!benchStudentMap[bench.id]) {
-      benchStudentMap[bench.id] = {};
-    }
-    benchStudentMap[bench.id][position] = student;
+  seatPlan.forEach((seat) => {
+    const roomNo = seat.bench?.room?.roomNumber;
+    const row = seat.bench?.row;
+    const benchNo = seat.bench?.benchNo;
+
+    if (!roomNo || row == null || benchNo == null) return;
+
+    if (!groupedByRoom[roomNo]) groupedByRoom[roomNo] = {};
+    if (!groupedByRoom[roomNo][row]) groupedByRoom[roomNo][row] = {};
+    if (!groupedByRoom[roomNo][row][benchNo]) groupedByRoom[roomNo][row][benchNo] = [];
+
+    groupedByRoom[roomNo][row][benchNo].push(seat);
   });
 
-  // Prepare benches array with students mapped
-  const benchesWithStudents = benchesData?.data?.map((bench) => ({
-    id: bench.id,
-    row: bench.row,
-    column: bench.column,
-    capacity: bench.capacity,
-    studentsByPosition: benchStudentMap[bench.id] || {},
-  })) || [];
-
-  // Assign colors per college for visual distinction
-  const collegeColors = {
-    "College A": "bg-red-600 text-white",
-    "College B": "bg-blue-500 text-white",
-    // add more if needed
-  };
-
   return (
-    <div className="flex flex-col gap-6 items-center">
-      {benchesWithStudents.map((bench, idx) => (
-        <div key={bench.id} className="flex flex-col items-center">
-          <div className="flex border rounded overflow-hidden">
-            {/* For each seat in bench capacity */}
-            {Array.from({ length: bench.capacity }).map((_, seatIdx) => {
-              // position keys in your data may vary, here assuming seat positions are numbered 1, 2, etc.
-              const position = seatIdx + 1;
-              const student = bench.studentsByPosition[position];
+    <div className="space-y-10">
+      {Object.keys(groupedByRoom).map((roomNo) => (
+        <div key={roomNo} className="border border-gray-300 p-4 rounded-lg shadow">
+          <h2 className="text-2xl font-bold text-center mb-6">Room: {roomNo}</h2>
 
-              if (!student) {
-                // Empty seat
-                return (
-                  <div
-                    key={seatIdx}
-                    className="w-40 h-24 flex flex-col justify-center items-center bg-gray-200 border-r last:border-r-0"
-                  >
-                    <span className="text-gray-500 font-semibold">Empty</span>
-                  </div>
-                );
-              }
+          {Object.keys(groupedByRoom[roomNo])
+            .sort((a, b) => Number(a) - Number(b))
+            .map((row) => (
+              <div key={row} className="mb-10">
+                <h3 className="text-lg font-semibold mb-4">Row: {row}</h3>
+                <div className="flex flex-wrap gap-8 justify-center">
+                  {Object.keys(groupedByRoom[roomNo][row])
+                    .sort((a, b) => Number(a) - Number(b))
+                    .map((benchNo) => {
+                      const seats = groupedByRoom[roomNo][row][benchNo];
 
-              const collegeName = student.college || "Unknown College";
-              const symbolNum = student.symbolNumber || student.symbolNum || "N/A";
-              const colorClass = collegeColors[collegeName] || "bg-gray-400 text-black";
-
-              return (
-                <div
-                  key={seatIdx}
-                  className={`w-40 h-24 flex flex-col justify-center items-center border-r last:border-r-0 px-2 ${colorClass}`}
-                >
-                  <div className="font-bold text-lg">{collegeName}</div>
-                  <div className="text-md mt-2">Symbol num {symbolNum}</div>
+                      return (
+                        <div key={benchNo} className="flex flex-col items-center">
+                          <div className="flex">
+                            {seats
+                              .sort((a, b) => a.position - b.position)
+                              .map((seat, idx) => (
+                                <div
+                                  key={seat.id}
+                                  className={`w-40 h-24 flex flex-col justify-center items-center text-white font-semibold text-sm px-2 py-1 ${
+                                    idx % 2 === 0 ? "bg-red-600" : "bg-blue-700"
+                                  }`}
+                                >
+                                  <p className="text-center">{seat.student.college}</p>
+                                  <p className="text-center">{seat.student.symbolNo}</p>
+                                </div>
+                              ))}
+                          </div>
+                          <p className="text-blue-800 font-bold text-lg mt-2">
+                            Bench {benchNo}
+                          </p>
+                        </div>
+                      );
+                    })}
                 </div>
-              );
-            })}
-          </div>
-          <div className="mt-2 font-semibold text-blue-600">bench {idx + 1}</div>
+              </div>
+            ))}
         </div>
       ))}
     </div>
