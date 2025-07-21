@@ -2,10 +2,11 @@ import React from "react";
 
 const SeatingPlanVisual = ({ seatPlan }) => {
   if (!seatPlan || seatPlan.length === 0) {
-    return <p className="text-center text-gray-500 italic">No seating data available.</p>;
+    return (
+      <p className="text-center text-gray-500 italic">No seating data available.</p>
+    );
   }
 
-  // Group seats by room -> row -> bench
   const groupedByRoom = {};
 
   seatPlan.forEach((seat) => {
@@ -22,7 +23,6 @@ const SeatingPlanVisual = ({ seatPlan }) => {
     groupedByRoom[roomNo][row][benchNo].push(seat);
   });
 
-  // Return array of hex color codes for bench capacity
   const getColorsForCapacity = (capacity) => {
     const colors = {
       2: ["#129990", "#000957"],
@@ -40,17 +40,17 @@ const SeatingPlanVisual = ({ seatPlan }) => {
             .sort((a, b) => Number(a) - Number(b))
             .map((row) => {
               const benches = groupedByRoom[roomNo][row];
-              const benchNosSorted = Object.keys(benches).sort((a, b) => Number(a) - Number(b));
+              const benchNosSorted = Object.keys(benches).sort(
+                (a, b) => Number(a) - Number(b)
+              );
 
               return (
                 <div key={row} className="mb-3">
-                  {/* Benches container */}
                   <div className="flex flex-wrap justify-center gap-8">
                     {benchNosSorted.map((benchNo) => {
                       const seats = benches[benchNo];
                       const benchCapacity = seats[0]?.bench?.capacity || 2;
 
-                      // Fill with dummy seats if not full
                       const fullBench = [...seats];
                       while (fullBench.length < benchCapacity) {
                         fullBench.push({
@@ -67,7 +67,6 @@ const SeatingPlanVisual = ({ seatPlan }) => {
                           className="flex flex-col items-center"
                           style={{ minWidth: benchCapacity * 64 }}
                         >
-                          {/* Seats inside bench */}
                           <div className="flex">
                             {fullBench.map((seat, idx) => {
                               const bgColor = colors[idx % colors.length];
@@ -75,28 +74,30 @@ const SeatingPlanVisual = ({ seatPlan }) => {
                               return (
                                 <div
                                   key={seat.id}
-                                  className="w-27 h-16 flex flex-col justify-center items-center text-white font-semibold text-xs"
+                                  className="w-28 h-16 flex flex-col justify-center items-center text-white font-semibold text-xs"
                                   style={{
                                     padding: 0,
                                     margin: 0,
-                                    borderRadius: 0,
                                     backgroundColor: bgColor,
+                                    color: "white",
+                                    boxShadow: "inset 0 0 0 1px #333",
                                   }}
                                 >
                                   {seat.dummy ? (
-                                    <p className="text-center">DUMMY</p>
+                                    <p>DUMMY</p>
                                   ) : (
                                     <>
-                                      <p className="text-center">{seat.student.college}</p>
-                                      <p className="text-center">{seat.student.symbolNumber}</p>
+                                      <p>{seat.student.college}</p>
+                                      <p>{seat.student.symbolNumber}</p>
                                     </>
                                   )}
                                 </div>
                               );
                             })}
                           </div>
-
-                          <p className="text-gray-700 font-bold text-sm mt-2">Bench {benchNo}</p>
+                          <p className="text-gray-700 font-bold text-sm mt-2">
+                            Bench {benchNo}
+                          </p>
                         </div>
                       );
                     })}
