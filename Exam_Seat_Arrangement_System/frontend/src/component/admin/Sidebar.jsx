@@ -114,17 +114,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           />
 
           <SidebarSection
-            icon={<FaTable className="mr-3" />}
-            label="Seat Plan"
-            isOpen={isSeatPlanOpen}
-            setIsOpen={setIsSeatPlanOpen}
-            links={[
-              { path: "/generateSeatingPlan", label: "Generate Seat Plan" },
-              { path: "/viewSeatingPlan", label: "View Seat Plan" },
-            ]}
-          />
-
-          <SidebarSection
             icon={<FaClipboardList className="mr-3" />}
             label="Room Assign"
             isOpen={isRoomAssignOpen}
@@ -143,6 +132,17 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             links={[
               { path: "/assignInvigilator", label: "Assign Invigilator" },
               { path: "/viewInvigilatorAssign", label: "View Invigilator Assignment" },
+            ]}
+          />
+
+          <SidebarSection
+            icon={<FaTable className="mr-3" />}
+            label="Seat Plan"
+            isOpen={isSeatPlanOpen}
+            setIsOpen={setIsSeatPlanOpen}
+            links={[
+              { path: "/generateSeatingPlan", label: "Generate Seat Plan" },
+              { path: "/viewSeatingPlan", label: "View Seat Plan" },
             ]}
           />
         </ul>
