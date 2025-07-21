@@ -8,18 +8,11 @@
 .font-mer{
   font-family: 'Merriweather', serif;
 }
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  #printable, #printable * {
-    visibility: visible;
-  }
-  #printable {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
+/* This resets colors during PDF export to avoid oklch errors */
+.pdf-export * {
+  color: #000 !important;
+  background-color: #fff !important;
+  border-color: #000 !important;
+  box-shadow: none !important;
 }
 
