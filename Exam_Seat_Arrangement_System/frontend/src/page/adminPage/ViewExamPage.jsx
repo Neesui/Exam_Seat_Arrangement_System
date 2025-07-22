@@ -34,66 +34,68 @@ const ViewExamPage = () => {
   };
 
   return (
-    <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md w-[99%] max-w-screen-lg mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">View Exams</h2>
+    <div className="min-h-screen w-full bg-gray-100 px-4 py-10">
+      <div className="w-full bg-white p-8 rounded-lg shadow-md overflow-x-auto">
+        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">View Exams</h2>
 
-      {isLoading ? (
-        <p>Loading exams...</p>
-      ) : error ? (
-        <p className="text-red-500">Failed to load exams.</p>
-      ) : (
-        <table className="w-full table-auto border-collapse border border-gray-200">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-4 py-2">S.N.</th>
-              <th className="border border-gray-300 px-4 py-2">Subject</th>
-              <th className="border border-gray-300 px-4 py-2">Date</th>
-              <th className="border border-gray-300 px-4 py-2">Start Time</th>
-              <th className="border border-gray-300 px-4 py-2">End Time</th>
-              <th className="border border-gray-300 px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.exams?.length > 0 ? (
-              data.exams.map((exam, index) => (
-                <tr key={exam.id}>
-                  <td className="border px-4 py-2">{index + 1}</td>
-                  <td className="border px-4 py-2">{exam.subject?.subjectName || "N/A"}</td>
-                  <td className="border px-4 py-2">{exam.date?.split("T")[0]}</td>
-                  <td className="border px-4 py-2">{formatTime(exam.startTime)}</td>
-                  <td className="border px-4 py-2">{formatTime(exam.endTime)}</td>
-                  <td className="border px-4 py-2">
-                    <button
-                      className="text-blue-500 hover:text-blue-700 mr-2"
-                      onClick={() => handleUpdate(exam.id)}
-                    >
-                      Update
-                    </button>
-                    <button
-                      className="text-red-500 hover:text-red-700 mr-2"
-                      onClick={() => handleDelete(exam.id)}
-                    >
-                      Delete
-                    </button>
-                    <button
-                      className="text-green-500 hover:text-green-700"
-                      onClick={() => handleView(exam.id)}
-                    >
-                      View
-                    </button>
+        {isLoading ? (
+          <p>Loading exams...</p>
+        ) : error ? (
+          <p className="text-red-500">Failed to load exams.</p>
+        ) : (
+          <table className="w-full table-auto border-collapse border border-gray-300 text-sm">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border border-gray-300 px-4 py-2">S.N.</th>
+                <th className="border border-gray-300 px-4 py-2">Subject</th>
+                <th className="border border-gray-300 px-4 py-2">Date</th>
+                <th className="border border-gray-300 px-4 py-2">Start Time</th>
+                <th className="border border-gray-300 px-4 py-2">End Time</th>
+                <th className="border border-gray-300 px-4 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.exams?.length > 0 ? (
+                data.exams.map((exam, index) => (
+                  <tr key={exam.id} className="text-center">
+                    <td className="border px-4 py-2">{index + 1}</td>
+                    <td className="border px-4 py-2">{exam.subject?.subjectName || "N/A"}</td>
+                    <td className="border px-4 py-2">{exam.date?.split("T")[0]}</td>
+                    <td className="border px-4 py-2">{formatTime(exam.startTime)}</td>
+                    <td className="border px-4 py-2">{formatTime(exam.endTime)}</td>
+                    <td className="border px-4 py-2">
+                      <button
+                        className="text-blue-600 hover:text-blue-800 mr-3"
+                        onClick={() => handleUpdate(exam.id)}
+                      >
+                        Update
+                      </button>
+                      <button
+                        className="text-red-600 hover:text-red-800 mr-3"
+                        onClick={() => handleDelete(exam.id)}
+                      >
+                        Delete
+                      </button>
+                      <button
+                        className="text-green-600 hover:text-green-800"
+                        onClick={() => handleView(exam.id)}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="border px-4 py-6 text-center text-gray-500">
+                    No exams available.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6" className="border px-4 py-2 text-center">
-                  No exams available.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      )}
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 };
