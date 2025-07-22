@@ -50,8 +50,8 @@ const AddBenchPage = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-gray-100 flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-2xl bg-white p-10 rounded-lg shadow-xl">
+    <div className="min-h-screen w-full bg-gray-100 flex flex-col justify-center px-4 py-10">
+      <div className="w-full bg-white p-10 rounded-lg shadow-xl">
         <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Add New Bench</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
