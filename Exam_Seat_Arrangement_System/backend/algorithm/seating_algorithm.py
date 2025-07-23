@@ -1,73 +1,134 @@
+# seating_algorithm_ga.py
 import sys
 import json
 import random
 from collections import defaultdict
+from copy import deepcopy
 
-try:
-    # Read JSON input
+# ---- CONFIG ----
+POPULATION_SIZE = 50
+GENERATIONS = 100
+MUTATION_RATE = 0.1
+
+# ---- UTILITIES ----
+def get_total_capacity(room):
+    return sum(bench['capacity'] for bench in room['benches'])
+
+def flatten_benches(rooms):
+    benches = []
+    for room in rooms:
+        for bench in room['benches']:
+            benches.append({
+                'benchId': bench['id'],
+                'capacity': bench['capacity'],
+                'roomId': room['roomId'],
+                'bench': bench
+            })
+    return benches
+
+# ---- CHROMOSOME OPS ----
+def create_individual(students, benches):
+    student_pool = deepcopy(students)
+    random.shuffle(student_pool)
+    individual = []
+    index = 0
+
+    for bench in benches:
+        for pos in range(1, bench['capacity'] + 1):
+            if index >= len(student_pool):
+                break
+            individual.append({
+                'studentId': student_pool[index]['id'],
+                'benchId': bench['benchId'],
+                'roomId': bench['roomId'],
+                'position': pos
+            })
+            index += 1
+
+    return individual
+
+def fitness(individual, student_colleges):
+    score = 0
+    bench_groups = defaultdict(list)
+
+    for seat in individual:
+        key = (seat['benchId'])
+        bench_groups[key].append(student_colleges[seat['studentId']])
+
+    for students in bench_groups.values():
+        unique_colleges = len(set(students))
+        score += unique_colleges * 10 - (len(students) - unique_colleges) * 5
+
+    score += len(individual)  # Prefer seating more students
+    return score
+
+def crossover(parent1, parent2):
+    split = len(parent1) // 2
+    child = parent1[:split] + parent2[split:]
+    seen = set()
+    result = []
+    for gene in child:
+        if gene['studentId'] not in seen:
+            result.append(gene)
+            seen.add(gene['studentId'])
+    return result
+
+def mutate(individual, benches, student_pool):
+    if random.random() > MUTATION_RATE:
+        return individual
+
+    mutant = deepcopy(individual)
+    i = random.randint(0, len(mutant) - 1)
+    available_students = list(set(s['id'] for s in student_pool) - set(g['studentId'] for g in mutant))
+    if not available_students:
+        return mutant
+
+    replacement = random.choice(available_students)
+    mutant[i]['studentId'] = replacement
+    return mutant
+
+# ---- MAIN ----
+def main():
     input_data = sys.stdin.read()
     data = json.loads(input_data)
 
-    students = data.get("students", [])
-    room_assignments = data.get("roomAssignments", [])
+    students = data['students']
+    room_assignments = data['roomAssignments']
+    student_colleges = {s['id']: s['college'] for s in students}
 
-    if not students or not room_assignments:
-        raise ValueError("Missing students or room assignments.")
+    all_rooms = [
+        {
+            'roomId': r['room']['id'],
+            'roomNumber': r['room']['roomNumber'],
+            'benches': sorted(r['room']['benches'], key=lambda b: (b['row'], b['column']))
+        }
+        for r in room_assignments
+    ]
 
-    # Group students by college
-    college_students = defaultdict(list)
-    for student in students:
-        college_students[student["college"]].append(student)
+    benches = flatten_benches(all_rooms)
 
-    # Shuffle within colleges
-    for col_students in college_students.values():
-        random.shuffle(col_students)
+    # --- GA START ---
+    population = [create_individual(students, benches) for _ in range(POPULATION_SIZE)]
 
-    # Interleave across colleges
-    interleaved_students = []
-    while any(college_students.values()):
-        for college in list(college_students.keys()):
-            if college_students[college]:
-                interleaved_students.append(college_students[college].pop(0))
+    for _ in range(GENERATIONS):
+        population.sort(key=lambda ind: fitness(ind, student_colleges), reverse=True)
+        next_gen = population[:5]  # elitism
 
-    # Prepare rooms sorted by capacity
-    all_rooms = []
-    for assignment in room_assignments:
-        room = assignment["room"]
-        benches = sorted(room["benches"], key=lambda b: (b["row"], b["column"]))
-        room_capacity = sum(bench["capacity"] for bench in benches)
-        all_rooms.append({
-            "roomId": room["id"],
-            "roomNumber": room["roomNumber"],
-            "benches": benches,
-            "capacity": room_capacity
-        })
+        while len(next_gen) < POPULATION_SIZE:
+            p1, p2 = random.choices(population[:25], k=2)
+            child = crossover(p1, p2)
+            child = mutate(child, benches, students)
+            next_gen.append(child)
 
-    all_rooms.sort(key=lambda x: x["capacity"], reverse=True)
+        population = next_gen
 
-    seat_assignments = []
-    student_index = 0
+    # Best solution
+    best = max(population, key=lambda ind: fitness(ind, student_colleges))
+    print(json.dumps(best))
 
-    for room in all_rooms:
-        for bench in room["benches"]:
-            for pos in range(1, bench["capacity"] + 1):
-                if student_index >= len(interleaved_students):
-                    break
-                student = interleaved_students[student_index]
-                seat_assignments.append({
-                    "studentId": student["id"],
-                    "benchId": bench["id"],
-                    "position": pos
-                })
-                student_index += 1
-            if student_index >= len(interleaved_students):
-                break
-        if student_index >= len(interleaved_students):
-            break
-
-    # Output valid JSON
-    print(json.dumps(seat_assignments))
-
-except Exception as e:
-    print(json.dumps({ "error": str(e) }))
-    sys.exit(1)
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        print(json.dumps({"error": str(e)}))
+        sys.exit(1)

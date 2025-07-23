@@ -31,6 +31,7 @@ import GenerateSeatingPlan from "../../page/adminPage/GenerateSeatingPlan";
 import ViewAllSeatingPlans from "../../page/adminPage/ViewAllSeatingPlans";
 import AssignedRoomPage from "../../page/adminPage/AssignedRoomPage";
 import AssignedInvigilatorPage from "../../page/adminPage/AssignedInvigilatorPage";
+import UpdateRoomAssignPage from "../../page/adminPage/UpdateRoomAssignPage";
 
 const adminRoutes = [
   {
@@ -129,6 +130,10 @@ const adminRoutes = [
   {
     path: "/viewRoomAssignDetails/:examId",
     element: <ViewRoomAssignDetailsPage />,
+  },
+  {
+    path: "/updateRoomAssign/:examId",
+    element: <UpdateRoomAssignPage />,
   },
   {
     path: "/assignInvigilator",
