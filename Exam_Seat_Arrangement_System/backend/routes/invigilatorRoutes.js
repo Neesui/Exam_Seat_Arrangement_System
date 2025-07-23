@@ -30,6 +30,6 @@ router.get("/meta-summary", authenticate, roleCheck(["INVIGILATOR"]), getInvigil
 
 // Shared by ADMIN & INVIGILATOR
 router.get("/assignments/all", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getAllInvigilatorAssignments);
-router.get("/assignments/:roomAssignmentId", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getInvigilatorAssignmentsByRoom);
+router.get("/room/:roomAssignmentId", authenticate, roleCheck("ADMIN"), getInvigilatorAssignmentsByRoom);
 
 export default router;

@@ -15,7 +15,7 @@ def has_conflict(existing, new_start, new_end):
         start = parse_time(e['start'])
         end = parse_time(e['end'])
 
-        # Check if time ranges overlap
+        # Check overlap
         if max(start, new_start) < min(end, new_end):
             return True
     return False
@@ -54,16 +54,24 @@ def fetch_invigilators(conn):
 
 def auto_assign_invigilators(room_assignments, invigilators, max_per_invigilator=2):
     assignments = []
+    invigilator_count = len(invigilators)
+    current_index = 0  # For round-robin selection
 
     for room in room_assignments:
-        start, end = room["start"], room["end"]
         assigned_count = 0
+        attempts = 0  # To prevent infinite loop
+        max_attempts = invigilator_count * 2  # Try looping twice through all invigilators
 
-        for inv in invigilators:
+        while assigned_count < 2 and attempts < max_attempts:
+            inv = invigilators[current_index % invigilator_count]
+            current_index += 1
+            attempts += 1
+
             if len(inv["assignments"]) >= max_per_invigilator:
                 continue
-            if not has_conflict(inv["assignments"], start, end):
-                inv["assignments"].append({"start": start, "end": end})
+
+            if not has_conflict(inv["assignments"], room["start"], room["end"]):
+                inv["assignments"].append({"start": room["start"], "end": room["end"]})
                 assignments.append({
                     "invigilatorId": inv["id"],
                     "roomAssignmentId": room["id"],
@@ -73,9 +81,7 @@ def auto_assign_invigilators(room_assignments, invigilators, max_per_invigilator
                 })
                 assigned_count += 1
 
-            if assigned_count >= 2:
-                break
-
+        # If less than 2 assigned, fill the rest as UNASSIGNED
         while assigned_count < 2:
             assignments.append({
                 "invigilatorId": None,
@@ -97,7 +103,7 @@ def main():
 
         result = auto_assign_invigilators(room_assignments, invigilators)
 
-        print(json.dumps(result, default=str))
+        print(json.dumps(result, default=str, indent=2))
     except Exception as e:
         print(json.dumps({"error": str(e)}))
     finally:

@@ -1,5 +1,6 @@
 import json
 from db_connection import get_db_connection
+from collections import defaultdict
 
 
 def fetch_exams(conn):
@@ -49,44 +50,43 @@ def fetch_existing_assignments(conn):
 
 
 def is_conflict(start1, end1, start2, end2):
-    if start1 is None or end1 is None or start2 is None or end2 is None:
-        return False
     return max(start1, start2) < min(end1, end2)
 
 
 def assign_rooms(exams, rooms, exam_students, existing_assignments):
-    # Initialize schedules with existing assignments
-    room_schedules = {room['id']: [] for room in rooms}
-    for assign in existing_assignments:
-        room_schedules[assign['roomId']].append({
-            "start": assign["start"],
-            "end": assign["end"]
-        })
+    # Step 1: Prepare schedule map per room
+    room_schedule = defaultdict(list)
+    for ea in existing_assignments:
+        room_schedule[ea['roomId']].append((ea['start'], ea['end']))
+
+    # Step 2: Sort exams by student count (descending) to use load-balancing efficiently
+    exams.sort(key=lambda x: exam_students.get(x['id'], 0), reverse=True)
 
     assignments = []
 
     for exam in exams:
-        students_needed = exam_students.get(exam['id'], 0)
-        assigned = False
+        exam_id = exam['id']
+        start, end = exam['start'], exam['end']
+        students = exam_students.get(exam_id, 0)
 
-        for room in rooms:
-            if room['capacity'] >= students_needed:
-                conflict = any(
-                    is_conflict(exam['start'], exam['end'], scheduled['start'], scheduled['end'])
-                    for scheduled in room_schedules[room['id']]
-                )
+        # Sort rooms by current load (ascending)
+        rooms_sorted = sorted(rooms, key=lambda r: sum(cap for s, e in room_schedule[r['id']] if is_conflict(start, end, s, e)))
 
-                if not conflict:
-                    room_schedules[room['id']].append({
-                        "start": exam["start"],
-                        "end": exam["end"]
-                    })
-                    assignments.append({"examId": exam['id'], "roomId": room['id']})
-                    assigned = True
+        for room in rooms_sorted:
+            capacity = room['capacity']
+            if capacity < students:
+                continue
+
+            conflict = False
+            for s, e in room_schedule[room['id']]:
+                if is_conflict(start, end, s, e):
+                    conflict = True
                     break
 
-        if not assigned:
-            print(f"⚠️ No available room for exam {exam['id']} at {exam['start']}")
+            if not conflict:
+                room_schedule[room['id']].append((start, end))
+                assignments.append({"examId": exam_id, "roomId": room['id']})
+                break
 
     return assignments
 

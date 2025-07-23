@@ -12,6 +12,18 @@ enum Role {
   INVIGILATOR
 }
 
+enum RoomAssignmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELED
+}
+
+enum InvigilatorStatus {
+  ASSIGNED
+  COMPLETED
+}
+
+
 model User {
   id          Int         @id @default(autoincrement())
   name        String
@@ -101,7 +113,7 @@ model Student {
 
   course       Course      @relation(fields: [courseId], references: [id])
   semester     Semester    @relation(fields: [semesterId], references: [id])
-  seats        Seat[]      // ✅ Fixed: one-to-many relation
+  seats        Seat[]     
 
   @@unique([symbolNumber, college])
   @@map("student")
@@ -178,8 +190,7 @@ model RoomAssignment {
   id                     Int                      @id @default(autoincrement())
   roomId                 Int
   examId                 Int
-  isActive               Boolean                  @default(true)
-  isCompleted            Boolean                  @default(false)
+  status     RoomAssignmentStatus @default(ACTIVE)
   completedAt            DateTime?
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt

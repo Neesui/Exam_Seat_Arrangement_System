@@ -8,31 +8,19 @@ export const runAndSaveRoomAssignments = (req, res) => {
 
   exec(`python "${scriptPath}"`, async (error, stdout, stderr) => {
     if (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Algorithm execution failed",
-        error: error.message,
-      });
+      return res.status(500).json({ success: false, message: "Algorithm execution failed", error: error.message });
     }
 
-    if (stderr) console.error("Python script stderr:", stderr);
+    if (stderr) console.error("Python stderr:", stderr);
 
     let assignments;
     try {
       assignments = JSON.parse(stdout);
       if (assignments.error) {
-        return res.status(500).json({
-          success: false,
-          message: "Algorithm error",
-          error: assignments.error,
-        });
+        return res.status(500).json({ success: false, message: "Algorithm error", error: assignments.error });
       }
     } catch (parseErr) {
-      return res.status(500).json({
-        success: false,
-        message: "Invalid output from Python",
-        error: parseErr.message,
-      });
+      return res.status(500).json({ success: false, message: "Invalid output from Python", error: parseErr.message });
     }
 
     try {
@@ -43,8 +31,7 @@ export const runAndSaveRoomAssignments = (req, res) => {
           data: {
             examId: Number(examId),
             roomId: Number(roomId),
-            isActive: true,
-            isCompleted: false,
+            status: "ACTIVE", // from RoomAssignmentStatus enum
           },
         })
       );
@@ -58,9 +45,7 @@ export const runAndSaveRoomAssignments = (req, res) => {
               subject: {
                 include: {
                   semester: {
-                    include: {
-                      course: true,
-                    },
+                    include: { course: true },
                   },
                 },
               },
@@ -68,9 +53,7 @@ export const runAndSaveRoomAssignments = (req, res) => {
           },
           invigilatorAssignments: {
             include: {
-              invigilator: {
-                include: { user: true },
-              },
+              invigilator: { include: { user: true } },
             },
           },
         },
@@ -84,8 +67,8 @@ export const runAndSaveRoomAssignments = (req, res) => {
           room: {
             ...assignment.room,
             totalBench: benches.length,
-            totalCapacity: benches.reduce((sum, bench) => sum + bench.capacity, 0),
-            benches: undefined, // exclude benches
+            totalCapacity: benches.reduce((sum, b) => sum + b.capacity, 0),
+            benches: undefined,
           },
         };
       });
@@ -96,16 +79,11 @@ export const runAndSaveRoomAssignments = (req, res) => {
         assignments: formatted,
       });
     } catch (dbErr) {
-      return res.status(500).json({
-        success: false,
-        message: "Database error",
-        error: dbErr.message,
-      });
+      return res.status(500).json({ success: false, message: "Database error", error: dbErr.message });
     }
   });
 };
 
-// Get all room assignments
 export const getAllRoomAssignments = async (req, res) => {
   try {
     const assignments = await prisma.roomAssignment.findMany({
@@ -115,20 +93,14 @@ export const getAllRoomAssignments = async (req, res) => {
           include: {
             subject: {
               include: {
-                semester: {
-                  include: {
-                    course: true,
-                  },
-                },
+                semester: { include: { course: true } },
               },
             },
           },
         },
         invigilatorAssignments: {
           include: {
-            invigilator: {
-              include: { user: true },
-            },
+            invigilator: { include: { user: true } },
           },
         },
       },
@@ -142,7 +114,7 @@ export const getAllRoomAssignments = async (req, res) => {
         room: {
           ...assignment.room,
           totalBench: benches.length,
-          totalCapacity: benches.reduce((sum, bench) => sum + bench.capacity, 0),
+          totalCapacity: benches.reduce((sum, b) => sum + b.capacity, 0),
           benches: undefined,
         },
       };
@@ -154,15 +126,10 @@ export const getAllRoomAssignments = async (req, res) => {
       assignments: formatted,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch room assignments",
-      error: err.message,
-    });
+    res.status(500).json({ success: false, message: "Failed to fetch room assignments", error: err.message });
   }
 };
 
-//Get room assignments by exam ID
 export const getRoomAssignmentsByExam = async (req, res) => {
   try {
     const examId = Number(req.params.examId);
@@ -175,18 +142,14 @@ export const getRoomAssignmentsByExam = async (req, res) => {
           include: {
             subject: {
               include: {
-                semester: {
-                  include: { course: true },
-                },
+                semester: { include: { course: true } },
               },
             },
           },
         },
         invigilatorAssignments: {
           include: {
-            invigilator: {
-              include: { user: true },
-            },
+            invigilator: { include: { user: true } },
           },
         },
       },
@@ -199,7 +162,7 @@ export const getRoomAssignmentsByExam = async (req, res) => {
         room: {
           ...assignment.room,
           totalBench: benches.length,
-          totalCapacity: benches.reduce((sum, bench) => sum + bench.capacity, 0),
+          totalCapacity: benches.reduce((sum, b) => sum + b.capacity, 0),
           benches: undefined,
         },
       };
@@ -211,19 +174,14 @@ export const getRoomAssignmentsByExam = async (req, res) => {
       assignments: formatted,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch room assignments",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: "Failed to fetch room assignments", error: error.message });
   }
 };
 
-// Update a room assignment
 export const updateRoomAssignment = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const { isActive, isCompleted, completedAt } = req.body;
+    const { status, completedAt } = req.body;
 
     if (isNaN(id)) {
       return res.status(400).json({ success: false, message: "Invalid assignment id" });
@@ -232,8 +190,7 @@ export const updateRoomAssignment = async (req, res) => {
     const assignment = await prisma.roomAssignment.update({
       where: { id },
       data: {
-        ...(isActive !== undefined && { isActive }),
-        ...(isCompleted !== undefined && { isCompleted }),
+        ...(status && { status }), // must be a valid RoomAssignmentStatus
         ...(completedAt !== undefined && {
           completedAt: completedAt ? new Date(completedAt) : null,
         }),
@@ -247,15 +204,10 @@ export const updateRoomAssignment = async (req, res) => {
       assignment,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to update room assignment",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: "Failed to update room assignment", error: error.message });
   }
 };
 
-// Delete a room assignment (cascades to InvigilatorAssignment)
 export const deleteRoomAssignment = async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -270,10 +222,6 @@ export const deleteRoomAssignment = async (req, res) => {
       message: "Room assignment deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete room assignment",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: "Failed to delete room assignment", error: error.message });
   }
 };

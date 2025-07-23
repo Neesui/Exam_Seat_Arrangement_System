@@ -2,8 +2,10 @@ import prisma from "../utils/db.js";
 import { exec } from "child_process";
 import path from "path";
 import fs from "fs";
-
 import { v4 as uuidv4 } from "uuid";
+
+// Enum values based on your Prisma schema
+const VALID_STATUSES = ["ASSIGNED", "COMPLETED", "ABSENT"];
 
 export const runAndSaveInvigilatorAssignments = (req, res) => {
   const scriptPath = path.resolve(process.cwd(), "algorithm", "invigilatorAssignment_algorithm.py");
@@ -34,18 +36,21 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
     }
 
     try {
-      // Generate new batch id for this run
-      const generationId = uuidv4();
+      const generationId = uuidv4(); // Unique batch ID
 
-      // Optional: you can mark old assignments as inactive or keep them
-
-      const validAssignments = assignments.filter(a => a.invigilatorId != null);
+      const validAssignments = assignments.filter((a) => {
+        return (
+          a.invigilatorId &&
+          a.roomAssignmentId &&
+          VALID_STATUSES.includes(a.status)
+        );
+      });
 
       await Promise.all(
         validAssignments.map((a) => {
-          let assignedAtDate = new Date(a.assignedAt);
+          let assignedAtDate = new Date(a.assignedAt || Date.now());
           if (isNaN(assignedAtDate.getTime())) {
-            assignedAtDate = new Date();
+            assignedAtDate = new Date(); // fallback
           }
 
           return prisma.invigilatorAssignment.create({
@@ -55,7 +60,7 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
               status: a.status,
               assignedAt: assignedAtDate,
               completedAt: null,
-              generationId,  // Save generation batch id here
+              generationId,
             },
           });
         })
@@ -69,15 +74,17 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
         totalSkipped: assignments.length - validAssignments.length,
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: "DB save failed", error: err.message });
+      res.status(500).json({
+        success: false,
+        message: "DB save failed",
+        error: err.message,
+      });
     }
   });
 };
 
-
 export const getAllInvigilatorAssignments = async (req, res) => {
   try {
-    // Find the latest generationId by max assignedAt
     const latest = await prisma.invigilatorAssignment.findFirst({
       orderBy: { assignedAt: "desc" },
       select: { generationId: true },
@@ -98,23 +105,26 @@ export const getAllInvigilatorAssignments = async (req, res) => {
               include: {
                 subject: {
                   include: {
-                    semester: { include: { course: true } }
-                  }
-                }
-              }
-            }
-          }
-        }
+                    semester: { include: { course: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
-      orderBy: { assignedAt: "asc" }
+      orderBy: { assignedAt: "asc" },
     });
+
     res.json({ success: true, assignments: data });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to fetch invigilator assignments", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch invigilator assignments",
+      error: error.message,
+    });
   }
 };
-
-
 
 export const getInvigilatorAssignmentsByRoom = async (req, res) => {
   const roomAssignmentId = Number(req.params.roomAssignmentId);
@@ -128,11 +138,29 @@ export const getInvigilatorAssignmentsByRoom = async (req, res) => {
       where: { roomAssignmentId },
       include: {
         invigilator: { include: { user: true } },
-        roomAssignment: true,
-      }
+        roomAssignment: {
+          include: {
+            room: true,
+            exam: {
+              include: {
+                subject: {
+                  include: {
+                    semester: { include: { course: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
+
     res.json({ success: true, assignments: data });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to fetch invigilator assignments for the room", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch invigilator assignments for the room",
+      error: error.message,
+    });
   }
 };
