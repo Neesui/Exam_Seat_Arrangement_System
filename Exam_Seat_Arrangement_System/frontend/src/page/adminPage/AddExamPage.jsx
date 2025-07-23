@@ -43,7 +43,7 @@ const AddExamPage = () => {
 
       if (result.success) {
         toast.success("Exam added successfully!");
-        navigate("/viewExam");
+        // navigate("/viewExam");
       } else {
         toast.error(result.message || "Failed to add exam");
       }

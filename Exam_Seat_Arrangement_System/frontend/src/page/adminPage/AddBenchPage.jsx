@@ -40,7 +40,7 @@ const AddBenchPage = () => {
 
       if (result.success) {
         toast.success("Bench added successfully!");
-        navigate(`/viewBenchByRoom/${roomId}`);
+        // navigate(`/viewBenchByRoom/${roomId}`);
       } else {
         toast.error(result.message || "Something went wrong");
       }
