@@ -32,7 +32,7 @@ model Invigilator {
   phone                  String
   address                String
   gender                 String
-  imageUrl               String?                  // Profile image for Invigilator
+  imageUrl               String?
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
 
@@ -47,7 +47,7 @@ model Invigilator {
 model Course {
   id        Int       @id @default(autoincrement())
   name      String    @unique
-  duration  Int       // total semesters, e.g., 8
+  duration  Int
   batchYear Int
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -61,7 +61,7 @@ model Course {
 
 model Semester {
   id          Int         @id @default(autoincrement())
-  semesterNum Int         // 1, 2, 3, ..., 8
+  semesterNum Int
   courseId    Int
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -95,13 +95,13 @@ model Student {
   college      String
   courseId     Int
   semesterId   Int
-  imageUrl     String?     // Profile image for Student
+  imageUrl     String?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
   course       Course      @relation(fields: [courseId], references: [id])
   semester     Semester    @relation(fields: [semesterId], references: [id])
-  seat         Seat?
+  seats        Seat[]      // ✅ Fixed: one-to-many relation
 
   @@unique([symbolNumber, college])
   @@map("student")
@@ -160,8 +160,8 @@ model Bench {
 model Seat {
   id             Int          @id @default(autoincrement())
   benchId        Int
-  position       Int          // 1=Left, 2=Right, 3=Middle etc.
-  studentId      Int          @unique      // <---- Added unique here
+  position       Int
+  studentId      Int
   seatingPlanId  Int
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -170,6 +170,7 @@ model Seat {
   student        Student      @relation(fields: [studentId], references: [id])
   seatingPlan    SeatingPlan  @relation(fields: [seatingPlanId], references: [id])
 
+  @@unique([studentId, seatingPlanId])
   @@map("seat")
 }
 
