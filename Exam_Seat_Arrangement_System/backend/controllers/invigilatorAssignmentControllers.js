@@ -4,9 +4,12 @@ import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 
-// Enum values based on your Prisma schema
-const VALID_STATUSES = ["ASSIGNED", "COMPLETED", "ABSENT"];
+// Only valid enum values based on your Prisma schema
+const VALID_STATUSES = ["ASSIGNED", "COMPLETED"];
 
+/**
+ * Run the Python scheduling algorithm and save the results in the database
+ */
 export const runAndSaveInvigilatorAssignments = (req, res) => {
   const scriptPath = path.resolve(process.cwd(), "algorithm", "invigilatorAssignment_algorithm.py");
 
@@ -16,10 +19,12 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
 
   exec(`python "${scriptPath}"`, async (error, stdout, stderr) => {
     if (error) {
-      return res.status(500).json({ success: false, message: "Algorithm execution failed", error: error.message });
+      return res.status(500).json({
+        success: false,
+        message: "Algorithm execution failed",
+        error: error.message,
+      });
     }
-
-    if (stderr) console.error("Python stderr:", stderr);
 
     if (!stdout) {
       return res.status(500).json({ success: false, message: "No output from Python script" });
@@ -29,22 +34,29 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
     try {
       assignments = JSON.parse(stdout);
       if (assignments.error) {
-        return res.status(500).json({ success: false, message: "Python error", error: assignments.error });
+        return res.status(500).json({
+          success: false,
+          message: "Python error",
+          error: assignments.error,
+        });
       }
-    } catch (parseErr) {
-      return res.status(500).json({ success: false, message: "Invalid Python output", error: parseErr.message });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Invalid Python output",
+        error: err.message,
+      });
     }
 
     try {
-      const generationId = uuidv4(); // Unique batch ID
+      const generationId = uuidv4(); // unique batch for tracking
 
-      const validAssignments = assignments.filter((a) => {
-        return (
+      const validAssignments = assignments.filter(
+        (a) =>
           a.invigilatorId &&
           a.roomAssignmentId &&
           VALID_STATUSES.includes(a.status)
-        );
-      });
+      );
 
       await Promise.all(
         validAssignments.map((a) => {
@@ -68,7 +80,7 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
 
       res.json({
         success: true,
-        message: "Invigilator assignments generated and saved",
+        message: "Invigilator assignments generated and saved successfully",
         generationId,
         totalAssigned: validAssignments.length,
         totalSkipped: assignments.length - validAssignments.length,
@@ -83,6 +95,9 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
   });
 };
 
+/**
+ * Fetch all latest invigilator assignments (based on most recent generationId)
+ */
 export const getAllInvigilatorAssignments = async (req, res) => {
   try {
     const latest = await prisma.invigilatorAssignment.findFirst({
@@ -126,11 +141,16 @@ export const getAllInvigilatorAssignments = async (req, res) => {
   }
 };
 
+/**
+ * Fetch invigilator assignments by specific RoomAssignment ID
+ */
 export const getInvigilatorAssignmentsByRoom = async (req, res) => {
   const roomAssignmentId = Number(req.params.roomAssignmentId);
 
   if (isNaN(roomAssignmentId)) {
-    return res.status(400).json({ success: false, message: "Invalid roomAssignmentId parameter" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid roomAssignmentId parameter" });
   }
 
   try {

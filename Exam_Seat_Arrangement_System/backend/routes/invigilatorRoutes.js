@@ -5,6 +5,7 @@ import {
   getProfile,
   updateProfile,
   getInvigilatorExamMetaSummary,
+  getInvigilatorById,
 } from "../controllers/invigilatorController.js";
 
 import {
@@ -15,12 +16,14 @@ import {
 
 import { authenticate } from "../middlewares/authenticate.js";
 import { roleCheck } from "../middlewares/authorize.js";
+import upload from "../middlewares/uploadFiles.js";
 
 const router = express.Router();
 
 //  Admin routes
-router.post("/add", authenticate, roleCheck(["ADMIN"]), addInvigilatorController);
+router.post("/add",authenticate,roleCheck(["ADMIN"]), upload.single("image"), addInvigilatorController);
 router.get("/all", authenticate, roleCheck(["ADMIN"]), getAllInvigilator);
+router.get("/:id", authenticate, roleCheck(["ADMIN"]), getInvigilatorById);
 router.post("/generate", authenticate, roleCheck(["ADMIN"]), runAndSaveInvigilatorAssignments);
 
 // Invigilator-only routes

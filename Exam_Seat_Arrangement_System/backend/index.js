@@ -1,7 +1,13 @@
 import express from 'express';
-import prisma from './utils/db.js'; 
+import path from "path";
+import { fileURLToPath } from "url";
+import prisma from './utils/db.js';
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
+// For __dirname in ES Module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Routes
 import authRouter from './routes/authRoutes.js';
@@ -17,21 +23,20 @@ import studentRouter from "./routes/studentRoutes.js";
 import roomAssignmentRouter from "./routes/roomAssignmentRoutes.js";
 import seatingRouter from "./routes/seatRoutes.js";
 
-
-
 const app = express();
 const port = 3000;
 
-// CORS Middleware BEFORE your routes
+// CORS Middleware
 app.use(cors({
-  origin: "http://localhost:5173",  
+  origin: "http://localhost:5173",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  credentials: true, 
+  credentials: true,
 }));
 
-//Other Middlewares
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // ✅ fixed
 
 // Routes
 app.use("/api/auth", authRouter);
@@ -47,8 +52,6 @@ app.use("/api/exam", examRouter);
 app.use("/api/room-assignments", roomAssignmentRouter);
 app.use("/api/seating", seatingRouter);
 
-
-
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({
@@ -57,7 +60,7 @@ app.use((req, res) => {
   });
 });
 
-// Start Server and Connect DB
+// Start Server
 app.listen(port, async () => {
   console.log(`Server is running on port ${port}`);
   try {

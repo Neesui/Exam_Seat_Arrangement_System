@@ -5,7 +5,7 @@ import AddSubjectPage from "../../page/adminPage/AddSubjectPage";
 import AdminDashboard from "../../page/adminPage/AdminDashboard";
 import StudentPage from "../../page/adminPage/StudentPage";
 import UpdateCoursePage from "../../page/adminPage/UpdateCoursePage";
-import UpdateInvigilatorPage from "../../page/invigilatorPage/UpdateInvigilatorPage";
+import UpdateInvigilatorPage from "../../page/adminPage/UpdateInvigilatorPage";
 import UpdateSubjectPage from "../../page/adminPage/UpdateSubjectPage";
 import ViewCoursePage from "../../page/adminPage/ViewFullCoursePage";
 import ViewInvigilatorPage from "../../page/adminPage/ViewInvigilatorPage";
@@ -32,6 +32,7 @@ import ViewAllSeatingPlans from "../../page/adminPage/ViewAllSeatingPlans";
 import AssignedRoomPage from "../../page/adminPage/AssignedRoomPage";
 import AssignedInvigilatorPage from "../../page/adminPage/AssignedInvigilatorPage";
 import UpdateRoomAssignPage from "../../page/adminPage/UpdateRoomAssignPage";
+import ViewInvigilatorDetailsPage from "../../page/adminPage/ViewInvigilatorDetailsPage";
 
 const adminRoutes = [
   {
@@ -45,6 +46,10 @@ const adminRoutes = [
   {
     path: "/viewInvigilator",
     element: <ViewInvigilatorPage />,
+  },
+  {
+    path: "/viewInvigilatorDetails/:id",
+    element: <ViewInvigilatorDetailsPage />,
   },
   {
     path: "/updateInvigilator/:id",

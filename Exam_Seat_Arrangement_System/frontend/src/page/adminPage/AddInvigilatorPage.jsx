@@ -14,6 +14,7 @@ const AddInvigilatorPage = () => {
     phone: '',
     address: '',
     gender: '',
+    image: null,
   });
 
   const navigate = useNavigate();
@@ -23,10 +24,23 @@ const AddInvigilatorPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const uploadFileHandler = (e) => {
+    const file = e.target.files[0];
+    setFormData({ ...formData, image: file });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const form = new FormData();
+    for (let key in formData) {
+      if (formData[key]) {
+        form.append(key, formData[key]);
+      }
+    }
+
     try {
-      await addInvigilator(formData).unwrap();
+      await addInvigilator(form).unwrap();
       toast.success('Invigilator added successfully!');
       setFormData({
         name: '',
@@ -36,12 +50,13 @@ const AddInvigilatorPage = () => {
         phone: '',
         address: '',
         gender: '',
+        image: null,
       });
       setTimeout(() => {
         navigate('/viewInvigilator');
       }, 1000);
     } catch (err) {
-      toast.error(err.data?.message || 'Failed to add invigilator.');
+      toast.error(err?.data?.message || 'Failed to add invigilator.');
     }
   };
 
@@ -121,6 +136,17 @@ const AddInvigilatorPage = () => {
             { value: 'Other', label: 'Other' },
           ]}
         />
+
+        {/* Image Upload */}
+        <div>
+          <label className="block text-gray-600 mb-1">Image:</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={uploadFileHandler}
+            className="w-full text-gray-600 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
         <div className="sm:col-span-2">
           <button

@@ -11,6 +11,21 @@ const ViewRoomAssignPage = () => {
   const { data, error, isLoading, refetch } = useGetAllRoomAssignmentsQuery();
   const [deleteRoomAssign, { isLoading: isDeleting }] = useDeleteRoomAssignMutation();
 
+  const assignments = data?.assignments || [];
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "ACTIVE":
+        return <span className="bg-green-100 text-green-700 px-2 py-1 text-xs rounded font-semibold">Active</span>;
+      case "COMPLETED":
+        return <span className="bg-blue-100 text-blue-700 px-2 py-1 text-xs rounded font-semibold">Completed</span>;
+      case "CANCELED":
+        return <span className="bg-red-100 text-red-700 px-2 py-1 text-xs rounded font-semibold">Canceled</span>;
+      default:
+        return <span className="bg-gray-100 text-gray-700 px-2 py-1 text-xs rounded font-semibold">Unknown</span>;
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this room assignment?")) return;
 
@@ -47,37 +62,19 @@ const ViewRoomAssignPage = () => {
               <th className="border border-gray-300 px-4 py-2">Room Number</th>
               <th className="border border-gray-300 px-4 py-2">Block</th>
               <th className="border border-gray-300 px-4 py-2">Floor</th>
-              <th className="border border-gray-300 px-4 py-2">Is Active</th>
-              <th className="border border-gray-300 px-4 py-2">Is Completed</th>
+              <th className="border border-gray-300 px-4 py-2">Status</th>
               <th className="border border-gray-300 px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {data?.assignments?.length > 0 ? (
-              data.assignments.map((assign, index) => (
+            {assignments.length > 0 ? (
+              assignments.map((assign, index) => (
                 <tr key={assign.id}>
                   <td className="border px-4 py-2 text-center">{index + 1}</td>
                   <td className="border px-4 py-2 text-center">{assign.room?.roomNumber || "N/A"}</td>
                   <td className="border px-4 py-2 text-center">{assign.room?.block || "-"}</td>
                   <td className="border px-4 py-2 text-center">{assign.room?.floor || "-"}</td>
-                  <td className="border px-4 py-2 text-center">
-                    <span
-                      className={`px-2 py-1 text-xs rounded font-semibold ${
-                        assign.isActive ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"
-                      }`}
-                    >
-                      {assign.isActive ? "Yes" : "No"}
-                    </span>
-                  </td>
-                  <td className="border px-4 py-2 text-center">
-                    <span
-                      className={`px-2 py-1 text-xs rounded font-semibold ${
-                        assign.isCompleted ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {assign.isCompleted ? "Yes" : "No"}
-                    </span>
-                  </td>
+                  <td className="border px-4 py-2 text-center">{getStatusBadge(assign.status)}</td>
                   <td className="border px-4 py-2 text-center space-x-2">
                     <button
                       className="text-blue-600 hover:underline"
@@ -104,7 +101,7 @@ const ViewRoomAssignPage = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="border px-4 py-4 text-center text-gray-500">
+                <td colSpan="6" className="border px-4 py-4 text-center text-gray-500">
                   No room assignments available.
                 </td>
               </tr>

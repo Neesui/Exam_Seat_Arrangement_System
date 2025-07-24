@@ -20,8 +20,12 @@ const ViewInvigilatorPage = () => {
     }
   };
 
-  const handleUpdate = (invigilatorId) => {
+  const handleEdit = (invigilatorId) => {
     navigate(`/updateInvigilator/${invigilatorId}`);
+  };
+
+  const handleView = (invigilatorId) => {
+    navigate(`/viewInvigilatorDetails/${invigilatorId}`);
   };
 
   return (
@@ -49,7 +53,7 @@ const ViewInvigilatorPage = () => {
           <tbody>
             {data?.invigilators?.length > 0 ? (
               data.invigilators.map((invigilator, index) => (
-                <tr key={invigilator._id || index}>
+                <tr key={invigilator.id || index}>
                   <td className="border px-4 py-2">{index + 1}</td>
                   <td className="border px-4 py-2">{invigilator.name}</td>
                   <td className="border px-4 py-2">{invigilator.email}</td>
@@ -57,16 +61,22 @@ const ViewInvigilatorPage = () => {
                   <td className="border px-4 py-2">{invigilator.course}</td>
                   <td className="border px-4 py-2">{invigilator.gender}</td>
                   <td className="border px-4 py-2">{invigilator.address}</td>
-                  <td className="border px-4 py-2">
+                  <td className="border px-4 py-2 space-x-2">
                     <button
-                      className="text-blue-500 hover:text-blue-700 mr-2"
-                      onClick={() => handleUpdate(invigilator._id)}
+                      className="text-green-500 hover:text-green-700"
+                      onClick={() => handleView(invigilator.id)}
                     >
-                      Update
+                      View
+                    </button>
+                    <button
+                      className="text-blue-500 hover:text-blue-700"
+                      onClick={() => handleEdit(invigilator.id)}
+                    >
+                      Edit
                     </button>
                     <button
                       className="text-red-500 hover:text-red-700"
-                      onClick={() => handleDelete(invigilator._id)}
+                      onClick={() => handleDelete(invigilator.id)}
                     >
                       Delete
                     </button>

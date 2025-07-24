@@ -1,119 +1,105 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
+  useGetAllRoomAssignmentsQuery,
   useUpdateRoomAssignMutation,
-  useGetRoomAssignByExamQuery,
-} from "../../redux/api/roomAssignApi";
+} from "../../redux/api/roomAssignApi"; 
+import Input from "../../component/public/Input";
 
 const UpdateRoomAssignPage = () => {
-  const { examId } = useParams();
+  const { id } = useParams(); // assignment ID
   const navigate = useNavigate();
 
-  const {
-    data: roomAssignData,
-    isLoading: isLoadingRoomAssign,
-    error: roomAssignError,
-  } = useGetRoomAssignByExamQuery(Number(examId));
-
+  const { data, isLoading, error } = useGetAllRoomAssignmentsQuery();
   const [updateRoomAssign, { isLoading: isUpdating }] = useUpdateRoomAssignMutation();
 
-  const [formValues, setFormValues] = useState([]);
+  const [status, setStatus] = useState("");
+  const [completedAt, setCompletedAt] = useState("");
 
   useEffect(() => {
-    if (roomAssignData?.assignments) {
-      const prepared = roomAssignData.assignments.map((assign) => ({
-        id: assign.id,
-        isActive: assign.isActive,
-        isCompleted: assign.isCompleted,
-      }));
-      setFormValues(prepared);
+    if (data?.assignments) {
+      const assignment = data.assignments.find((a) => String(a.id) === String(id));
+      if (assignment) {
+        setStatus(assignment.status || "");
+        setCompletedAt(
+          assignment.completedAt ? new Date(assignment.completedAt).toISOString().split("T")[0] : ""
+        );
+      }
     }
-  }, [roomAssignData]);
-
-  const handleChange = (index, field, value) => {
-    const updated = [...formValues];
-    updated[index][field] = value === "true" || value === true;
-    setFormValues(updated);
-  };
+  }, [data, id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      await Promise.all(
-        formValues.map((assign) =>
-          updateRoomAssign({
-            id: assign.id,
-            isActive: assign.isActive,
-            isCompleted: assign.isCompleted,
-          }).unwrap()
-        )
-      );
+      const result = await updateRoomAssign({
+        id: Number(id),
+        status,
+        completedAt: completedAt ? new Date(completedAt).toISOString() : null,
+      }).unwrap();
 
-      toast.success("Room assignment(s) updated successfully!");
-      navigate("/viewRoomAssign");
-    } catch (error) {
-      console.error("Update Error:", error);
-      toast.error(error?.data?.message || "Failed to update room assignment(s).");
+      if (result.success) {
+        toast.success("Room assignment updated successfully!");
+        navigate("/viewRoomAssign");
+      } else {
+        toast.error(result.message || "Something went wrong");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.data?.message || "Failed to update room assignment");
     }
   };
 
-  if (isLoadingRoomAssign) return <p className="text-center mt-10">Loading room assignment data...</p>;
-  if (roomAssignError) return <p className="text-center mt-10 text-red-500">Failed to load room assignment data.</p>;
+  if (isLoading) return <p className="text-center mt-10">Loading assignment...</p>;
+  if (error) return <p className="text-red-500 text-center mt-10">Failed to load data.</p>;
 
   return (
-    <div className="max-w-3xl mx-auto mt-20 p-6 bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-6 text-center">Update Room Assignments</h2>
+    <div className="h-screen w-full bg-gray-100 flex items-center justify-center px-4">
+      <div className="w-full max-w-xl bg-white p-10 rounded-lg shadow-xl">
+        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Update Room Assignment</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {formValues.map((assign, index) => (
-          <div
-            key={assign.id}
-            className="p-4 border rounded bg-gray-50 space-y-4"
-          >
-            <h3 className="font-semibold">
-              Room Assignment #{index + 1}
-            </h3>
-
-            <div className="flex justify-between gap-4">
-              <div className="w-full">
-                <label className="block font-medium mb-1">Is Active</label>
-                <select
-                  value={assign.isActive}
-                  onChange={(e) => handleChange(index, "isActive", e.target.value)}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value={true}>Yes</option>
-                  <option value={false}>No</option>
-                </select>
-              </div>
-
-              <div className="w-full">
-                <label className="block font-medium mb-1">Is Completed</label>
-                <select
-                  value={assign.isCompleted}
-                  onChange={(e) => handleChange(index, "isCompleted", e.target.value)}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value={true}>Yes</option>
-                  <option value={false}>No</option>
-                </select>
-              </div>
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-semibold mb-1">Status</label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="">Select Status</option>
+              <option value="ACTIVE">Active</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="CANCELED">Canceled</option>
+            </select>
           </div>
-        ))}
 
-        <button
-          type="submit"
-          disabled={isUpdating}
-          className={`w-full bg-blue-600 text-white p-3 rounded font-semibold hover:bg-blue-700 transition ${
-            isUpdating ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          {isUpdating ? "Updating..." : "Update Room Assignments"}
-        </button>
-      </form>
+          {/* Completed At using Input.jsx */}
+          <Input
+            id="completedAt"
+            label="Completed Date"
+            type="date"
+            name="completedAt"
+            value={completedAt}
+            onChange={(e) => setCompletedAt(e.target.value)}
+            required={status === "COMPLETED"}
+            disabled={status !== "COMPLETED"}
+          />
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className={`w-full p-3 rounded text-white font-semibold transition ${
+              isUpdating ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            }`}
+            disabled={isUpdating}
+          >
+            {isUpdating ? "Updating..." : "Update Assignment"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

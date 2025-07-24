@@ -191,6 +191,7 @@ model RoomAssignment {
   roomId                 Int
   examId                 Int
   status     RoomAssignmentStatus @default(ACTIVE)
+  assignedAt       DateTime  @default(now())
   completedAt            DateTime?
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt

@@ -25,13 +25,15 @@ export const invigilatorApi = apiSlice.injectEndpoints({
     }),
 
     updateInvigilator: builder.mutation({
-      query: ({ id, ...data }) => ({
+      query: ({ id, formData }) => ({
         url: `/api/invigilator/${id}`,
         method: "PUT",
-        body: data,
+        body: formData,
+        formData: true,
       }),
       invalidatesTags: ["INVIGILATOR"],
     }),
+    
 
     deleteInvigilator: builder.mutation({
       query: (id) => ({

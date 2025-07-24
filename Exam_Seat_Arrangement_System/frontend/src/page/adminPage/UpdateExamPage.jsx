@@ -1,152 +1,154 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { useGetExamByIdQuery, useUpdateExamMutation } from "../../redux/api/examApi";
-import { useGetSubjectsQuery } from "../../redux/api/subjectApi";
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import {
+  useGetInvigilatorByIdQuery,
+  useUpdateInvigilatorMutation,
+} from '../../redux/api/invigilatorApi';
 
-const UpdateExamPage = () => {
-  const { examId } = useParams();
+const UpdateInvigilatorPage = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  const { data: examData, isLoading: isExamLoading, error: examError } = useGetExamByIdQuery(Number(examId));
-  const {
-    data: subjectData,
-    isLoading: isSubjectsLoading,
-    error: subjectError,
-  } = useGetSubjectsQuery();
+  const { data: invigilatorData, error, isLoading } = useGetInvigilatorByIdQuery(id);
+  const [updateInvigilator, { isLoading: isUpdating }] = useUpdateInvigilatorMutation();
 
-  const [updateExam, { isLoading: isUpdating }] = useUpdateExamMutation();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    course: '',
+    phone: '',
+    address: '',
+    gender: '',
+  });
 
-  const [subjectId, setSubjectId] = useState("");
-  const [date, setDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  const [image, setImage] = useState(null);         // new image
+  const [preview, setPreview] = useState(null);     // for image preview
 
   useEffect(() => {
-    if (examData?.exam) {
-      const { subjectId, date, startTime, endTime } = examData.exam;
-      setSubjectId(subjectId.toString());
-      setDate(date?.split("T")[0] || "");
+    if (invigilatorData) {
+      setFormData({
+        name: invigilatorData.name || '',
+        email: invigilatorData.email || '',
+        password: '',
+        course: invigilatorData.course || '',
+        phone: invigilatorData.phone || '',
+        address: invigilatorData.address || '',
+        gender: invigilatorData.gender || '',
+      });
 
-      // Convert to HH:MM format
-      const toTimeOnly = (dateTimeStr) => {
-        if (!dateTimeStr) return "";
-        const d = new Date(dateTimeStr);
-        return d.toISOString().substr(11, 5); 
-      };
-
-      setStartTime(toTimeOnly(startTime));
-      setEndTime(toTimeOnly(endTime));
+      // If backend returns image URL
+      if (invigilatorData.image) {
+        setPreview(`http://localhost:3000/uploads/${invigilatorData.image}`);
+      }
     }
-  }, [examData]);
+  }, [invigilatorData]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImage(file);
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreview(reader.result);
+      reader.readAsDataURL(file);
+    } else {
+      setPreview(null);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!subjectId || !date) {
-      toast.error("Subject and Date are required.");
-      return;
-    }
-
-    const toDateTime = (timeStr) => {
-      return timeStr ? new Date(`${date}T${timeStr}:00`).toISOString() : null;
-    };
-
     try {
-      await updateExam({
-        id: Number(examId),
-        subjectId: Number(subjectId),
-        date: new Date(date).toISOString(),
-        startTime: toDateTime(startTime),
-        endTime: toDateTime(endTime),
-      }).unwrap();
+      const fd = new FormData();
+      for (const key in formData) {
+        fd.append(key, formData[key]);
+      }
+      if (image) fd.append('image', image);
 
-      toast.success("Exam updated successfully!");
-      navigate("/viewExam");
-    } catch (error) {
-      console.error("Update Exam Error:", error);
-      toast.error(error?.data?.message || "Failed to update exam.");
+      await updateInvigilator({ id, formData: fd }).unwrap();
+      toast.success('Invigilator updated successfully!');
+      navigate('/viewInvigilator');
+    } catch (err) {
+      toast.error(err?.data?.message || 'Failed to update invigilator.');
     }
   };
 
-  if (isExamLoading) return <p className="text-center mt-10">Loading exam data...</p>;
-  if (examError) return <p className="text-center mt-10 text-red-500">Failed to load exam data.</p>;
+  if (isLoading) return <p className="text-center mt-10">Loading...</p>;
+  if (error) return <p className="text-center mt-10 text-red-500">Failed to load invigilator.</p>;
 
   return (
     <div className="max-w-xl mx-auto mt-20 p-6 bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-6 text-center">Update Exam</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">Update Invigilator</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Subject Select */}
-        <div>
-          <label className="block mb-1 font-semibold">Subject</label>
-          {isSubjectsLoading ? (
-            <p>Loading subjects...</p>
-          ) : subjectError ? (
-            <p className="text-red-500">Failed to load subjects</p>
-          ) : (
-            <select
-              value={subjectId}
-              onChange={(e) => setSubjectId(e.target.value)}
+      <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-5">
+        {["name", "email", "password", "course", "phone", "address"].map((field) => (
+          <div key={field}>
+            <label className="block mb-1 font-semibold capitalize">{field}</label>
+            <input
+              type={field === "password" ? "password" : "text"}
+              name={field}
+              value={formData[field]}
+              onChange={handleChange}
+              placeholder={`Enter ${field}`}
               className="w-full border p-2 rounded"
-              required
-            >
-              <option value="">Select Subject</option>
-              {subjectData?.data?.map((subject) => (
-                <option key={subject.id} value={subject.id}>
-                  {subject.subjectName} ({subject.code})
-                </option>
-              ))}
-            </select>
+            />
+          </div>
+        ))}
+
+        {/* Gender Select */}
+        <div>
+          <label className="block mb-1 font-semibold">Gender</label>
+          <select
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          >
+            <option value="">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        {/* Image Upload */}
+        <div>
+          <label className="block mb-1 font-semibold">Profile Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="w-full border p-2 rounded"
+          />
+          {preview && (
+            <img
+              src={preview}
+              alt="Preview"
+              className="mt-2 w-32 h-32 object-cover rounded border"
+            />
           )}
         </div>
 
-        {/* Date */}
-        <div>
-          <label className="block mb-1 font-semibold">Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full border p-2 rounded"
-            required
-          />
-        </div>
-
-        {/* Start Time */}
-        <div>
-          <label className="block mb-1 font-semibold">Start Time</label>
-          <input
-            type="time"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
-        </div>
-
-        {/* End Time */}
-        <div>
-          <label className="block mb-1 font-semibold">End Time</label>
-          <input
-            type="time"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-            className="w-full border p-2 rounded"
-          />
-        </div>
-
+        {/* Submit */}
         <button
           type="submit"
-          className={`w-full bg-blue-600 text-white p-3 rounded font-semibold hover:bg-blue-700 transition ${
+          disabled={isUpdating}
+          className={`w-full bg-green-600 text-white p-3 rounded font-semibold hover:bg-green-700 transition ${
             isUpdating ? "opacity-50 cursor-not-allowed" : ""
           }`}
-          disabled={isUpdating}
         >
-          {isUpdating ? "Updating..." : "Update Exam"}
+          {isUpdating ? "Updating..." : "Update Invigilator"}
         </button>
       </form>
     </div>
   );
 };
 
-export default UpdateExamPage;
+export default UpdateInvigilatorPage;

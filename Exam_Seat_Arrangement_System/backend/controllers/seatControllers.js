@@ -10,6 +10,7 @@ export const generateSeatingPlan = async (req, res) => {
   const { examId } = req.params;
 
   try {
+    // Fetch exam with nested course info
     const exam = await prisma.exam.findUnique({
       where: { id: Number(examId) },
       include: {
@@ -29,21 +30,15 @@ export const generateSeatingPlan = async (req, res) => {
       return res.status(404).json({ success: false, message: "Exam not found" });
     }
 
+    // Fetch students for this course and semester
     const students = await prisma.student.findMany({
       where: {
         courseId: exam.subject.semester.courseId,
-        semesterId: exam.subject.semesterId,
+        semesterId: exam.subject.semester.id,
       },
-    });
-
-    const roomAssignments = await prisma.roomAssignment.findMany({
-      where: { examId: Number(examId) },
-      include: {
-        room: {
-          include: {
-            benches: true,
-          },
-        },
+      select: {
+        id: true,
+        college: true,
       },
     });
 
@@ -51,18 +46,33 @@ export const generateSeatingPlan = async (req, res) => {
       return res.status(400).json({ success: false, message: "No students found for this exam" });
     }
 
+    // Fetch room assignments with benches for this exam
+    const roomAssignments = await prisma.roomAssignment.findMany({
+      where: { examId: Number(examId) },
+      include: {
+        room: {
+          include: {
+            benches: {
+              orderBy: [{ row: 'asc' }, { column: 'asc' }],
+            },
+          },
+        },
+      },
+    });
+
     if (!roomAssignments.length) {
       return res.status(400).json({ success: false, message: "No room assignments found for this exam" });
     }
 
+    // Prepare payload for Python GA script
     const inputPayload = {
       examId: exam.id,
       students,
       roomAssignments,
     };
 
-    const pythonPath = path.join(__dirname, "../algorithm/seating_algorithm.py");
-    const python = spawn("python", [pythonPath]);
+    const pythonPath = path.join(__dirname, "../algorithm/seating_algorithm_ga.py");
+    const python = spawn("python3", [pythonPath]); // Use python3 command
 
     let result = "";
     let errorOutput = "";
@@ -99,6 +109,16 @@ export const generateSeatingPlan = async (req, res) => {
           });
         }
 
+        // Deactivate old seating plans for this exam
+        await prisma.seatingPlan.updateMany({
+          where: {
+            examId: Number(examId),
+            isActive: true,
+          },
+          data: { isActive: false },
+        });
+
+        // Create new seating plan
         const seatingPlan = await prisma.seatingPlan.create({
           data: {
             examId: Number(examId),
@@ -106,6 +126,7 @@ export const generateSeatingPlan = async (req, res) => {
           },
         });
 
+        // Prepare seat records
         const seatsData = parsedSeats.map((seat) => ({
           studentId: seat.studentId,
           benchId: seat.benchId,
@@ -113,6 +134,7 @@ export const generateSeatingPlan = async (req, res) => {
           seatingPlanId: seatingPlan.id,
         }));
 
+        // Insert seats in bulk
         await prisma.seat.createMany({ data: seatsData });
 
         res.json({
@@ -121,18 +143,17 @@ export const generateSeatingPlan = async (req, res) => {
           seatingPlanId: seatingPlan.id,
         });
       } catch (err) {
-        console.error("JSON parse error or DB error:", err);
-        return res.status(500).json({ success: false, message: "Failed to generate seating plan" });
+        console.error("Error parsing JSON or DB error:", err);
+        res.status(500).json({ success: false, message: "Failed to generate seating plan" });
       }
     });
   } catch (err) {
-    console.error("Internal Server Error:", err);
+    console.error("Internal server error:", err);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
 
-// Get all seating plans
 export const getAllSeatingPlan = async (req, res) => {
   try {
     const seatingPlans = await prisma.seatingPlan.findMany({
@@ -156,7 +177,7 @@ export const getAllSeatingPlan = async (req, res) => {
               select: {
                 id: true,
                 college: true,
-                symbolNumber: true, // ✅ Ensure this is included
+                symbolNumber: true,
               },
             },
             bench: {
@@ -193,4 +214,3 @@ export const getAllSeatingPlan = async (req, res) => {
     });
   }
 };
-

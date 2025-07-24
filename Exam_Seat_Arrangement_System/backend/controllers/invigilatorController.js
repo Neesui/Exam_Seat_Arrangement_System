@@ -1,19 +1,24 @@
 import bcrypt from "bcrypt";
 import prisma from "../utils/db.js";
 
+// Add Invigilator (with image upload support)
 export const addInvigilatorController = async (req, res) => {
-  console.log("📥 Incoming request body:", req.body);
-
   try {
     const { name, email, password, course, phone, address, gender } = req.body;
 
+    // Check if email exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ success: false, message: "Email already in use" });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Image path if uploaded
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+    // Create user and invigilator
     const newUser = await prisma.user.create({
       data: {
         name,
@@ -26,12 +31,11 @@ export const addInvigilatorController = async (req, res) => {
             phone,
             address,
             gender,
+            imageUrl: imagePath,
           },
         },
       },
-      include: {
-        invigilator: true,
-      },
+      include: { invigilator: true },
     });
 
     res.status(201).json({
@@ -52,19 +56,15 @@ export const addInvigilatorController = async (req, res) => {
   }
 };
 
-
+// Get all invigilators
 export const getAllInvigilator = async (req, res) => {
   try {
     const invigilators = await prisma.user.findMany({
-      where: {
-        role: 'INVIGILATOR',
-      },
-      include: {
-        invigilator: true,
-      },
+      where: { role: "INVIGILATOR" },
+      include: { invigilator: true },
     });
 
-    const formattedInvigilators = invigilators.map((user) => ({
+    const formatted = invigilators.map((user) => ({
       id: user.id,
       name: user.name,
       email: user.email,
@@ -73,30 +73,72 @@ export const getAllInvigilator = async (req, res) => {
       phone: user.invigilator?.phone || '',
       address: user.invigilator?.address || '',
       gender: user.invigilator?.gender || '',
+      image: user.invigilator?.imageUrl
+        ? `${process.env.BASE_URL || "http://localhost:3000"}${user.invigilator.imageUrl}`
+        : null,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     }));
 
-    // Send response
     res.json({
       success: true,
-      message: 'All invigilators fetched successfully',
-      invigilators: formattedInvigilators,
+      message: "All invigilators fetched successfully",
+      invigilators: formatted,
     });
 
   } catch (error) {
-    console.error('Error fetching all invigilators:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Server Error',
-    });
+    console.error("Error fetching invigilators:", error);
+    res.status(500).json({ success: false, message: error.message || "Server Error" });
   }
 };
 
+// Get single invigilator by user id
+export const getInvigilatorById = async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    return res.status(400).json({ success: false, message: "Invalid invigilator ID" });
+  }
 
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: { invigilator: true },
+    });
+
+    if (!user || user.role !== "INVIGILATOR") {
+      return res.status(404).json({ success: false, message: "Invigilator not found" });
+    }
+
+    const result = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      course: user.invigilator?.course || '',
+      phone: user.invigilator?.phone || '',
+      address: user.invigilator?.address || '',
+      gender: user.invigilator?.gender || '',
+      image: user.invigilator?.imageUrl
+        ? `${process.env.BASE_URL || "http://localhost:3000"}${user.invigilator.imageUrl}`
+        : null,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+
+    res.json({
+      success: true,
+      message: "Invigilator fetched successfully",
+      invigilator: result,
+    });
+  } catch (error) {
+    console.error("Error fetching invigilator by ID:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// Get profile of logged-in invigilator
 export const getProfile = async (req, res) => {
   const userId = req.user.id;
-
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -114,7 +156,7 @@ export const getProfile = async (req, res) => {
   }
 };
 
-
+// Update invigilator profile
 export const updateProfile = async (req, res) => {
   const userId = req.user.id;
   const { name, email, password, course, phone, address, gender } = req.body;
@@ -144,17 +186,15 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    res.json({
-      success: true,
-      message: "Profile updated successfully",
-    });
+    res.json({ success: true, message: "Profile updated successfully" });
+
   } catch (error) {
     console.error("Update profile error:", error);
     res.status(500).json({ success: false, message: "Failed to update profile" });
   }
 };
 
-
+// Get Exam Meta Summary for Logged-in Invigilator
 export const getInvigilatorExamMetaSummary = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -246,7 +286,12 @@ export const getInvigilatorExamMetaSummary = async (req, res) => {
       });
     }
 
-    res.json({ success: true, message: "Exam meta summary fetched successfully", data: result });
+    res.json({
+      success: true,
+      message: "Exam meta summary fetched successfully",
+      data: result,
+    });
+
   } catch (error) {
     console.error("Get Invigilator Exam Meta Summary error:", error);
     res.status(500).json({ success: false, message: error.message || "Server Error" });

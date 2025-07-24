@@ -7,7 +7,7 @@ import {
 import ViewRoomAssignPage from "./ViewRoomAssignPage ";
 
 const AssignedRoomPage = () => {
-  const { error, isLoading, refetch } = useGetAllRoomAssignmentsQuery();
+  const { error } = useGetAllRoomAssignmentsQuery();
   const [generateAssignments, { isLoading: generating }] = useGenerateRoomAssignmentsMutation();
 
   useEffect(() => {
@@ -20,7 +20,7 @@ const AssignedRoomPage = () => {
     try {
       await generateAssignments().unwrap();
       toast.success("Room assignments generated successfully");
-      refetch();
+      // RTK Query invalidation triggers refetch automatically
     } catch (err) {
       toast.error(err?.data?.message || "Failed to generate room assignments");
     }

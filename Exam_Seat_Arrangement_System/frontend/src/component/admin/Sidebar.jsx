@@ -14,16 +14,11 @@ import {
 } from "react-icons/fa";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
-  const [isCoursesOpen, setIsCoursesOpen] = useState(false);
-  const [isStudentDetailsOpen, setIsStudentDetailsOpen] = useState(false);
-  const [isRoomOpen, setIsRoomOpen] = useState(false);
-  const [isBenchOpen, setIsBenchOpen] = useState(false);
-  const [isInvigilatorOpen, setIsInvigilatorOpen] = useState(false);
-  const [isExamOpen, setIsExamOpen] = useState(false);
-  const [isRoomAssignOpen, setIsRoomAssignOpen] = useState(false);
-  const [isSeatPlanOpen, setIsSeatPlanOpen] = useState(false);
-  const [isInvigilatorAssignOpen, setIsInvigilatorAssignOpen] = useState(false);
-  const [isAssignedInvigilatorOpen, setIsAssignedInvigilatorOpen] = useState(false); // ✅ New
+  const [activeSection, setActiveSection] = useState(null);
+
+  const handleSectionToggle = (sectionName) => {
+    setActiveSection((prev) => (prev === sectionName ? null : sectionName));
+  };
 
   return (
     <>
@@ -50,8 +45,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <SidebarSection
             icon={<FaUserGraduate className="mr-3" />}
             label="Students"
-            isOpen={isStudentDetailsOpen}
-            setIsOpen={setIsStudentDetailsOpen}
+            isOpen={activeSection === "Students"}
+            setIsOpen={() => handleSectionToggle("Students")}
             links={[
               { path: "/addStudents", label: "Add Students" },
               { path: "/viewStudents", label: "View Student Details" },
@@ -61,8 +56,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <SidebarSection
             icon={<FaChalkboardTeacher className="mr-3" />}
             label="Invigilator"
-            isOpen={isInvigilatorOpen}
-            setIsOpen={setIsInvigilatorOpen}
+            isOpen={activeSection === "Invigilator"}
+            setIsOpen={() => handleSectionToggle("Invigilator")}
             links={[
               { path: "/addInvigilator", label: "Add Invigilator" },
               { path: "/viewInvigilator", label: "View Invigilator" },
@@ -72,8 +67,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <SidebarSection
             icon={<FaBookOpen className="mr-3" />}
             label="Courses"
-            isOpen={isCoursesOpen}
-            setIsOpen={setIsCoursesOpen}
+            isOpen={activeSection === "Courses"}
+            setIsOpen={() => handleSectionToggle("Courses")}
             links={[
               { path: "/addfullCourse", label: "Add Courses" },
               { path: "/viewCourse", label: "View Courses" },
@@ -83,8 +78,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <SidebarSection
             icon={<FaDoorOpen className="mr-3" />}
             label="Room"
-            isOpen={isRoomOpen}
-            setIsOpen={setIsRoomOpen}
+            isOpen={activeSection === "Room"}
+            setIsOpen={() => handleSectionToggle("Room")}
             links={[
               { path: "/addRoom", label: "Add Room" },
               { path: "/viewRoom", label: "View Room Details" },
@@ -94,8 +89,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <SidebarSection
             icon={<FaChair className="mr-3" />}
             label="Bench"
-            isOpen={isBenchOpen}
-            setIsOpen={setIsBenchOpen}
+            isOpen={activeSection === "Bench"}
+            setIsOpen={() => handleSectionToggle("Bench")}
             links={[
               { path: "/addBench", label: "Add Bench" },
               { path: "/viewBench", label: "View Bench Details" },
@@ -105,8 +100,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <SidebarSection
             icon={<FaBookOpen className="mr-3" />}
             label="Exam"
-            isOpen={isExamOpen}
-            setIsOpen={setIsExamOpen}
+            isOpen={activeSection === "Exam"}
+            setIsOpen={() => handleSectionToggle("Exam")}
             links={[
               { path: "/createExam", label: "Create Exam" },
               { path: "/viewExam", label: "View Exam" },
@@ -116,8 +111,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <SidebarSection
             icon={<FaClipboardList className="mr-3" />}
             label="Room Assign"
-            isOpen={isRoomAssignOpen}
-            setIsOpen={setIsRoomAssignOpen}
+            isOpen={activeSection === "Room Assign"}
+            setIsOpen={() => handleSectionToggle("Room Assign")}
             links={[
               { path: "/assignRoom", label: "Assign Room for Exam" },
               { path: "/viewRoomAssign", label: "View Room Assign" },
@@ -127,8 +122,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <SidebarSection
             icon={<FaClipboardList className="mr-3" />}
             label="Invigilator Assign"
-            isOpen={isInvigilatorAssignOpen}
-            setIsOpen={setIsInvigilatorAssignOpen}
+            isOpen={activeSection === "Invigilator Assign"}
+            setIsOpen={() => handleSectionToggle("Invigilator Assign")}
             links={[
               { path: "/assignInvigilator", label: "Assign Invigilator" },
               { path: "/viewInvigilatorAssign", label: "View Invigilator Assignment" },
@@ -138,8 +133,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <SidebarSection
             icon={<FaTable className="mr-3" />}
             label="Seat Plan"
-            isOpen={isSeatPlanOpen}
-            setIsOpen={setIsSeatPlanOpen}
+            isOpen={activeSection === "Seat Plan"}
+            setIsOpen={() => handleSectionToggle("Seat Plan")}
             links={[
               { path: "/generateSeatingPlan", label: "Generate Seat Plan" },
               { path: "/viewSeatingPlan", label: "View Seat Plan" },

@@ -23,6 +23,8 @@ const UpdateInvigilatorPage = () => {
     gender: '',
   });
 
+  const [image, setImage] = useState(null); // ✅ Image state
+
   useEffect(() => {
     if (invigilatorData) {
       setFormData({
@@ -41,10 +43,21 @@ const UpdateInvigilatorPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      await updateInvigilator({ id, ...formData }).unwrap();
+      const fd = new FormData();
+      for (const key in formData) {
+        fd.append(key, formData[key]);
+      }
+      if (image) fd.append("image", image); // ✅ Append image
+
+      await updateInvigilator({ id, formData: fd }).unwrap();
       toast.success('Invigilator updated successfully!');
       navigate('/viewInvigilator');
     } catch (err) {
@@ -58,8 +71,7 @@ const UpdateInvigilatorPage = () => {
   return (
     <div className="mx-auto max-w-4xl bg-white p-6 rounded-lg shadow-md mt-20">
       <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Update Invigilator</h2>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {/* Same form fields as AddInvigilatorPage */}
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5" encType="multipart/form-data">
         {["name", "email", "password", "course", "phone", "address", "gender"].map((field) => (
           <div key={field}>
             <label htmlFor={field} className="block text-gray-600 mb-1">
@@ -91,6 +103,21 @@ const UpdateInvigilatorPage = () => {
             )}
           </div>
         ))}
+
+        {/* ✅ Image Upload */}
+        <div>
+          <label htmlFor="image" className="block text-gray-600 mb-1">
+            Image:
+          </label>
+          <input
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="w-full border border-gray-300 p-2 rounded-lg"
+          />
+        </div>
+
         <div className="sm:col-span-2">
           <button
             type="submit"
