@@ -19,13 +19,12 @@ const AddStudentPage = () => {
     imageUrl: "",
   });
 
-  const navigate = useNavigate();
-  const [imagePreview, setImagePreview] = useState(null);
-  const [uploading, setUploading] = useState(false);
-
   const [addStudent, { isLoading }] = useAddStudentMutation();
-  const { data: coursesData, isLoading: coursesLoading } = useGetCoursesQuery();
-  const { data: semestersData, isLoading: semestersLoading } = useGetSemestersQuery();
+  const { data: coursesData } = useGetCoursesQuery();
+  const { data: semestersData } = useGetSemestersQuery();
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -41,17 +40,20 @@ const AddStudentPage = () => {
     setUploading(true);
 
     try {
-      const { data } = await axios.post("/api/upload", formDataUpload, {
+      const { data } = await axios.post("http://localhost:3000/api/upload/file", formDataUpload, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+        withCredentials: true,
       });
 
-      setFormData((prev) => ({ ...prev, imageUrl: data.url }));
-      setImagePreview(data.url);
+      const imageUrl = `http://localhost:3000${data.url}`;
+      setFormData((prev) => ({ ...prev, imageUrl }));
+      setImagePreview(imageUrl);
       toast.success("Image uploaded successfully");
     } catch (error) {
       toast.error("Image upload failed");
+      console.error(error);
     } finally {
       setUploading(false);
     }
@@ -61,7 +63,7 @@ const AddStudentPage = () => {
     e.preventDefault();
 
     if (!formData.courseId || !formData.semesterId) {
-      toast.error("Please select course and semester");
+      toast.error("Please select both course and semester.");
       return;
     }
 
@@ -85,17 +87,18 @@ const AddStudentPage = () => {
           imageUrl: "",
         });
         setImagePreview(null);
+        navigate("/viewStudents");
       } else {
         toast.error(result.message || "Failed to add student");
       }
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to add student");
+      toast.error(error?.data?.message || "Error adding student");
     }
   };
 
   return (
     <div className="mx-auto max-w-5xl bg-white p-6 rounded-lg shadow-md mt-20">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Add New Student</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">Add New Student</h2>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <Input
@@ -104,7 +107,6 @@ const AddStudentPage = () => {
           name="studentName"
           value={formData.studentName}
           onChange={handleChange}
-          placeholder="Enter student name"
           required
         />
 
@@ -114,7 +116,6 @@ const AddStudentPage = () => {
           name="symbolNumber"
           value={formData.symbolNumber}
           onChange={handleChange}
-          placeholder="Enter symbol number"
           required
         />
 
@@ -124,7 +125,6 @@ const AddStudentPage = () => {
           name="regNumber"
           value={formData.regNumber}
           onChange={handleChange}
-          placeholder="Enter registration number"
           required
         />
 
@@ -134,7 +134,6 @@ const AddStudentPage = () => {
           name="college"
           value={formData.college}
           onChange={handleChange}
-          placeholder="Enter college name"
           required
         />
 
@@ -170,7 +169,7 @@ const AddStudentPage = () => {
 
         {/* Image Upload */}
         <div>
-          <label className="block text-gray-600 mb-1">Image</label>
+          <label className="block text-gray-700 mb-1 font-medium">Upload Image</label>
           <input
             type="file"
             accept="image/*"
@@ -191,7 +190,7 @@ const AddStudentPage = () => {
           <button
             type="submit"
             disabled={isLoading || uploading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
           >
             {isLoading ? "Adding..." : "Add Student"}
           </button>
@@ -200,5 +199,5 @@ const AddStudentPage = () => {
     </div>
   );
 };
-
+ 
 export default AddStudentPage;
