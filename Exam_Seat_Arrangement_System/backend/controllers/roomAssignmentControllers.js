@@ -1,98 +1,161 @@
-import prisma from "../utils/db.js";
-import { exec } from "child_process";
+import { PrismaClient } from "@prisma/client";
+import { spawn } from "child_process";
 import path from "path";
 
-const allowedStatuses = ["ACTIVE", "COMPLETED", "CANCELED"];
+const prisma = new PrismaClient();
 
-export const runAndSaveRoomAssignments = (req, res) => {
-  const scriptPath = path.resolve(process.cwd(), "algorithm", "roomAssignment_algorithm.py");
-
-  exec(`python "${scriptPath}"`, async (error, stdout, stderr) => {
-    if (error) {
-      console.error("Python script error:", error);
-      return res.status(500).json({ success: false, message: "Algorithm execution failed", error: error.message });
-    }
-
-    if (stderr) console.error("Python stderr:", stderr);
-
-    let assignments;
-    try {
-      assignments = JSON.parse(stdout);
-      if (assignments.error) {
-        return res.status(500).json({ success: false, message: "Algorithm error", error: assignments.error });
-      }
-      if (!Array.isArray(assignments)) {
-        return res.status(500).json({ success: false, message: "Algorithm output should be an array" });
-      }
-    } catch (parseErr) {
-      console.error("JSON parse error:", parseErr);
-      return res.status(500).json({ success: false, message: "Invalid output from Python", error: parseErr.message });
-    }
-
-    try {
-      // Cancel old ACTIVE assignments (to keep history)
-      await prisma.roomAssignment.updateMany({
-        where: { status: "ACTIVE" },
-        data: { status: "CANCELED", updatedAt: new Date() },
-      });
-
-      // Insert new assignments with assignedAt = now and status ACTIVE
-      const createPromises = assignments.map(({ examId, roomId }) => {
-        if (typeof examId !== "number" || typeof roomId !== "number") {
-          throw new Error("Invalid examId or roomId in assignment");
-        }
-        return prisma.roomAssignment.create({
-          data: {
-            examId,
-            roomId,
-            status: "ACTIVE",
-            assignedAt: new Date(),
-          },
-        });
-      });
-
-      await Promise.all(createPromises);
-
-      // Fetch saved assignments with related data
-      const savedAssignments = await prisma.roomAssignment.findMany({
-        include: {
-          room: { include: { benches: true } },
-          exam: {
-            include: {
-              subject: { include: { semester: { include: { course: true } } } },
+export const runAndSaveRoomAssignments = async (req, res) => {
+  try {
+    const exams = await prisma.exam.findMany({
+      include: {
+        subject: {
+          include: {
+            semester: {
+              include: {
+                course: true,
+              },
             },
           },
-          invigilatorAssignments: {
-            include: { invigilator: { include: { user: true } } },
+        },
+        seatingPlans: {
+          include: {
+            seats: {                 // <-- corrected plural 'seats'
+              include: {
+                student: true,
+              },
+            },
           },
         },
-        orderBy: { examId: "asc" },
-      });
+        roomAssignments: true,
+      },
+    });
 
-      // Format assignments: add totalBench and totalCapacity, exclude benches array for payload size
-      const formatted = savedAssignments.map((assignment) => {
-        const benches = assignment.room.benches || [];
-        return {
-          ...assignment,
-          room: {
-            ...assignment.room,
-            totalBench: benches.length,
-            totalCapacity: benches.reduce((sum, b) => sum + b.capacity, 0),
-            benches: undefined, // exclude benches array
+    const rooms = await prisma.room.findMany({
+      include: {
+        benches: true,
+      },
+    });
+
+    // Prepare input data for Python algorithm
+    const input = {
+      exams: exams.map((exam) => ({
+        id: exam.id,
+        date: exam.date,
+        startTime: exam.startTime,
+        endTime: exam.endTime,
+        students: exam.seatingPlans
+          .flatMap((sp) => sp.seats)  // flatten all seats
+          .map((seat) => seat.student)
+          .filter(Boolean),
+      })),
+      rooms: rooms.map((room) => ({
+        id: room.id,
+        name: room.roomNumber,
+        benches: room.benches.map((bench) => ({
+          id: bench.id,
+          capacity: bench.capacity,
+        })),
+      })),
+    };
+
+    const pythonProcess = spawn("python", [
+      path.join("algorithm", "roomAssignment_algorithm.py"),
+    ]);
+
+    let result = "";
+    let errorOutput = "";
+
+    pythonProcess.stdout.on("data", (data) => {
+      result += data.toString();
+    });
+
+    pythonProcess.stderr.on("data", (data) => {
+      errorOutput += data.toString();
+    });
+
+    pythonProcess.stdin.write(JSON.stringify(input));
+    pythonProcess.stdin.end();
+
+    pythonProcess.on("close", async (code) => {
+      if (code !== 0) {
+        return res.status(500).json({
+          success: false,
+          message: "Python script failed",
+          error: errorOutput,
+        });
+      }
+
+      let assignments;
+      try {
+        assignments = JSON.parse(result);
+        if (assignments.error) {
+          return res.status(500).json({
+            success: false,
+            message: "Python script error",
+            error: assignments,
+          });
+        }
+      } catch (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to parse Python output",
+          error: err.message,
+        });
+      }
+
+      if (!assignments.length) {
+        return res.status(200).json({
+          success: true,
+          message: "No assignments to save",
+          assignments: [],
+        });
+      }
+
+      const savedAssignments = [];
+
+      for (const assignment of assignments) {
+        if (!assignment.examId || !assignment.roomId) continue;
+
+        // Cancel existing active assignments for this exam
+        await prisma.roomAssignment.updateMany({
+          where: {
+            examId: assignment.examId,
+            status: "ACTIVE",
           },
-        };
-      });
+          data: {
+            status: "CANCELED",
+          },
+        });
 
-      res.json({
+        // Create new active assignment
+        const newAssignment = await prisma.roomAssignment.create({
+          data: {
+            examId: assignment.examId,
+            roomId: assignment.roomId,
+            status: "ACTIVE",
+            assignedAt: new Date(assignment.assignedAt),
+            completedAt: assignment.completedAt
+              ? new Date(assignment.completedAt)
+              : null,
+          },
+        });
+
+        savedAssignments.push(newAssignment);
+      }
+
+      res.status(200).json({
         success: true,
-        message: "Room assignments saved and fetched successfully",
-        assignments: formatted,
+        message: "Room assignments saved and returned",
+        assignments: savedAssignments,
       });
-    } catch (dbErr) {
-      console.error("Database error:", dbErr);
-      res.status(500).json({ success: false, message: "Database error", error: dbErr.message });
-    }
-  });
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
 };
 
 export const getAllRoomAssignments = async (req, res) => {
@@ -132,7 +195,9 @@ export const getAllRoomAssignments = async (req, res) => {
     });
   } catch (err) {
     console.error("Fetch all assignments error:", err);
-    res.status(500).json({ success: false, message: "Failed to fetch room assignments", error: err.message });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch room assignments", error: err.message });
   }
 };
 
@@ -190,6 +255,7 @@ export const updateRoomAssignment = async (req, res) => {
     }
 
     const { status, completedAt } = req.body;
+    const allowedStatuses = ["ACTIVE", "COMPLETED", "CANCELED"];
 
     if (status && !allowedStatuses.includes(status)) {
       return res.status(400).json({ success: false, message: "Invalid status value" });
