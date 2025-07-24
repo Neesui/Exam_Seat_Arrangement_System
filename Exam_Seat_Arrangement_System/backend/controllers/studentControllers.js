@@ -1,6 +1,6 @@
 import prisma from "../utils/db.js";
 
-//Create Single Student
+// Create Student
 export const createStudent = async (req, res) => {
   try {
     const {
@@ -40,7 +40,7 @@ export const createStudent = async (req, res) => {
   }
 };
 
-//Get All Students
+// Get All Students
 export const getStudents = async (req, res) => {
   try {
     const students = await prisma.student.findMany({
@@ -68,17 +68,19 @@ export const getStudents = async (req, res) => {
   }
 };
 
-// Get Single Student
+// Get Single Student by ID
 export const getStudentById = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ success: false, message: "Invalid student ID" });
+    }
 
     const student = await prisma.student.findUnique({
       where: { id },
       include: {
         course: true,
         semester: true,
-        seat: true,
       },
     });
 
@@ -101,14 +103,15 @@ export const getStudentById = async (req, res) => {
   }
 };
 
-//Update Student
+// Update Student
 export const updateStudent = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ success: false, message: "Invalid student ID" });
+    }
 
-    const existingStudent = await prisma.student.findUnique({
-      where: { id },
-    });
+    const existingStudent = await prisma.student.findUnique({ where: { id } });
 
     if (!existingStudent) {
       return res.status(404).json({
@@ -155,11 +158,13 @@ export const updateStudent = async (req, res) => {
   }
 };
 
-
 // Delete Student
 export const deleteStudent = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ success: false, message: "Invalid student ID" });
+    }
 
     await prisma.student.delete({
       where: { id },
@@ -179,34 +184,43 @@ export const deleteStudent = async (req, res) => {
   }
 };
 
-// ✅ Bulk Import Students - Fixed to accept array directly in req.body
+// Bulk Import Students (array of student objects)
 export const importStudents = async (req, res) => {
-    try {
-      const students = req.body;
-  
-      if (!Array.isArray(students) || students.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: "No student data provided.",
-        });
-      }
-  
-      await prisma.student.createMany({
-        data: students,
-        skipDuplicates: true, // prevents duplicates by unique constraint
-      });
-  
-      res.status(200).json({
-        success: true,
-        message: "Students imported successfully!",
-      });
-    } catch (error) {
-      console.error("Import Error:", error);
-      res.status(500).json({
+  try {
+    const students = req.body;
+
+    if (!Array.isArray(students) || students.length === 0) {
+      return res.status(400).json({
         success: false,
-        message: "Failed to import students.",
-        error: error.message,
+        message: "No student data provided.",
       });
     }
-  };
-  
+
+    // Optional: Validate fields here or trust frontend validation
+
+    await prisma.student.createMany({
+      data: students.map(s => ({
+        studentName: s.studentName,
+        symbolNumber: s.symbolNumber,
+        regNumber: s.regNumber,
+        college: s.college,
+        courseId: Number(s.courseId),
+        semesterId: Number(s.semesterId),
+        imageUrl: s.imageUrl || null,
+      })),
+      skipDuplicates: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Students imported successfully!",
+    });
+  } catch (error) {
+    console.error("Import Students Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to import students.",
+      error: error.message,
+    });
+  }
+};

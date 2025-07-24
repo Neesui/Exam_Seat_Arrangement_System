@@ -1,9 +1,9 @@
 import multer from 'multer';
 import path from 'path';
 
-const fileStorage = multer.diskStorage({
+const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, 'uploads/file/');
+    cb(null, 'uploads/');
   },
   filename(req, file, cb) {
     const ext = path.extname(file.originalname);
@@ -13,18 +13,21 @@ const fileStorage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
-    'application/pdf',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-    'application/vnd.ms-excel', // .xls
+    'image/jpeg',
+    'image/png',
+    'image/jpg',
+    'image/svg+xml', 
   ];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Only PDF, XLSX, and XLS files are allowed'), false);
+    cb(
+      new Error('Only JPG, JPEG, PNG, and SVG image formats are allowed'),
+      false
+    );
   }
 };
 
-export const uploadFile = multer({
-  storage: fileStorage,
-  fileFilter,
-});
+const upload = multer({ storage, fileFilter });
+
+export default upload;
