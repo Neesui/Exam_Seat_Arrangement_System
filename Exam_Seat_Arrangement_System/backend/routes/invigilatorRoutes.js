@@ -16,7 +16,7 @@ import {
 
 import { authenticate } from "../middlewares/authenticate.js";
 import { roleCheck } from "../middlewares/authorize.js";
-import upload from "../middlewares/uploadFiles.js";
+import upload from "../middlewares/uploadImages.js";
 
 const router = express.Router();
 

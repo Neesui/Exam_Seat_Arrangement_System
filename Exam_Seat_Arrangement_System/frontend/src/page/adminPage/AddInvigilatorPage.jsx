@@ -53,7 +53,7 @@ const AddInvigilatorPage = () => {
         image: null,
       });
       setTimeout(() => {
-        navigate('/viewInvigilator');
+        // navigate('/viewInvigilator');
       }, 1000);
     } catch (err) {
       toast.error(err?.data?.message || 'Failed to add invigilator.');
