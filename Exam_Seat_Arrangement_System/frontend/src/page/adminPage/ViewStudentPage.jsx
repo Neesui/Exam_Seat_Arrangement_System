@@ -9,15 +9,16 @@ import SearchBox from "../../component/public/SearchBox";
 import SelectFilter from "../../component/public/SelectFilter";
 import Pagination from "../../component/public/Pagination";
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 15;
 
 const ViewStudentPage = () => {
   const navigate = useNavigate();
-
   const { data, error, isLoading } = useGetAllStudentsQuery();
   const [deleteStudent] = useDeleteStudentMutation();
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [collegeSearch, setCollegeSearch] = useState("");
+  const [symbolSearch, setSymbolSearch] = useState("");
+  const [searchType, setSearchType] = useState(""); // 'college' or 'symbol'
   const [filterSemester, setFilterSemester] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -53,17 +54,30 @@ const ViewStudentPage = () => {
 
   const filteredStudents = useMemo(() => {
     if (!data?.students) return [];
-    const lowerSearch = searchTerm.toLowerCase();
+
     return data.students.filter((student) => {
-      const matchesCollege = student.college.toLowerCase().includes(lowerSearch);
-      const matchesSymbol = student.symbolNumber.toLowerCase().includes(lowerSearch);
-      const matchesSearch = matchesCollege || matchesSymbol;
       const matchesSemester = filterSemester
         ? student.semester?.id === filterSemester
         : true;
-      return matchesSearch && matchesSemester;
+
+      if (searchType === "college") {
+        return (
+          student.college.toLowerCase().includes(collegeSearch.toLowerCase()) &&
+          matchesSemester
+        );
+      }
+
+      if (searchType === "symbol") {
+        return (
+          student.symbolNumber.toLowerCase().includes(symbolSearch.toLowerCase()) &&
+          matchesSemester
+        );
+      }
+
+      // Default case (no filtering)
+      return matchesSemester;
     });
-  }, [data, searchTerm, filterSemester]);
+  }, [data, collegeSearch, symbolSearch, filterSemester, searchType]);
 
   const totalPages = Math.ceil(filteredStudents.length / ITEMS_PER_PAGE);
   const paginatedStudents = filteredStudents.slice(
@@ -81,15 +95,24 @@ const ViewStudentPage = () => {
       <div className="max-w-7xl mx-auto bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-3xl font-bold mb-8 text-gray-800 text-center">All Students</h2>
 
+        {/* Search & Filters */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-6 gap-4">
-          <SearchBox
-            value={searchTerm}
-            onChange={(val) => {
-              setSearchTerm(val);
-              setCurrentPage(1);
-            }}
-            placeholder="Search by college or symbol no."
-          />
+          <div className="flex gap-2">
+            <SearchBox
+              value={collegeSearch}
+              onChange={(val) => setCollegeSearch(val)}
+              placeholder="Search by College"
+            />
+            
+          </div>
+
+          <div className="flex gap-2">
+            <SearchBox
+              value={symbolSearch}
+              onChange={(val) => setSymbolSearch(val)}
+              placeholder="Search by Symbol No."
+            />
+          </div>
 
           <SelectFilter
             label="All Semesters"
@@ -102,6 +125,7 @@ const ViewStudentPage = () => {
           />
         </div>
 
+        {/* Table */}
         {isLoading ? (
           <p className="text-center">Loading students...</p>
         ) : error ? (
@@ -113,15 +137,15 @@ const ViewStudentPage = () => {
             <table className="w-full border-collapse border border-gray-300 text-sm sm:text-base">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border border-gray-300 px-2 py-2 text-left">S.N</th>
-                  <th className="border border-gray-300 px-2 py-2 text-left">Image</th>
-                  <th className="border border-gray-300 px-2 py-2 text-left">Name</th>
-                  <th className="border border-gray-300 px-2 py-2 text-left">Symbol No.</th>
-                  <th className="border border-gray-300 px-2 py-2 text-left">Reg. No.</th>
-                  <th className="border border-gray-300 px-2 py-2 text-left">College</th>
-                  <th className="border border-gray-300 px-2 py-2 text-left">Course</th>
-                  <th className="border border-gray-300 px-2 py-2 text-left">Semester</th>
-                  <th className="border border-gray-300 px-2 py-2 text-left">Actions</th>
+                  <th className="border px-2 py-2">S.N</th>
+                  <th className="border px-2 py-2">Image</th>
+                  <th className="border px-2 py-2">Name</th>
+                  <th className="border px-2 py-2">Symbol No.</th>
+                  <th className="border px-2 py-2">Reg. No.</th>
+                  <th className="border px-2 py-2">College</th>
+                  <th className="border px-2 py-2">Course</th>
+                  <th className="border px-2 py-2">Semester</th>
+                  <th className="border px-2 py-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
