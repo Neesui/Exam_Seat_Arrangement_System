@@ -31,6 +31,16 @@ export const createStudent = async (req, res) => {
       student,
     });
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return res.status(409).json({
+        success: false,
+        message: "Student already exists with the same symbol number and college.",
+      });
+    }
+
     console.error("Create Student Error:", error);
     res.status(500).json({
       success: false,
@@ -39,6 +49,7 @@ export const createStudent = async (req, res) => {
     });
   }
 };
+
 
 // Get All Students
 export const getStudents = async (req, res) => {
@@ -67,6 +78,40 @@ export const getStudents = async (req, res) => {
     });
   }
 };
+
+// Get students by college name
+export const getStudentsByCollege = async (req, res) => {
+  try {
+    const { collegeName } = req.params;
+
+    const students = await prisma.student.findMany({
+      where: {
+        college: collegeName,
+      },
+      include: {
+        course: true,
+        semester: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Students from ${collegeName} fetched successfully`,
+      students,
+    });
+  } catch (error) {
+    console.error("Error fetching students by college:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch students by college",
+      error: error.message,
+    });
+  }
+};
+
 
 // Get Single Student by ID
 export const getStudentById = async (req, res) => {

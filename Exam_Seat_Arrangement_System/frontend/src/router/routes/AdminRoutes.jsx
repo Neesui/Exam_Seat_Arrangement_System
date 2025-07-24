@@ -33,6 +33,7 @@ import AssignedRoomPage from "../../page/adminPage/AssignedRoomPage";
 import AssignedInvigilatorPage from "../../page/adminPage/AssignedInvigilatorPage";
 import UpdateRoomAssignPage from "../../page/adminPage/UpdateRoomAssignPage";
 import ViewInvigilatorDetailsPage from "../../page/adminPage/ViewInvigilatorDetailsPage";
+import ViewStudentsByCollege from "../../page/publicPage/ViewStudentsByCollege";
 
 const adminRoutes = [
   {
@@ -167,6 +168,10 @@ const adminRoutes = [
   {
     path: "/student",
     element: <StudentPage />,
+  },
+  {
+    path: "/studentDetailsbyCollege/:college",
+    element: <ViewStudentsByCollege />,
   },
 
   {

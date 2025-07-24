@@ -23,7 +23,6 @@ const AddStudentPage = () => {
   const { data: coursesData } = useGetCoursesQuery();
   const { data: semestersData } = useGetSemestersQuery();
   const [uploading, setUploading] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -49,7 +48,6 @@ const AddStudentPage = () => {
 
       const imageUrl = `http://localhost:3000${data.url}`;
       setFormData((prev) => ({ ...prev, imageUrl }));
-      setImagePreview(imageUrl);
       toast.success("Image uploaded successfully");
     } catch (error) {
       toast.error("Image upload failed");
@@ -86,13 +84,16 @@ const AddStudentPage = () => {
           semesterId: "",
           imageUrl: "",
         });
-        setImagePreview(null);
-        navigate("/viewStudents");
+        // navigate("/viewStudents");
       } else {
         toast.error(result.message || "Failed to add student");
       }
     } catch (error) {
-      toast.error(error?.data?.message || "Error adding student");
+      if (error?.status === 409) {
+        toast.error("Student already exists with the same symbol number and college.");
+      } else {
+        toast.error(error?.data?.message || "Error adding student");
+      }
     }
   };
 
@@ -167,7 +168,7 @@ const AddStudentPage = () => {
           required
         />
 
-        {/* Image Upload */}
+        {/* Image Upload (no icon, no preview) */}
         <div>
           <label className="block text-gray-700 mb-1 font-medium">Upload Image</label>
           <input
@@ -176,14 +177,7 @@ const AddStudentPage = () => {
             onChange={uploadFileHandler}
             className="w-full border border-gray-300 p-2 rounded-lg"
           />
-          {uploading && <p className="text-sm text-gray-500">Uploading...</p>}
-          {imagePreview && (
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="mt-2 w-24 h-24 object-cover rounded border"
-            />
-          )}
+          {uploading && <p className="text-sm text-gray-500 mt-1">Uploading...</p>}
         </div>
 
         <div className="sm:col-span-2">
@@ -199,5 +193,5 @@ const AddStudentPage = () => {
     </div>
   );
 };
- 
+
 export default AddStudentPage;

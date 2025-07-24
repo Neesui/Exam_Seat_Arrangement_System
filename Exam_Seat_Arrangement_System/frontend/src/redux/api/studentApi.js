@@ -14,6 +14,10 @@ export const studentApi = apiSlice.injectEndpoints({
       query: () => "/api/student/all",
       providesTags: ["STUDENT"],
     }),
+    getStudentsByCollege: builder.query({
+      query: (collegeName) => `/api/student/college/${collegeName}`,
+      providesTags: ["STUDENT"],
+    }),    
     getStudentById: builder.query({
       query: (id) => `/api/student/${id}`,
       providesTags: ["STUDENT"],
@@ -47,6 +51,7 @@ export const studentApi = apiSlice.injectEndpoints({
 export const {
   useAddStudentMutation,
   useGetAllStudentsQuery,
+  useGetStudentsByCollegeQuery,
   useGetStudentByIdQuery,
   useUpdateStudentMutation,
   useDeleteStudentMutation,
