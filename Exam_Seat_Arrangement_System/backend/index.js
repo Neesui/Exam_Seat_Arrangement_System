@@ -22,6 +22,8 @@ import examRouter from "./routes/examRoutes.js";
 import studentRouter from "./routes/studentRoutes.js";
 import roomAssignmentRouter from "./routes/roomAssignmentRoutes.js";
 import seatingRouter from "./routes/seatRoutes.js";
+import uploadRouter from './routes/uploadRoutes.js'; 
+
 
 const app = express();
 const port = 3000;
@@ -36,7 +38,8 @@ app.use(cors({
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // ✅ fixed
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); 
+app.use("/api/upload", uploadRouter); 
 
 // Routes
 app.use("/api/auth", authRouter);
