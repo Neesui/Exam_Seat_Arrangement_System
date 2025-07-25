@@ -1,4 +1,3 @@
-# seating_algorithm_ga.py
 import sys
 import json
 import random
@@ -20,8 +19,10 @@ def flatten_benches(rooms):
         for bench in room['benches']:
             benches.append({
                 'benchId': bench['id'],
+                'benchName': bench.get('name', f"Bench {bench['id']}"),  # fallback name
                 'capacity': bench['capacity'],
                 'roomId': room['roomId'],
+                'roomNumber': room.get('roomNumber', f"Room {room['roomId']}"),
                 'bench': bench
             })
     return benches
@@ -87,6 +88,43 @@ def mutate(individual, benches, student_pool):
     mutant[i]['studentId'] = replacement
     return mutant
 
+# ---- GROUP AND PRINT FUNCTIONS ----
+def group_seating_plan(seating_list, student_colleges, benches):
+    """
+    Group seating by roomId -> benchId -> list of (college, studentId)
+    """
+    # Create lookup for bench info by benchId
+    bench_info = {b['benchId']: b for b in benches}
+
+    room_plan = defaultdict(lambda: defaultdict(list))
+
+    for seat in seating_list:
+        roomId = seat['roomId']
+        benchId = seat['benchId']
+        studentId = seat['studentId']
+        college = student_colleges.get(studentId, "Unknown")
+        room_plan[roomId][benchId].append((college, studentId))
+
+    return room_plan, bench_info
+
+def print_room_plan(room_plan, bench_info):
+    for roomId, benches in room_plan.items():
+        # Compute total seats assigned in this room
+        total_seats = sum(len(students) for students in benches.values())
+        roomNumber = None
+        # Attempt to get room number from bench_info (all benches share same roomNumber)
+        for benchId in benches.keys():
+            roomNumber = bench_info[benchId].get('roomNumber', f"Room {roomId}")
+            break
+
+        print(f"{roomNumber} (Capacity: {total_seats} seats)")
+        # Sort benches by benchId or name if needed
+        for benchId, students in sorted(benches.items()):
+            benchName = bench_info[benchId].get('benchName', f"Bench {benchId}")
+            seats_str = ", ".join([f"{college} - {studentId}" for college, studentId in students])
+            print(f"  {benchName}: {seats_str}")
+        print()
+
 # ---- MAIN ----
 def main():
     input_data = sys.stdin.read()
@@ -99,7 +137,7 @@ def main():
     all_rooms = [
         {
             'roomId': r['room']['id'],
-            'roomNumber': r['room']['roomNumber'],
+            'roomNumber': r['room'].get('roomNumber', f"Room {r['room']['id']}"),
             'benches': sorted(r['room']['benches'], key=lambda b: (b['row'], b['column']))
         }
         for r in room_assignments
@@ -124,6 +162,12 @@ def main():
 
     # Best solution
     best = max(population, key=lambda ind: fitness(ind, student_colleges))
+
+    # Group and print the best seating plan by room and bench for debugging
+    room_plan, bench_info = group_seating_plan(best, student_colleges, benches)
+    print_room_plan(room_plan, bench_info)
+
+    # Output the raw best seating list JSON for your Node.js backend
     print(json.dumps(best))
 
 if __name__ == '__main__':

@@ -45,6 +45,10 @@ def fetch_invigilators(conn):
         return invigilators
 
 def auto_assign(room_assignments, invigilators, max_per_invigilator=2):
+    # Check for at least 2 invigilators
+    if len(invigilators) < 2:
+        return {"error": "Not enough invigilators to assign. At least 2 required."}
+
     assignments = []
     invigilator_count = len(invigilators)
     current_index = 0
@@ -76,6 +80,7 @@ def auto_assign(room_assignments, invigilators, max_per_invigilator=2):
     return assignments
 
 def main():
+    conn = None
     try:
         conn = get_db_connection()
         room_assignments = fetch_room_assignments(conn)

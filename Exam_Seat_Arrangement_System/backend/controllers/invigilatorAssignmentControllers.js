@@ -7,14 +7,25 @@ import { v4 as uuidv4 } from "uuid";
 // Only valid enum values based on your Prisma schema
 const VALID_STATUSES = ["ASSIGNED", "COMPLETED"];
 
-/**
- * Run the Python scheduling algorithm and save the results in the database
- */
-export const runAndSaveInvigilatorAssignments = (req, res) => {
+
+export const runAndSaveInvigilatorAssignments = async (req, res) => {
   const scriptPath = path.resolve(process.cwd(), "algorithm", "invigilatorAssignment_algorithm.py");
 
   if (!fs.existsSync(scriptPath)) {
     return res.status(500).json({ success: false, message: "Algorithm script not found" });
+  }
+
+  // Pre-check: count invigilators before running Python script
+  try {
+    const invCount = await prisma.invigilator.count();
+    if (invCount < 2) {
+      return res.status(400).json({
+        success: false,
+        message: "Not enough invigilators to assign. At least 2 required.",
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "DB error", error: err.message });
   }
 
   exec(`python "${scriptPath}"`, async (error, stdout, stderr) => {
@@ -33,11 +44,12 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
     let assignments;
     try {
       assignments = JSON.parse(stdout);
+
+      // Handle error returned from Python
       if (assignments.error) {
-        return res.status(500).json({
+        return res.status(400).json({
           success: false,
-          message: "Python error",
-          error: assignments.error,
+          message: assignments.error,
         });
       }
     } catch (err) {
@@ -49,7 +61,7 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
     }
 
     try {
-      const generationId = uuidv4(); // unique batch for tracking
+      const generationId = uuidv4(); 
 
       const validAssignments = assignments.filter(
         (a) =>
@@ -62,7 +74,7 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
         validAssignments.map((a) => {
           let assignedAtDate = new Date(a.assignedAt || Date.now());
           if (isNaN(assignedAtDate.getTime())) {
-            assignedAtDate = new Date(); // fallback
+            assignedAtDate = new Date(); // fallback to current date
           }
 
           return prisma.invigilatorAssignment.create({
@@ -95,9 +107,6 @@ export const runAndSaveInvigilatorAssignments = (req, res) => {
   });
 };
 
-/**
- * Fetch all latest invigilator assignments (based on most recent generationId)
- */
 export const getAllInvigilatorAssignments = async (req, res) => {
   try {
     const latest = await prisma.invigilatorAssignment.findFirst({
@@ -141,9 +150,7 @@ export const getAllInvigilatorAssignments = async (req, res) => {
   }
 };
 
-/**
- * Fetch invigilator assignments by specific RoomAssignment ID
- */
+
 export const getInvigilatorAssignmentsByRoom = async (req, res) => {
   const roomAssignmentId = Number(req.params.roomAssignmentId);
 

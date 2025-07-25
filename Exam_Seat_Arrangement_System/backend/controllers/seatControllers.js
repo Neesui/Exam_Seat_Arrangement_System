@@ -2,6 +2,7 @@ import prisma from "../utils/db.js";
 import { spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+import os from "os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,7 +54,7 @@ export const generateSeatingPlan = async (req, res) => {
         room: {
           include: {
             benches: {
-              orderBy: [{ row: 'asc' }, { column: 'asc' }],
+              orderBy: [{ row: "asc" }, { column: "asc" }],
             },
           },
         },
@@ -71,8 +72,12 @@ export const generateSeatingPlan = async (req, res) => {
       roomAssignments,
     };
 
-    const pythonPath = path.join(__dirname, "../algorithm/seating_algorithm_ga.py");
-    const python = spawn("python3", [pythonPath]); // Use python3 command
+    const pythonPath = path.join(__dirname, "../algorithm/seating_algorithm.py");
+
+    // Use python on Windows, python3 on others
+    const pythonCmd = os.platform() === "win32" ? "python" : "python3";
+
+    const python = spawn(pythonCmd, [pythonPath]);
 
     let result = "";
     let errorOutput = "";
