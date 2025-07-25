@@ -1,56 +1,79 @@
 import { PrismaClient } from "@prisma/client";
-import { spawn } from "child_process";
+import { spawn, spawnSync } from "child_process";
 import path from "path";
 
 const prisma = new PrismaClient();
 
+/**
+ * Detects the Python executable to use.
+ * Tries "python3" first, then "python".
+ * Throws an error if neither found.
+ */
+function getPythonCommand() {
+  let res = spawnSync("python3", ["--version"]);
+  if (res.status === 0) return "python3";
+
+  res = spawnSync("python", ["--version"]);
+  if (res.status === 0) return "python";
+
+  throw new Error("Python executable not found. Please install Python and ensure it's in your PATH.");
+}
+
 export const runAndSaveRoomAssignments = async (req, res) => {
   try {
-    const exams = await prisma.exam.findMany({
+    const { examId } = req.body;
+    if (!examId || isNaN(examId)) {
+      return res.status(400).json({ success: false, message: "Valid examId is required in request body" });
+    }
+
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
       include: {
         subject: {
           include: {
-            semester: {
-              include: {
-                course: true,
-              },
-            },
+            semester: { include: { course: true } },
           },
         },
-        seatingPlans: {
-          include: {
-            seats: {                 // <-- corrected plural 'seats'
-              include: {
-                student: true,
-              },
-            },
-          },
-        },
-        roomAssignments: true,
       },
     });
+
+    if (!exam) {
+      return res.status(404).json({ success: false, message: "Exam not found" });
+    }
+
+    const students = await prisma.student.findMany({
+      where: {
+        semesterId: exam.subject.semester.id,
+        courseId: exam.subject.semester.courseId,
+      },
+    });
+
+    if (!students.length) {
+      return res.status(200).json({ success: true, message: "No students found for this exam" });
+    }
 
     const rooms = await prisma.room.findMany({
-      include: {
-        benches: true,
-      },
+      include: { benches: true },
     });
 
-    // Prepare input data for Python algorithm
+    // Prepare input JSON for Python script
     const input = {
-      exams: exams.map((exam) => ({
-        id: exam.id,
-        date: exam.date,
-        startTime: exam.startTime,
-        endTime: exam.endTime,
-        students: exam.seatingPlans
-          .flatMap((sp) => sp.seats)  // flatten all seats
-          .map((seat) => seat.student)
-          .filter(Boolean),
-      })),
+      exams: [
+        {
+          id: exam.id,
+          startTime: exam.startTime?.toISOString(),
+          endTime: exam.endTime?.toISOString(),
+          students: students.map((s) => ({
+            id: s.id,
+            name: s.studentName,
+            symbolNumber: s.symbolNumber,
+            college: s.college,
+          })),
+        },
+      ],
       rooms: rooms.map((room) => ({
         id: room.id,
-        name: room.roomNumber,
+        roomNumber: room.roomNumber,
         benches: room.benches.map((bench) => ({
           id: bench.id,
           capacity: bench.capacity,
@@ -58,7 +81,9 @@ export const runAndSaveRoomAssignments = async (req, res) => {
       })),
     };
 
-    const pythonProcess = spawn("python", [
+    const pythonCmd = getPythonCommand();
+
+    const pythonProcess = spawn(pythonCmd, [
       path.join("algorithm", "roomAssignment_algorithm.py"),
     ]);
 
@@ -77,24 +102,18 @@ export const runAndSaveRoomAssignments = async (req, res) => {
     pythonProcess.stdin.end();
 
     pythonProcess.on("close", async (code) => {
-      if (code !== 0) {
+      if (code !== 0 || errorOutput) {
         return res.status(500).json({
           success: false,
-          message: "Python script failed",
-          error: errorOutput,
+          message: "Python script error",
+          error: errorOutput || `Exited with code ${code}`,
         });
       }
 
       let assignments;
       try {
         assignments = JSON.parse(result);
-        if (assignments.error) {
-          return res.status(500).json({
-            success: false,
-            message: "Python script error",
-            error: assignments,
-          });
-        }
+        if (!Array.isArray(assignments)) throw new Error("Invalid Python output format");
       } catch (err) {
         return res.status(500).json({
           success: false,
@@ -103,53 +122,35 @@ export const runAndSaveRoomAssignments = async (req, res) => {
         });
       }
 
-      if (!assignments.length) {
-        return res.status(200).json({
-          success: true,
-          message: "No assignments to save",
-          assignments: [],
-        });
-      }
+      // Cancel any active assignments for this exam
+      await prisma.roomAssignment.updateMany({
+        where: { examId, status: "ACTIVE" },
+        data: { status: "CANCELED" },
+      });
 
+      // Save new assignments
       const savedAssignments = [];
-
       for (const assignment of assignments) {
-        if (!assignment.examId || !assignment.roomId) continue;
-
-        // Cancel existing active assignments for this exam
-        await prisma.roomAssignment.updateMany({
-          where: {
-            examId: assignment.examId,
-            status: "ACTIVE",
-          },
+        const saved = await prisma.roomAssignment.create({
           data: {
-            status: "CANCELED",
-          },
-        });
-
-        // Create new active assignment
-        const newAssignment = await prisma.roomAssignment.create({
-          data: {
-            examId: assignment.examId,
+            examId,
             roomId: assignment.roomId,
             status: "ACTIVE",
             assignedAt: new Date(assignment.assignedAt),
-            completedAt: assignment.completedAt
-              ? new Date(assignment.completedAt)
-              : null,
+            completedAt: assignment.completedAt ? new Date(assignment.completedAt) : null,
           },
         });
-
-        savedAssignments.push(newAssignment);
+        savedAssignments.push(saved);
       }
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
-        message: "Room assignments saved and returned",
+        message: "Room assignments saved successfully",
         assignments: savedAssignments,
       });
     });
   } catch (error) {
+    console.error("Error in runAndSaveRoomAssignments:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -195,9 +196,7 @@ export const getAllRoomAssignments = async (req, res) => {
     });
   } catch (err) {
     console.error("Fetch all assignments error:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to fetch room assignments", error: err.message });
+    res.status(500).json({ success: false, message: "Failed to fetch room assignments", error: err.message });
   }
 };
 
