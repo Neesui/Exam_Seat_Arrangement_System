@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { FaBell, FaSearch, FaBars, FaTimes } from "react-icons/fa";
-import Sidebar from "./InvSidebar";
 import { logout as logoutAction} from '../../redux/features/authReduer'
 import { useLogoutMutation } from '../../redux/api/authApi';
 import { useDispatch } from 'react-redux';
 import { Outlet } from "react-router-dom";
+import InvSidebar from "./InvSidebar";
 
 
 const InvNavbar = () => {
@@ -153,7 +153,7 @@ const InvNavbar = () => {
       {/* Sidebar */}
       <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+      <InvSidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       {/* Page Content */}
       <div className="flex-1  ml-64 md:ml-64">
