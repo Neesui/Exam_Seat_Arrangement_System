@@ -22,6 +22,15 @@ const ViewExamDetailsPage = () => {
     return isoDate ? new Date(isoDate).toISOString().split("T")[0] : "-";
   };
 
+  const formatTime = (isoTime) => {
+    const date = new Date(isoTime);
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
+
   return (
     <div className="max-w-4xl mx-auto mt-20 p-4">
       <div className="bg-white rounded shadow-md border border-gray-200 p-6">
@@ -67,7 +76,8 @@ const ViewExamDetailsPage = () => {
             <tr>
               <td className="border px-4 py-2 font-semibold">Time</td>
               <td className="border px-4 py-2">
-                {exam.startTime || "-"} - {exam.endTime || "-"}
+                {exam.startTime ? formatTime(exam.startTime) : "-"} -{" "}
+                {exam.endTime ? formatTime(exam.endTime) : "-"}
               </td>
             </tr>
           </tbody>
