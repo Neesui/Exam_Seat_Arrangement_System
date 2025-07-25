@@ -61,7 +61,7 @@ const ViewRoomAssignDetailsPage = () => {
         </div>
 
         {/* Exam Details */}
-        {exam   ? (
+        {exam ? (
           <>
             <div className="border border-gray-300 rounded p-4 mb-6 bg-gray-50">
               <h3 className="text-lg font-semibold text-gray-700 mb-4">
@@ -123,7 +123,6 @@ const ViewRoomAssignDetailsPage = () => {
                       <th className="border px-4 py-2">Floor</th>
                       <th className="border px-4 py-2">Total Benches</th>
                       <th className="border px-4 py-2">Total Capacity</th>
-                      <th className="border px-4 py-2">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -134,13 +133,6 @@ const ViewRoomAssignDetailsPage = () => {
                         <td className="border px-4 py-2">{assignment.room?.floor}</td>
                         <td className="border px-4 py-2 text-center">{assignment.room?.totalBench || 0}</td>
                         <td className="border px-4 py-2 text-center">{assignment.room?.totalCapacity || 0}</td>
-                        <td className="border px-4 py-2 text-center">
-                          {assignment.isCompleted
-                            ? "Completed"
-                            : assignment.isActive
-                            ? "Active"
-                            : "Inactive"}
-                        </td>
                       </tr>
                     ))}
                   </tbody>

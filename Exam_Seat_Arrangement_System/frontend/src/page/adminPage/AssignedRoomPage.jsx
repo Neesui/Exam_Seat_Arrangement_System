@@ -28,7 +28,7 @@ const AssignedRoomPage = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Assigned Rooms</h1>
+      <h1 className="text-2xl mt-15 font-bold mb-5">Assigned Rooms</h1>
       <button
         onClick={handleGenerate}
         disabled={generating}
