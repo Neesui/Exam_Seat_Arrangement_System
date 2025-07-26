@@ -12,7 +12,7 @@ const Navbar = () => {
   const navItems = [
     { id: 1, text: 'Home', link: '/' },
     { id: 2, text: 'About', link: '/about' },
-    { id: 3, text: 'View Exam Room', link: '/exam-room' },
+    { id: 3, text: 'View Exam Room', link: '/exam_room' },
   ];
 
   return (
