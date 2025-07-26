@@ -60,7 +60,7 @@ def fitness(individual, student_colleges):
         unique_colleges = len(set(students))
         score += unique_colleges * 10 - (len(students) - unique_colleges) * 5
 
-    score += len(individual)  # Prefer seating more students
+    score += len(individual)  
     return score
 
 def crossover(parent1, parent2):

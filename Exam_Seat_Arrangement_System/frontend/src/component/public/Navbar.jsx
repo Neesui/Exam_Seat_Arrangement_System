@@ -1,39 +1,44 @@
 import React, { useState } from 'react';
 import { AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
-  // State to manage the navbar's visibility
   const [nav, setNav] = useState(false);
 
-  // Toggle function to handle the navbar's display
   const handleNav = () => {
     setNav(!nav);
   };
 
-  // Array containing navigation items
   const navItems = [
-    { id: 1, text: 'Home' },
-    { id: 2, text: 'Company' },
-    { id: 3, text: 'Resources' },
-    { id: 4, text: 'About' },
-    { id: 5, text: 'Contact' },
+    { id: 1, text: 'Home', link: '/' },
+    { id: 2, text: 'About', link: '/about' },
+    { id: 3, text: 'View Exam Room', link: '/exam-room' },
   ];
 
   return (
-    <div className='bg-black flex justify-between items-center h-24  mx-auto px-4 text-white'>
+    <div className='bg-[#150671] flex justify-between items-center h-24 mx-auto px-4 text-white'>
       {/* Logo */}
-      <h1 className='w-full text-3xl font-bold text-[#00df9a]'>REACT.</h1>
+      <h1 className='text-3xl ml-25 font-bold text-white'>ABC College</h1>
 
       {/* Desktop Navigation */}
-      <ul className='hidden md:flex'>
+      <ul className='hidden md:flex mr-25 items-center'>
         {navItems.map(item => (
           <li
             key={item.id}
-            className='p-4 hover:bg-[#00df9a] rounded-xl m-2 cursor-pointer duration-300 hover:text-black'
+            className='p-4 m-2 font-bold text-xl hover:bg-[#87c8de] rounded-xl cursor-pointer duration-300 hover:text-black'
           >
-            {item.text}
+            <Link to={item.link}>{item.text}</Link>
           </li>
         ))}
+        {/* Login Button */}
+        <li className='ml-4 font-bold text-xl'>
+          <Link
+            to='/login'
+            className='bg-[#ff0000] text-white px-4 py-2 rounded-sm hover:bg-[#51a48f] duration-300'
+          >
+            Login
+          </Link>
+        </li>
       </ul>
 
       {/* Mobile Navigation Icon */}
@@ -45,20 +50,22 @@ const Navbar = () => {
       <ul
         className={
           nav
-            ? 'fixed md:hidden left-0 top-0 w-[60%] h-full border-r border-r-gray-900 bg-[#000300] ease-in-out duration-500'
+            ? 'fixed md:hidden left-0 top-0 w-[60%] h-full border-r border-r-gray-900 bg-[#150671] ease-in-out duration-500'
             : 'ease-in-out w-[60%] duration-500 fixed top-0 bottom-0 left-[-100%]'
         }
       >
         {/* Mobile Logo */}
-        <h1 className='w-full text-3xl font-bold text-[#00df9a] m-4'>REACT.</h1>
+        <h1 className='text-3xl font-bold text-white m-4'>ABC College</h1>
 
         {/* Mobile Navigation Items */}
         {navItems.map(item => (
           <li
             key={item.id}
-            className='p-4 border-b rounded-xl hover:bg-[#00df9a] duration-300 hover:text-black cursor-pointer border-gray-600'
+            className='p-4 border-b border-gray-300 font-bold text-lg hover:bg-[#00df9a] rounded-xl duration-300 hover:text-black cursor-pointer'
           >
-            {item.text}
+            <Link to={item.link} onClick={() => setNav(false)}>
+              {item.text}
+            </Link>
           </li>
         ))}
       </ul>
