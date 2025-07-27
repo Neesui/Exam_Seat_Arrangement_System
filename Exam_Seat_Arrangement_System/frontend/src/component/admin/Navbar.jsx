@@ -1,16 +1,17 @@
 import React, { useState } from "react";
-import { FaBell, FaSearch, FaBars, FaTimes } from "react-icons/fa";
-import Sidebar from "./SideBar";
-import { logout as logoutAction} from '../../redux/features/authReduer'
-import { useLogoutMutation } from '../../redux/api/authApi';
-import { useDispatch } from 'react-redux';
+import { FaBars, FaTimes } from "react-icons/fa";
+import { logout as logoutAction } from "../../redux/features/authReduer";
+import { useLogoutMutation } from "../../redux/api/authApi";
+import { useDispatch } from "react-redux";
 import { Outlet } from "react-router-dom";
-
+import Sidebar from "./SideBar";
+import SearchBox from "../public/SearchBox";
 
 const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const toggleMobileSearch = () => setMobileSearchOpen(!mobileSearchOpen);
@@ -22,51 +23,36 @@ const Navbar = () => {
     try {
       await logout().unwrap();
       dispatch(logoutAction());
-      // toast.success("Logged out successfully");
       window.location.href = "/";
     } catch (err) {
       console.error(err);
-      // toast.error(err?.data?.message || "Logout failed");
-    }
-  };
+    }
+  };
+
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+    console.log("Searching for:", term);
+  };
 
   return (
     <>
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur bg-white/80 border-b border-gray-200 px-4 py-2.5 flex justify-between items-center">
         {/* Left side */}
-        {/* Mobile NC Admin */}
-        <div className="md:hidden text-lg font-bold text-gray-800">
-          NC Admin
-        </div>
-
-        {/* Desktop NC Admin */}
-        <div className="hidden md:block text-lg font-bold text-gray-800">
+        <div className="text-lg font-bold text-gray-800">
           NC Admin
         </div>
 
         {/* Right side */}
         <div className="flex items-center space-x-4 md:space-x-6">
-          {/* Desktop Search Input */}
-          <div className="relative hidden md:block w-64">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaSearch className="h-4 w-4 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search"
-              className="block w-full pl-9 pr-3 py-1.5 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+          {/* Desktop SearchBox */}
+          <div className="hidden md:block w-100">
+            <SearchBox
+              value={searchTerm}
+              onChange={handleSearch}
+              placeholder="Search..."
             />
           </div>
-
-          {/* Notifications */}
-          <button
-            className="relative p-2 text-gray-400 hover:text-gray-500 focus:outline-none"
-            aria-label="Notifications"
-          >
-            <FaBell className="h-5 w-5" />
-            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
-          </button>
 
           {/* Profile */}
           <div className="relative">
@@ -107,7 +93,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Search Icon/Input */}
+          {/* Mobile Search Toggle */}
           <div className="md:hidden relative">
             {!mobileSearchOpen && (
               <button
@@ -115,51 +101,43 @@ const Navbar = () => {
                 className="text-gray-600 focus:outline-none"
                 aria-label="Open Search"
               >
-                <FaSearch className="h-6 w-6" />
+                <FaBars className="h-6 w-6" />
               </button>
             )}
-            {mobileSearchOpen && (
-              <div className="relative">
-                <input
-                  type="text"
-                  autoFocus
-                  placeholder="Search"
-                  className="block w-48 pl-3 pr-10 py-1.5 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-                <button
-                  onClick={toggleMobileSearch}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-none"
-                  aria-label="Close Search"
-                >
-                  <FaTimes />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Hamburger menu */}
-          <div className="md:hidden">
-            <button
-              onClick={toggleSidebar}
-              className="text-gray-600 focus:outline-none"
-              aria-label="Toggle sidebar"
-            >
-              <FaBars className="h-6 w-6" />
-            </button>
           </div>
         </div>
       </nav>
 
-      {/* Sidebar */}
-      <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+      {/* Mobile Search Input */}
+      {mobileSearchOpen && (
+        <div className="fixed top-16 left-0 right-0 z-40 bg-white px-4 py-2 shadow-md md:hidden">
+          <div className="flex justify-between items-center">
+            <SearchBox
+              value={searchTerm}
+              onChange={(term) => {
+                handleSearch(term);
+                setMobileSearchOpen(false);
+              }}
+              placeholder="Search..."
+            />
+            <button
+              onClick={toggleMobileSearch}
+              className="ml-2 text-gray-600 focus:outline-none"
+              aria-label="Close Search"
+            >
+              <FaTimes className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
-      {/* Page Content */}
-      <div className="flex-1  ml-64 md:ml-64">
-        <Outlet />
+      {/* Main Layout */}
+      <div className="flex min-h-screen bg-gray-100 pt-14">
+        <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+        <div className="flex-1 ml-64 md:ml-64">
+          <Outlet />
+        </div>
       </div>
-    </div>
     </>
   );
 };
