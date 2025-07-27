@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { FaEnvelope, FaLock } from 'react-icons/fa'; 
-import { useNavigate } from'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useLoginMutation } from '../../redux/api/authApi';
 import { loginSuccess } from '../../redux/features/authReduer';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  // RTK Query mutation hook
   const [login, { isLoading }] = useLoginMutation();
 
   const handleSubmit = async (e) => {
@@ -20,13 +19,9 @@ const LoginForm = () => {
     setError('');
     
     try {
-      // Call the login endpoint
       const result = await login({ email, password }).unwrap();
-      
-      // Update the auth state with the response
       dispatch(loginSuccess(result));
-      
-      // Redirect based on user role
+
       switch (result.user.role) {
         case 'ADMIN':
           navigate('/admin');
@@ -39,28 +34,29 @@ const LoginForm = () => {
       }
     } catch (err) {
       setError(err.data?.error || 'Failed to login');
-    }
-  };
-  return (
-    <div className="flex flex-col gap-4 w-full max-w-[300px]">
-      <h2 className="text-2xl font-bold text-center">Login</h2>
+    }
+  };
 
-      {/* Email input with icon */}
-      <div className="relative">
+  return (
+    <div className="w-full max-w-[400px] bg-white p-8 rounded-lg">
+      <h2 className="text-3xl font-bold text-center mb-6">Login</h2>
+
+      {/* Email input */}
+      <div className="relative mb-5">
         <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <input
           id="email"
           name="email"
-          type="email"
+          type="email"
           placeholder="Email address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="pl-10 pr-4 py-4 w-full border rounded-md focus:outline-none"
+          className="pl-10 pr-5 py-5 w-full border rounded-md focus:outline-none"
         />
       </div>
 
-      {/* Password input with icon */}
-      <div className="relative">
+      {/* Password input */}
+      <div className="relative mb-5">
         <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <input 
           id="password"
@@ -69,20 +65,28 @@ const LoginForm = () => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="pl-10 pr-4 py-4 w-full border rounded-md focus:outline-none"
+          className="pl-10 pr-5 py-5 w-full border rounded-md focus:outline-none"
         />
       </div>
 
-      <div className="flex justify-between items-center text-sm">
+      {/* Responsive "Remember me" and "Forgot Password?" */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center text-[15px] gap-2 mb-5">
         <label className="flex items-center gap-1">
           <input type="checkbox" />
           Remember me
         </label>
-        <a href="#" className="text-red-500 text-[15px] hover:underline">Forgot Password?</a>
+        <a href="#" className="text-red-500 text-[16px] hover:underline">Forgot Password?</a>
       </div>
 
-      <button className="bg-gradient-to-r from-purple-600 to-purple-800 text-white mt-1.5 px-4 py-4 rounded-md" onClick={handleSubmit}>
-        Login
+      {/* Error message */}
+      {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
+
+      {/* Submit button */}
+      <button
+        className="bg-gradient-to-r from-[#038884] to-purple-800 text-white text-xl px-4 py-4 rounded-md w-full font-semibold"
+        onClick={handleSubmit}
+      >
+        {isLoading ? 'Logging in...' : 'Login'}
       </button>
     </div>
   );
