@@ -62,6 +62,7 @@ export const getAllInvigilator = async (req, res) => {
     const invigilators = await prisma.user.findMany({
       where: { role: "INVIGILATOR" },
       include: { invigilator: true },
+      orderBy: { createdAt: "desc" },
     });
 
     const formatted = invigilators.map((user) => ({

@@ -1,18 +1,29 @@
 import React from "react";
-import { useGetAllInvigilatorsQuery } from "../../redux/api/invigilatorApi"; 
+import { useGetAllInvigilatorsQuery } from "../../redux/api/invigilatorApi"; // adjust path if needed
 
 const RecentInvigilator = () => {
   const {
-    data: invigilators = [],
+    data,
     isLoading,
     isError,
-  } = useGetAllInvigilatorsQuery();
+    refetch,
+  } = useGetAllInvigilatorsQuery(undefined, {
+    pollingInterval: 10000, // auto-refresh every 10 seconds (optional)
+  });
 
-  const latest = invigilators[0]; 
+  const latest = data?.invigilators?.[0]; // get most recent invigilator
 
   return (
     <div className="bg-white shadow-md p-6 rounded-md max-w-md mx-auto mt-10">
-      <h2 className="text-2xl font-semibold mb-4">Recently Added</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">Recently Added</h2>
+        <button
+          onClick={refetch}
+          className="text-sm text-blue-600 underline hover:text-blue-800"
+        >
+          Refresh
+        </button>
+      </div>
 
       {isLoading ? (
         <p className="text-gray-500">Loading...</p>
@@ -24,7 +35,7 @@ const RecentInvigilator = () => {
         <div className="flex items-center gap-4 p-4 rounded bg-red-200">
           <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-300">
             <img
-              src={latest.avatar || "https://via.placeholder.com/150"}
+              src={latest.image || "https://via.placeholder.com/150"}
               alt={latest.name}
               className="w-full h-full object-cover"
             />
