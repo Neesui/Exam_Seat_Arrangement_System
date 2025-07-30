@@ -16,7 +16,7 @@ const RecentInvigilator = () => {
   return (
     <div className="bg-white shadow-md p-6 rounded-md max-w-md mx-auto mt-10">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold">Recently Added</h2>
+        <h2 className="text-2xl font-semibold">All Invigilator</h2>
         <button
           onClick={refetch}
           className="text-sm text-blue-600 underline hover:text-blue-800"

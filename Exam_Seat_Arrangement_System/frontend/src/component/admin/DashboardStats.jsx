@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";  // Import useNavigate
 import {
   FaUserGraduate,
   FaChalkboardTeacher,
@@ -12,6 +13,8 @@ import { useGetAllRoomAssignmentsQuery } from "../../redux/api/roomAssignApi";
 import { useGetAllSeatingPlansQuery } from "../../redux/api/seatPlanApi";
 
 const DashboardStats = () => {
+  const navigate = useNavigate(); // Initialize navigate
+
   const {
     data: studentsData,
     isLoading: loadingStudents,
@@ -78,24 +81,28 @@ const DashboardStats = () => {
       value: students.length,
       icon: <FaUserGraduate className="text-green-600" size={32} />,
       iconBg: "bg-green-100",
+      route: "/viewStudents",
     },
     {
       label: "Invigilators",
       value: invigilators.length,
       icon: <FaChalkboardTeacher className="text-blue-600" size={32} />,
       iconBg: "bg-blue-100",
+      route: "/viewInvigilator",
     },
     {
       label: "Active Room Assignments",
       value: activeAssignments.length,
       icon: <FaDoorOpen className="text-yellow-600" size={32} />,
       iconBg: "bg-yellow-100",
+      route: "/viewRoomAssign",
     },
     {
       label: "Active Seating Plans",
       value: activeSeatingPlans.length,
       icon: <FaClipboardList className="text-red-600" size={32} />,
       iconBg: "bg-red-100",
+      route: "/viewSeatingPlan",
     },
   ];
 
@@ -111,7 +118,9 @@ const DashboardStats = () => {
         {statItems.map((item) => (
           <div
             key={item.label}
-            className="flex items-center bg-white shadow-sm rounded-lg p-5 hover:shadow-md transition"
+            onClick={() => navigate(item.route)} // Navigate on click
+            className="cursor-pointer flex items-center bg-white shadow-sm rounded-lg p-5 hover:shadow-md transition"
+            title={`Go to ${item.label}`} // Tooltip on hover
           >
             <div
               className={`rounded-full p-4 ${item.iconBg} flex items-center justify-center`}
