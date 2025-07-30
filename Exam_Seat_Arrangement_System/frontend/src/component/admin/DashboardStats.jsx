@@ -1,8 +1,9 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";  // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import {
   FaUserGraduate,
   FaChalkboardTeacher,
+  FaBookOpen,
   FaDoorOpen,
   FaClipboardList,
 } from "react-icons/fa";
@@ -11,9 +12,10 @@ import { useGetAllStudentsQuery } from "../../redux/api/studentApi";
 import { useGetAllInvigilatorsQuery } from "../../redux/api/invigilatorApi";
 import { useGetAllRoomAssignmentsQuery } from "../../redux/api/roomAssignApi";
 import { useGetAllSeatingPlansQuery } from "../../redux/api/seatPlanApi";
+import { useGetExamsQuery } from "../../redux/api/examApi";
 
 const DashboardStats = () => {
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const {
     data: studentsData,
@@ -39,25 +41,33 @@ const DashboardStats = () => {
     isError: errorSeats,
   } = useGetAllSeatingPlansQuery();
 
+  const {
+    data: examsData,
+    isLoading: loadingExams,
+    isError: errorExams,
+  } = useGetExamsQuery();
+
   const isLoading =
-    loadingStudents || loadingInvigilators || loadingAssignments || loadingSeats;
+    loadingStudents ||
+    loadingInvigilators ||
+    loadingAssignments ||
+    loadingSeats ||
+    loadingExams;
 
   const isError =
-    errorStudents || errorInvigilators || errorAssignments || errorSeats;
+    errorStudents ||
+    errorInvigilators ||
+    errorAssignments ||
+    errorSeats ||
+    errorExams;
 
-  // Extract arrays safely from API responses
   const students = studentsData?.students || [];
   const invigilators = invigilatorsData?.invigilators || [];
-
-  // Room assignments and filter active ones
   const roomAssignments = assignmentsData?.assignments || [];
-  const activeAssignments = roomAssignments.filter(
-    (a) => a.status === "ACTIVE"
-  );
-
-  // Seating plans and filter active ones
+  const activeAssignments = roomAssignments.filter((a) => a.status === "ACTIVE");
   const seatingPlans = seatingPlansData?.data || [];
   const activeSeatingPlans = seatingPlans.filter((sp) => sp.isActive);
+  const exams = examsData?.exams || [];
 
   if (isLoading) {
     return (
@@ -91,6 +101,13 @@ const DashboardStats = () => {
       route: "/viewInvigilator",
     },
     {
+      label: "Exams",
+      value: exams.length,
+      icon: <FaBookOpen className="text-purple-600" size={32} />,
+      iconBg: "bg-purple-100",
+      route: "/viewExam",
+    },
+    {
       label: "Active Room Assignments",
       value: activeAssignments.length,
       icon: <FaDoorOpen className="text-yellow-600" size={32} />,
@@ -107,20 +124,20 @@ const DashboardStats = () => {
   ];
 
   return (
-    <div className="bg-gray-100 min-h-screen py-6 px-6">
+    <div className="bg-gray-100 py-6 px-6">
       <h1 className="text-2xl font-bold mb-2">Admin Dashboard</h1>
       <p className="text-sm text-gray-600 mb-6">
         Home <span className="text-yellow-500">› Admin</span>
       </p>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
         {statItems.map((item) => (
           <div
             key={item.label}
-            onClick={() => navigate(item.route)} // Navigate on click
+            onClick={() => navigate(item.route)}
             className="cursor-pointer flex items-center bg-white shadow-sm rounded-lg p-5 hover:shadow-md transition"
-            title={`Go to ${item.label}`} // Tooltip on hover
+            title={`Go to ${item.label}`}
+            style={{ minHeight: "100px" }}
           >
             <div
               className={`rounded-full p-4 ${item.iconBg} flex items-center justify-center`}

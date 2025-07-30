@@ -1,5 +1,5 @@
 import React from "react";
-import { useGetAllInvigilatorsQuery } from "../../redux/api/invigilatorApi"; // adjust path if needed
+import { useGetAllInvigilatorsQuery } from "../../redux/api/invigilatorApi"; 
 
 const RecentInvigilator = () => {
   const {
@@ -8,13 +8,13 @@ const RecentInvigilator = () => {
     isError,
     refetch,
   } = useGetAllInvigilatorsQuery(undefined, {
-    pollingInterval: 10000, // auto-refresh every 10 seconds (optional)
+    pollingInterval: 10000, 
   });
 
-  const latest = data?.invigilators?.[0]; // get most recent invigilator
+  const latest = data?.invigilators?.[0]; 
 
   return (
-    <div className="bg-white shadow-md p-6 rounded-md max-w-md mx-auto mt-10">
+    <div className="bg-white shadow-md p-6 rounded-md max-w-md mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">All Invigilator</h2>
         <button
