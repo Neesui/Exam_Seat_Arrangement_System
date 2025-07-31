@@ -22,7 +22,7 @@ const ViewBenchByRoomPage = () => {
   } = useGetRoomByIdQuery(Number(roomId));
 
   return (
-    <div className="mt-20 bg-white p-6 rounded-lg shadow-md w-full max-w-screen-lg mx-auto">
+    <div className="mt-5 bg-white p-6 rounded-lg shadow-md w-full max-w-screen-lg mx-auto">
       <div className="relative mb-6">
         <button
           onClick={() => navigate(-1)}

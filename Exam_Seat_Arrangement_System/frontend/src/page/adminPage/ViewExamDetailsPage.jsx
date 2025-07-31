@@ -32,7 +32,7 @@ const ViewExamDetailsPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-20 p-4">
+    <div className="max-w-4xl mx-auto mt-5 p-4">
       <div className="bg-white rounded shadow-md border border-gray-200 p-6">
 
         <div className="relative mb-6">

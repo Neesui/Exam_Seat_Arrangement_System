@@ -47,7 +47,7 @@ const ViewRoomAssignPage = () => {
   };
 
   return (
-    <div className="bg-white p-6 mt-15 rounded-lg shadow-md w-full max-w-full overflow-x-auto">
+    <div className="bg-white p-6 mt-5 rounded-lg shadow-md w-full max-w-full overflow-x-auto">
       <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">Room Assignments</h2>
 
       {isLoading ? (

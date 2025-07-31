@@ -61,7 +61,7 @@ const AddInvigilatorPage = () => {
   };
 
   return (
-    <div className="mx-auto max-w-5xl bg-white p-6 rounded-lg shadow-md mt-20">
+    <div className="mx-auto max-w-5xl bg-white p-6 rounded-lg shadow-md mt-5">
       <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Add New Invigilator</h2>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">

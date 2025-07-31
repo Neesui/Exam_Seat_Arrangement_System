@@ -60,7 +60,7 @@ const ViewInvigilatorPage = () => {
   };
 
   return (
-    <div className="ml-8 mt-20 bg-white p-6 rounded-lg shadow-md max-w-[95%] mx-auto">
+    <div className="ml-8 mt-5 bg-white p-6 rounded-lg shadow-md max-w-[95%] mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">View Invigilators</h2>
 
       {/* Search Filters */}

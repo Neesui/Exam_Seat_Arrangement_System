@@ -12,7 +12,7 @@ const ViewStudentsByCollege = () => {
   const students = data?.students || [];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto mt-10 bg-white shadow rounded">
+    <div className="p-6 max-w-5xl mx-auto mt-5 bg-white shadow rounded">
       <h2 className="text-2xl font-bold mb-4 text-center">Students from {collegeName}</h2>
 
       {students.length === 0 ? (

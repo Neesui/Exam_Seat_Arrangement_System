@@ -91,7 +91,7 @@ const ViewStudentPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full mt-8 bg-gray-100 py-12 px-2 overflow-auto">
+    <div className="min-h-screen w-full bg-gray-100 py-12 px-2 overflow-auto">
       <div className="max-w-7xl mx-auto bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-3xl font-bold mb-8 text-gray-800 text-center">All Students</h2>
 

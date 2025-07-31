@@ -58,7 +58,7 @@ const ViewInvigilatorAssignPage = () => {
   const groupedList = Object.values(groupedAssignments);
 
   return (
-    <div className="w-full px-4 py-6 mt-15 bg-white rounded-lg shadow-md">
+    <div className="w-full px-4 py-6 mt-5 bg-white rounded-lg shadow-md">
       <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
         Invigilator Assignments
       </h2>

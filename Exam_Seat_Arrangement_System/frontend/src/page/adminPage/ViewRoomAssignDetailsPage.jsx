@@ -44,7 +44,7 @@ const ViewRoomAssignDetailsPage = () => {
   );
 
   return (
-    <div className="max-w-6xl mx-auto mt-20 p-4">
+    <div className="max-w-6xl mx-auto mt-5 p-4">
       <div className="bg-white shadow rounded border border-gray-200 p-6">
         {/* Header */}
         <div className="relative mb-6">

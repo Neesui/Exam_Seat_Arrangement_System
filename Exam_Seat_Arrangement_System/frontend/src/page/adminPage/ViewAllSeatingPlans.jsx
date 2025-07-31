@@ -36,7 +36,7 @@ const ViewAllSeatingPlans = () => {
   const totalPages = Math.ceil(totalPlans / plansPerPage);
 
   return (
-    <div className="mt-16 p-6 max-w-screen-xl mx-auto bg-white rounded shadow">
+    <div className="mt-5 p-6 max-w-screen-xl mx-auto bg-white rounded shadow">
       <h2 className="text-4xl font-bold text-center mb-6">All Seating Plans</h2>
 
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 print:hidden">

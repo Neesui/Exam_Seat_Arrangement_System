@@ -4,7 +4,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import { useGetInvigilatorByIdQuery } from "../../redux/api/invigilatorApi";
 
 const ViewInvigilatorDetailsPage = () => {
-  const { id } = useParams(); // get invigilator id from URL
+  const { id } = useParams(); 
   const navigate = useNavigate();
 
   const { data, error, isLoading } = useGetInvigilatorByIdQuery(id);
@@ -22,7 +22,7 @@ const ViewInvigilatorDetailsPage = () => {
   const inv = data?.invigilator || {};
 
   return (
-    <div className="max-w-6xl mx-auto mt-20 p-6 bg-white rounded shadow">
+    <div className="max-w-6xl mx-auto mt-5 p-6 bg-white rounded shadow">
       {/* Header */}
       <div className="relative mb-6">
         <button
