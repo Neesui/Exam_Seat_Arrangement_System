@@ -189,3 +189,43 @@ export const getInvigilatorAssignmentsByRoom = async (req, res) => {
     });
   }
 };
+// Update invigilator assignment status and auto set completedAt
+export const updateInvigilatorAssignmentStatus = async (req, res) => {
+  const { id } = req.params; // assignment ID
+  const { status } = req.body;
+  const VALID_STATUSES = ["ASSIGNED", "COMPLETED"];
+
+
+  if (!VALID_STATUSES.includes(status)) {
+    return res.status(400).json({ success: false, message: "Invalid status" });
+  }
+
+  try {
+    const updateData = { status };
+
+    if (status === "COMPLETED") {
+      updateData.completedAt = new Date();
+    } else if (status === "ASSIGNED") {
+      updateData.completedAt = null; // clear completedAt if reverting status
+    }
+
+    const updatedAssignment = await prisma.invigilatorAssignment.update({
+      where: { id: Number(id) },
+      data: updateData,
+      include: {
+        invigilator: { include: { user: true } },
+        roomAssignment: true,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Assignment status updated successfully",
+      assignment: updatedAssignment,
+    });
+  } catch (error) {
+    console.error("Error updating invigilator assignment status:", error);
+    res.status(500).json({ success: false, message: error.message || "Server error" });
+  }
+};
+
