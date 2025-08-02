@@ -85,7 +85,7 @@ const ViewInvigilatorAssignPage = () => {
   return (
     <div className="w-full px-4 py-6 mt-5 bg-white rounded-lg shadow-md">
       <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
-        Invigilator Assignments
+       All Invigilator Assignments
       </h2>
 
       {isLoading ? (
