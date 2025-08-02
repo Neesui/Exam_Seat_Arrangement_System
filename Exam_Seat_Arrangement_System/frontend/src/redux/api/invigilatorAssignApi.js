@@ -17,6 +17,15 @@ export const invigilatorAssignApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["INV_ASSIGN"],
     }),
+    updateInvigilatorAssign: builder.mutation({
+      query: ({ id, status }) => ({
+        url: `/api/invigilator/assignments/${id}`,
+        method: "PUT",
+        body: { status },
+      }),
+      invalidatesTags: ["INV_ASSIGN"],
+    }),
+    
     deleteInvigilatorAssign: builder.mutation({
       query: (id) => ({
         url: `/api/invigilator/assignments/${id}`,
@@ -29,6 +38,7 @@ export const invigilatorAssignApi = apiSlice.injectEndpoints({
 
 export const {
   useGetAllInvigilatorAssignmentsQuery,
+  useUpdateInvigilatorAssignMutation,
   useGetInvigilatorAssignmentsByRoomQuery,
   useGenerateInvigilatorAssignmentsMutation,
   useDeleteInvigilatorAssignMutation,

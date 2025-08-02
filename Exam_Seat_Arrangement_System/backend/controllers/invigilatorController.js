@@ -61,25 +61,39 @@ export const getAllInvigilator = async (req, res) => {
   try {
     const invigilators = await prisma.user.findMany({
       where: { role: "INVIGILATOR" },
-      include: { invigilator: true },
+      include: { 
+        invigilator: {
+          include: {
+            invigilatorAssignments: {
+              where: { status: "ASSIGNED" },  // only currently assigned
+              orderBy: { assignedAt: "desc" },
+              take: 1, // latest active assignment
+            }
+          }
+        }
+      },
       orderBy: { createdAt: "desc" },
     });
 
-    const formatted = invigilators.map((user) => ({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      course: user.invigilator?.course || '',
-      phone: user.invigilator?.phone || '',
-      address: user.invigilator?.address || '',
-      gender: user.invigilator?.gender || '',
-      image: user.invigilator?.imageUrl
-        ? `${process.env.BASE_URL || "http://localhost:3000"}${user.invigilator.imageUrl}`
-        : null,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    }));
+    const formatted = invigilators.map((user) => {
+      const assignment = user.invigilator?.invigilatorAssignments[0];
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        course: user.invigilator?.course || '',
+        phone: user.invigilator?.phone || '',
+        address: user.invigilator?.address || '',
+        gender: user.invigilator?.gender || '',
+        image: user.invigilator?.imageUrl
+          ? `${process.env.BASE_URL || "http://localhost:3000"}${user.invigilator.imageUrl}`
+          : null,
+        assignedStatus: assignment ? assignment.status : "NOT ASSIGNED",
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+    });
 
     res.json({
       success: true,
@@ -92,6 +106,7 @@ export const getAllInvigilator = async (req, res) => {
     res.status(500).json({ success: false, message: error.message || "Server Error" });
   }
 };
+
 
 // Get single invigilator by user id
 export const getInvigilatorById = async (req, res) => {

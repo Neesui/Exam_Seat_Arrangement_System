@@ -34,6 +34,7 @@ import AssignedInvigilatorPage from "../../page/adminPage/AssignedInvigilatorPag
 import UpdateRoomAssignPage from "../../page/adminPage/UpdateRoomAssignPage";
 import ViewInvigilatorDetailsPage from "../../page/adminPage/ViewInvigilatorDetailsPage";
 import ViewStudentsByCollege from "../../page/publicPage/ViewStudentsByCollege";
+import UpdateInvigilatorAssign from "../../page/adminPage/UpdateInvigilatorAssign";
 
 const adminRoutes = [
   {
@@ -148,6 +149,10 @@ const adminRoutes = [
   {
     path: "/viewInvigilatorAssign",
     element: <ViewInvigilatorAssignPage />,
+  },
+  {
+    path: "/updateInvigilatorAssign/:invigilatorAssignId",
+    element: <UpdateInvigilatorAssign />,
   },
   {
     path: "/addStudents",
