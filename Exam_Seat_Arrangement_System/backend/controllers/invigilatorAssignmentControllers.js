@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from "uuid";
 // Only valid enum values based on your Prisma schema
 const VALID_STATUSES = ["ASSIGNED", "COMPLETED"];
 
-
 export const runAndSaveInvigilatorAssignments = async (req, res) => {
   const scriptPath = path.resolve(process.cwd(), "algorithm", "invigilatorAssignment_algorithm.py");
 
@@ -61,7 +60,7 @@ export const runAndSaveInvigilatorAssignments = async (req, res) => {
     }
 
     try {
-      const generationId = uuidv4(); 
+      const generationId = uuidv4();
 
       const validAssignments = assignments.filter(
         (a) =>
@@ -149,7 +148,6 @@ export const getAllInvigilatorAssignments = async (req, res) => {
     });
   }
 };
-
 
 export const getInvigilatorAssignmentsByRoom = async (req, res) => {
   const roomAssignmentId = Number(req.params.roomAssignmentId);

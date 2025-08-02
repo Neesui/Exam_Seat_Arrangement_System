@@ -100,7 +100,7 @@ const ViewInvigilatorPage = () => {
                 <th className="border border-gray-300 px-4 py-2">Email</th>
                 <th className="border border-gray-300 px-4 py-2">Phone</th>
                 <th className="border border-gray-300 px-4 py-2">Course</th>
-                <th className="border border-gray-300 px-4 py-2">Status</th> {/* New */}
+                <th className="border border-gray-300 px-4 py-2">Status</th> {/* Status */}
                 <th className="border border-gray-300 px-4 py-2">Action</th>
               </tr>
             </thead>
@@ -114,14 +114,18 @@ const ViewInvigilatorPage = () => {
                   <td className="border px-4 py-2">{invigilator.email}</td>
                   <td className="border px-4 py-2">{invigilator.phone}</td>
                   <td className="border px-4 py-2">{invigilator.course}</td>
-                  <td className="border px-4 py-2">
+                  <td className="border px-4 py-2 text-center">
                     {invigilator.assignedStatus === "ASSIGNED" ? (
-                      <span className="text-green-600 font-semibold">Assigned</span>
+                      <span className="bg-green-100 text-green-700 px-2 py-1 rounded font-semibold text-xs">
+                        Assigned
+                      </span>
                     ) : (
-                      <span className="text-gray-600">Not Assigned</span>
+                      <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded font-semibold text-xs">
+                        Not Assigned
+                      </span>
                     )}
                   </td>
-                  <td className="border px-4 py-2 space-x-2">
+                  <td className="border px-4 py-2 space-x-2 text-center">
                     <button
                       className="text-green-500 hover:text-green-700"
                       onClick={() => handleView(invigilator.id)}

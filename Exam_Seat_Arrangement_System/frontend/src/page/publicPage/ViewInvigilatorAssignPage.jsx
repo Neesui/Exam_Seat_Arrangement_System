@@ -35,7 +35,31 @@ const ViewInvigilatorAssignPage = () => {
     }
   };
 
-  // Group assignments by roomAssignmentId
+  // Status badge function like Room Assignments
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "ASSIGNED":
+        return (
+          <span className="bg-green-100 text-green-700 px-2 py-1 text-xs rounded font-semibold">
+            Assigned
+          </span>
+        );
+      case "COMPLETED":
+        return (
+          <span className="bg-blue-100 text-blue-700 px-2 py-1 text-xs rounded font-semibold">
+            Completed
+          </span>
+        );
+      default:
+        return (
+          <span className="bg-gray-100 text-gray-700 px-2 py-1 text-xs rounded font-semibold">
+            Unknown
+          </span>
+        );
+    }
+  };
+
+  // Group assignments by roomAssignmentId and include status
   const groupedAssignments = data?.assignments?.reduce((acc, curr) => {
     const roomAssignmentId = curr.roomAssignmentId;
     if (!acc[roomAssignmentId]) {
@@ -51,6 +75,7 @@ const ViewInvigilatorAssignPage = () => {
       name: curr.invigilator?.user?.name || "N/A",
       email: curr.invigilator?.user?.email || "N/A",
       assignId: curr.id,
+      status: curr.status,
     });
     return acc;
   }, {}) || {};
@@ -76,6 +101,7 @@ const ViewInvigilatorAssignPage = () => {
               <th className="border px-4 py-2">Emails</th>
               <th className="border px-4 py-2">Subject</th>
               <th className="border px-4 py-2">Room</th>
+              <th className="border px-4 py-2">Status</th>
               <th className="border px-4 py-2">Actions</th>
             </tr>
           </thead>
@@ -95,6 +121,13 @@ const ViewInvigilatorAssignPage = () => {
                   </td>
                   <td className="border px-4 py-2 text-center">
                     {group.room || "N/A"}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    {group.invigilators.map((i, idx) => (
+                      <div key={idx} className="mb-1">
+                        {getStatusBadge(i.status)}
+                      </div>
+                    ))}
                   </td>
                   <td className="border px-4 py-2 text-center space-x-2">
                     <button
@@ -122,7 +155,7 @@ const ViewInvigilatorAssignPage = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="text-center text-gray-500 py-4">
+                <td colSpan="7" className="text-center text-gray-500 py-4">
                   No invigilator assignments found.
                 </td>
               </tr>
