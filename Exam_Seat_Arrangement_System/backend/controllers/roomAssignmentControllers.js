@@ -268,8 +268,10 @@ export const updateRoomAssignment = async (req, res) => {
       updateData.status = status;
 
       if (status === "COMPLETED") {
+        // Use provided completedAt or default to now()
         updateData.completedAt = completedAt ? new Date(completedAt) : new Date();
       } else {
+        // Clear completedAt if status is not COMPLETED
         updateData.completedAt = null;
       }
     } else if (completedAt !== undefined) {
@@ -292,6 +294,7 @@ export const updateRoomAssignment = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to update room assignment", error: error.message });
   }
 };
+
 
 export const deleteRoomAssignment = async (req, res) => {
   try {

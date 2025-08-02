@@ -4,11 +4,11 @@ import { toast } from "react-toastify";
 import {
   useGetAllRoomAssignmentsQuery,
   useUpdateRoomAssignMutation,
-} from "../../redux/api/roomAssignApi"; 
+} from "../../redux/api/roomAssignApi";
 import Input from "../../component/public/Input";
 
 const UpdateRoomAssignPage = () => {
-  const { id } = useParams(); // assignment ID
+  const { examId } = useParams();
   const navigate = useNavigate();
 
   const { data, isLoading, error } = useGetAllRoomAssignmentsQuery();
@@ -18,23 +18,39 @@ const UpdateRoomAssignPage = () => {
   const [completedAt, setCompletedAt] = useState("");
 
   useEffect(() => {
-    if (data?.assignments) {
-      const assignment = data.assignments.find((a) => String(a.id) === String(id));
+    if (data?.assignments && examId) {
+      const assignment = data.assignments.find((a) => String(a.id) === String(examId));
       if (assignment) {
         setStatus(assignment.status || "");
         setCompletedAt(
-          assignment.completedAt ? new Date(assignment.completedAt).toISOString().split("T")[0] : ""
+          assignment.completedAt
+            ? new Date(assignment.completedAt).toISOString().split("T")[0]
+            : ""
         );
       }
     }
-  }, [data, id]);
+  }, [data, examId]);
+
+  useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
+    if (status === "COMPLETED" || status === "CANCELED") {
+      setCompletedAt(today);
+    } else {
+      setCompletedAt("");
+    }
+  }, [status]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const assignmentId = Number(examId);
+    if (!assignmentId || isNaN(assignmentId)) {
+      toast.error("Invalid room assignment ID");
+      return;
+    }
 
     try {
       const result = await updateRoomAssign({
-        id: Number(id),
+        id: assignmentId,
         status,
         completedAt: completedAt ? new Date(completedAt).toISOString() : null,
       }).unwrap();
@@ -76,7 +92,7 @@ const UpdateRoomAssignPage = () => {
             </select>
           </div>
 
-          {/* Completed At using Input.jsx */}
+          {/* Completed At */}
           <Input
             id="completedAt"
             label="Completed Date"
@@ -84,11 +100,11 @@ const UpdateRoomAssignPage = () => {
             name="completedAt"
             value={completedAt}
             onChange={(e) => setCompletedAt(e.target.value)}
-            required={status === "COMPLETED"}
-            disabled={status !== "COMPLETED"}
+            required={status === "COMPLETED" || status === "CANCELED"}
+            disabled={status === "ACTIVE"}
           />
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
             className={`w-full p-3 rounded text-white font-semibold transition ${

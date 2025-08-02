@@ -43,6 +43,10 @@ const ViewRoomAssignDetailsPage = () => {
       })) || []
   );
 
+  const assignedRooms = assignments.filter(
+    (assignment) => assignment.room?.roomNumber
+  );
+
   return (
     <div className="max-w-6xl mx-auto mt-5 p-4">
       <div className="bg-white shadow rounded border border-gray-200 p-6">
@@ -108,8 +112,8 @@ const ViewRoomAssignDetailsPage = () => {
             </div>
 
             {/* Room Assignments Table */}
-            {assignments.length === 0 ? (
-              <p className="text-center text-gray-600">No room assignments found.</p>
+            {assignedRooms.length === 0 ? (
+              <p className="text-center text-gray-600">No assigned rooms found.</p>
             ) : (
               <div className="mb-10">
                 <h3 className="text-lg font-semibold text-gray-700 mb-4">
@@ -126,7 +130,7 @@ const ViewRoomAssignDetailsPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {assignments.map((assignment) => (
+                    {assignedRooms.map((assignment) => (
                       <tr key={assignment.id}>
                         <td className="border px-4 py-2">{assignment.room?.roomNumber}</td>
                         <td className="border px-4 py-2">{assignment.room?.block}</td>
@@ -140,6 +144,7 @@ const ViewRoomAssignDetailsPage = () => {
               </div>
             )}
 
+            {/* Invigilator Table */}
             <div>
               <h3 className="text-lg font-semibold text-gray-700 mb-4">
                 Invigilator Informations
