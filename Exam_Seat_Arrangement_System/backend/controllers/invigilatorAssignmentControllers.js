@@ -81,6 +81,71 @@ export const runAndSaveInvigilatorAssignments = async (req, res) => {
   });
 };
 
+// Get all invigilator assignments ever, all statuses included
+export const getAllInvigilatorAssignmentsAllStatuses = async (req, res) => {
+  try {
+    const data = await prisma.invigilatorAssignment.findMany({
+      include: {
+        invigilator: { include: { user: true } },
+        roomAssignment: {
+          include: {
+            room: true,
+            exam: {
+              include: {
+                subject: {
+                  include: {
+                    semester: { include: { course: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { assignedAt: "asc" },
+    });
+
+    res.json({ success: true, assignments: data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to fetch assignments", error: error.message });
+  }
+};
+
+// Get currently assigned invigilators (status = ASSIGNED)
+export const getCurrentAssignedInvigilators = async (req, res) => {
+  try {
+    const assignments = await prisma.invigilatorAssignment.findMany({
+      where: {
+        status: "ASSIGNED",
+      },
+      include: {
+        invigilator: { include: { user: true } },
+        roomAssignment: {
+          include: {
+            room: true,
+            exam: {
+              include: {
+                subject: {
+                  include: {
+                    semester: { include: { course: true } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { assignedAt: "asc" },
+    });
+
+    res.json({ success: true, assignments });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to fetch currently assigned invigilators", error: error.message });
+  }
+};
+
+// Your existing functions below:
+
 export const getAllInvigilatorAssignments = async (req, res) => {
   try {
     const latest = await prisma.invigilatorAssignment.findFirst({
@@ -173,7 +238,6 @@ export const getCurrentInvigilatorAssignments = async (req, res) => {
     });
   }
 };
-
 
 export const getInvigilatorAssignmentsByRoom = async (req, res) => {
   const roomAssignmentId = Number(req.params.roomAssignmentId);

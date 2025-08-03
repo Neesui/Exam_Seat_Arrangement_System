@@ -14,6 +14,7 @@ import {
   getInvigilatorAssignmentsByRoom,
   updateInvigilatorAssignmentStatus,
   getCurrentInvigilatorAssignments,
+  getCurrentAssignedInvigilators,
 } from "../controllers/invigilatorAssignmentControllers.js";
 
 import { authenticate } from "../middlewares/authenticate.js";
@@ -36,8 +37,7 @@ router.get("/meta-summary", authenticate, roleCheck(["INVIGILATOR"]), getInvigil
 // Shared by ADMIN & INVIGILATOR
 router.get("/assignments/all", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getAllInvigilatorAssignments);
 router.get("/room/:roomAssignmentId", authenticate, roleCheck("ADMIN"), getInvigilatorAssignmentsByRoom);
-router.put("/assignments/:id", authenticate, roleCheck(["ADMIN"]), updateInvigilatorAssignmentStatus
-);
-router.get("/assignments/current", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getCurrentInvigilatorAssignments);
+router.put("/assignments/:id", authenticate, roleCheck(["ADMIN"]), updateInvigilatorAssignmentStatus);
+router.get("/assignments/current", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getCurrentAssignedInvigilators);
 
 export default router;
