@@ -8,11 +8,13 @@ import {
 
 const ViewInvigilatorAssignPage = () => {
   const navigate = useNavigate();
+
   const { data, error, isLoading, refetch } = useGetAllInvigilatorAssignmentsQuery();
   const [deleteAssign, { isLoading: isDeleting }] = useDeleteInvigilatorAssignMutation();
 
+  // Delete an assignment by its ID
   const handleDelete = async (assignmentId) => {
-    if (!window.confirm("Are you sure you want to delete this room assignment (all invigilators)?")) return;
+    if (!window.confirm("Are you sure you want to delete this assignment?")) return;
 
     try {
       await deleteAssign(assignmentId).unwrap();
@@ -23,10 +25,12 @@ const ViewInvigilatorAssignPage = () => {
     }
   };
 
+  // Navigate to update assignment page
   const handleUpdate = (assignmentId) => {
     navigate(`/updateInvigilatorAssign/${assignmentId}`);
   };
 
+  // Navigate to view details page by examId
   const handleView = (examId) => {
     if (examId) {
       navigate(`/viewInvigilatorAssignDetails/${examId}`);
@@ -35,7 +39,7 @@ const ViewInvigilatorAssignPage = () => {
     }
   };
 
-  // Status badge function like Room Assignments
+  // Render status badges with colors
   const getStatusBadge = (status) => {
     switch (status) {
       case "ASSIGNED":
@@ -59,7 +63,7 @@ const ViewInvigilatorAssignPage = () => {
     }
   };
 
-  // Group assignments by roomAssignmentId and include status
+  // Group assignments by roomAssignmentId
   const groupedAssignments = data?.assignments?.reduce((acc, curr) => {
     const roomAssignmentId = curr.roomAssignmentId;
     if (!acc[roomAssignmentId]) {
@@ -85,13 +89,15 @@ const ViewInvigilatorAssignPage = () => {
   return (
     <div className="w-full px-4 py-6 mt-5 bg-white rounded-lg shadow-md">
       <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
-       All Invigilator Assignments
+        All Invigilator Assignments
       </h2>
 
       {isLoading ? (
         <p className="text-center">Loading assignments...</p>
       ) : error ? (
         <p className="text-center text-red-500">Failed to load assignments.</p>
+      ) : groupedList.length === 0 ? (
+        <p className="text-center text-gray-500">No invigilator assignments found.</p>
       ) : (
         <table className="w-full table-auto border-collapse border border-gray-300">
           <thead className="bg-gray-100">
@@ -106,60 +112,52 @@ const ViewInvigilatorAssignPage = () => {
             </tr>
           </thead>
           <tbody>
-            {groupedList.length > 0 ? (
-              groupedList.map((group, index) => (
-                <tr key={group.roomAssignmentId}>
-                  <td className="border px-4 py-2 text-center">{index + 1}</td>
-                  <td className="border px-4 py-2 text-center whitespace-pre-line">
-                    {group.invigilators.map(i => i.name).join("\n")}
-                  </td>
-                  <td className="border px-4 py-2 text-center whitespace-pre-line">
-                    {group.invigilators.map(i => i.email).join("\n")}
-                  </td>
-                  <td className="border px-4 py-2 text-center">
-                    {group.subject || "N/A"}
-                  </td>
-                  <td className="border px-4 py-2 text-center">
-                    {group.room || "N/A"}
-                  </td>
-                  <td className="border px-4 py-2 text-center">
-                    {group.invigilators.map((i, idx) => (
-                      <div key={idx} className="mb-1">
-                        {getStatusBadge(i.status)}
-                      </div>
-                    ))}
-                  </td>
-                  <td className="border px-4 py-2 text-center space-x-2">
-                    <button
-                      className="text-blue-600 hover:underline"
-                      onClick={() => handleUpdate(group.invigilators[0].assignId)}
-                      disabled={isDeleting}
-                    >
-                      Update
-                    </button>
-                    <button
-                      className="text-red-600 hover:underline"
-                      onClick={() => handleDelete(group.invigilators[0].assignId)}
-                      disabled={isDeleting}
-                    >
-                      Delete
-                    </button>
-                    <button
-                      className="text-green-600 hover:underline"
-                      onClick={() => handleView(group.examId)}
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="text-center text-gray-500 py-4">
-                  No invigilator assignments found.
+            {groupedList.map((group, index) => (
+              <tr key={group.roomAssignmentId}>
+                <td className="border px-4 py-2 text-center">{index + 1}</td>
+                <td className="border px-4 py-2 whitespace-pre-line text-center">
+                  {group.invigilators.map(i => i.name).join("\n")}
+                </td>
+                <td className="border px-4 py-2 whitespace-pre-line text-center">
+                  {group.invigilators.map(i => i.email).join("\n")}
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  {group.subject || "N/A"}
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  {group.room || "N/A"}
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  {group.invigilators.map((i, idx) => (
+                    <div key={idx} className="mb-1">
+                      {getStatusBadge(i.status)}
+                    </div>
+                  ))}
+                </td>
+                <td className="border px-4 py-2 text-center space-x-2">
+                  <button
+                    className="text-blue-600 hover:underline"
+                    onClick={() => handleUpdate(group.invigilators[0].assignId)}
+                    disabled={isDeleting}
+                  >
+                    Update
+                  </button>
+                  <button
+                    className="text-red-600 hover:underline"
+                    onClick={() => handleDelete(group.invigilators[0].assignId)}
+                    disabled={isDeleting}
+                  >
+                    Delete
+                  </button>
+                  <button
+                    className="text-green-600 hover:underline"
+                    onClick={() => handleView(group.examId)}
+                  >
+                    View
+                  </button>
                 </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
       )}
