@@ -2,11 +2,11 @@ import { apiSlice } from "./apiSlice";
 
 export const roomAssignApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    // Rename this to generateRoomAssignments for clarity
     generateRoomAssignments: builder.mutation({
-      query: () => ({
+      query: (body) => ({
         url: "/api/room-assignments/generate",
         method: "POST",
+        body,
       }),
       invalidatesTags: [{ type: "ROOM_ASSIGN", id: "LIST" }],
     }),

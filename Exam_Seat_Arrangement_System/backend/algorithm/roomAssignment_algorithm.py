@@ -8,32 +8,38 @@ def is_conflict(start1, end1, start2, end2):
 
 def main():
     try:
+        # Read and parse input JSON from stdin
         input_data = json.load(sys.stdin)
         exams = input_data.get("exams", [])
         rooms = input_data.get("rooms", [])
 
-        room_schedule = defaultdict(list)
-        assignments = []
+        room_schedule = defaultdict(list)  # room_id -> list of (start, end)
+        assignments = []  # Output array
 
+        # Sort exams by number of students (descending)
         exams.sort(key=lambda e: len(e.get("students", [])), reverse=True)
 
         for exam in exams:
-            exam_id = exam["id"]
+            exam_id = exam.get("id")
             start_str = exam.get("startTime")
             end_str = exam.get("endTime")
             students = exam.get("students", [])
 
-            if not start_str or not end_str or not students:
-                continue  # Skip exams with no time or students
+            if not exam_id or not start_str or not end_str or not students:
+                continue  # Skip invalid exam
 
-            start = datetime.fromisoformat(start_str)
-            end = datetime.fromisoformat(end_str)
+            try:
+                start = datetime.fromisoformat(start_str)
+                end = datetime.fromisoformat(end_str)
+            except ValueError:
+                continue  # Skip if date format is wrong
 
             students_remaining = len(students)
 
+            # Sort rooms by capacity descending
             sorted_rooms = sorted(
                 rooms,
-                key=lambda r: sum(b["capacity"] for b in r.get("benches", [])),
+                key=lambda r: sum(b.get("capacity", 0) for b in r.get("benches", [])),
                 reverse=True
             )
 
@@ -41,28 +47,35 @@ def main():
                 if students_remaining <= 0:
                     break
 
-                if any(is_conflict(start, end, s, e) for s, e in room_schedule[room["id"]]):
+                room_id = room.get("id")
+                if not room_id:
                     continue
 
-                capacity = sum(b["capacity"] for b in room.get("benches", []))
-                if capacity == 0:
+                # Skip if this room has conflicting exam during this time
+                if any(is_conflict(start, end, s, e) for s, e in room_schedule[room_id]):
                     continue
 
-                # Assign room to this exam
-                room_schedule[room["id"]].append((start, end))
+                capacity = sum(b.get("capacity", 0) for b in room.get("benches", []))
+                if capacity <= 0:
+                    continue
+
+                # Assign room
+                room_schedule[room_id].append((start, end))
                 assignments.append({
                     "examId": exam_id,
-                    "roomId": room["id"],
+                    "roomId": room_id,
                     "assignedAt": datetime.now().isoformat(),
                     "completedAt": None
                 })
 
                 students_remaining -= capacity
 
+        # Output assignments to stdout as JSON
         print(json.dumps(assignments))
-
     except Exception as e:
-        print(json.dumps({"error": str(e)}))
+        # Ensure Python always outputs valid JSON on error
+        print(json.dumps({ "error": str(e) }))
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
