@@ -14,7 +14,10 @@ function getPythonCommand() {
   throw new Error("Python is not installed or not in PATH");
 }
 
-// POST /api/room-assignments/generate
+function statusAllowsReassignment(existing) {
+  return existing.status === "CANCELED" || existing.status === "COMPLETED";
+}
+
 export const runAndSaveRoomAssignments = async (req, res) => {
   try {
     const { examId } = req.body;
@@ -53,7 +56,6 @@ export const runAndSaveRoomAssignments = async (req, res) => {
       include: { benches: true }
     });
 
-    // Prepare data for Python script
     const input = {
       exams: [{
         id: exam.id,
@@ -116,11 +118,52 @@ export const runAndSaveRoomAssignments = async (req, res) => {
         });
       }
 
-      // Cancel existing ACTIVE room assignments for this exam
+      // SAME-DAY CONFLICT CHECK BEFORE SAVING
+      for (const a of assignments) {
+        const existing = await prisma.roomAssignment.findFirst({
+          where: {
+            examId: Number(a.examId),
+            roomId: Number(a.roomId),
+            assignedAt: {
+              gte: new Date(exam.startTime.setHours(0, 0, 0, 0)),
+              lt: new Date(exam.startTime.setHours(23, 59, 59, 999))
+            }
+          }
+        });
+
+        if (existing) {
+          const isSameTime =
+            exam.startTime.toISOString() === existing.exam.startTime.toISOString() &&
+            exam.endTime.toISOString() === existing.exam.endTime.toISOString();
+
+          if (isSameTime && existing.status === "ACTIVE") {
+            return res.status(400).json({
+              success: false,
+              message: `Room ${a.roomId} is already assigned for this exam at the same time`
+            });
+          }
+
+          if (!isSameTime && existing.status === "ACTIVE") {
+            return res.status(400).json({
+              success: false,
+              message: `Room ${a.roomId} is already assigned earlier today and still active`
+            });
+          }
+
+          if (!isSameTime && !statusAllowsReassignment(existing)) {
+            return res.status(400).json({
+              success: false,
+              message: `Room ${a.roomId} is already assigned earlier today and cannot be reassigned`
+            });
+          }
+        }
+      }
+
+      // Cancel existing ACTIVE assignments for this exam
       await prisma.roomAssignment.updateMany({
         where: { examId: Number(examId), status: "ACTIVE" },
         data: { status: "CANCELED" }
-      }); 
+      });
 
       // Save new room assignments
       const savedAssignments = [];
@@ -152,6 +195,7 @@ export const runAndSaveRoomAssignments = async (req, res) => {
     });
   }
 };
+
 
 // GET /api/room-assignments/all
 export const getAllRoomAssignments = async (req, res) => {
