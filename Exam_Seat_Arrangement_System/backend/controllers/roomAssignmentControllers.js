@@ -120,7 +120,7 @@ export const runAndSaveRoomAssignments = async (req, res) => {
       await prisma.roomAssignment.updateMany({
         where: { examId: Number(examId), status: "ACTIVE" },
         data: { status: "CANCELED" }
-      });
+      }); 
 
       // Save new room assignments
       const savedAssignments = [];
