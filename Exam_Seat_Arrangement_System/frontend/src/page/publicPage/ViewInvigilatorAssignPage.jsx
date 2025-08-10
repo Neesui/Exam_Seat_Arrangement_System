@@ -6,7 +6,7 @@ import {
   useDeleteInvigilatorAssignMutation,
 } from "../../redux/api/invigilatorAssignApi";
 import SearchBox from "../../component/public/SearchBox";
-import Pagination from "../../component/public/Pagination"; // ✅ Pagination component
+import Pagination from "../../component/public/Pagination"; 
 
 const ITEMS_PER_PAGE = 10;
 

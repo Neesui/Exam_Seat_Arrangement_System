@@ -4,7 +4,7 @@ import DashboardStats from "../../component/admin/DashboardStats";
 
 const AdminDashboard = () => (
   <div className="h-full w-full border border-gray-300 bg-gray-100 p-6">
-    <div className="w-full mb-6">
+    <div className="w-full ">
       <DashboardStats />
     </div>
     <div className="w-full flex justify-end">
