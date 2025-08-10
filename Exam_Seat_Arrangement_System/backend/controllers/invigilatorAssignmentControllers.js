@@ -81,69 +81,6 @@ export const runAndSaveInvigilatorAssignments = async (req, res) => {
   });
 };
 
-// Get all invigilator assignments ever, all statuses included
-export const getAllInvigilatorAssignmentsAllStatuses = async (req, res) => {
-  try {
-    const data = await prisma.invigilatorAssignment.findMany({
-      include: {
-        invigilator: { include: { user: true } },
-        roomAssignment: {
-          include: {
-            room: true,
-            exam: {
-              include: {
-                subject: {
-                  include: {
-                    semester: { include: { course: true } },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      orderBy: { assignedAt: "asc" },
-    });
-
-    res.json({ success: true, assignments: data });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to fetch assignments", error: error.message });
-  }
-};
-
-// Get currently assigned invigilators (status = ASSIGNED)
-export const getCurrentAssignedInvigilators = async (req, res) => {
-  try {
-    const assignments = await prisma.invigilatorAssignment.findMany({
-      where: {
-        status: "ASSIGNED",
-      },
-      include: {
-        invigilator: { include: { user: true } },
-        roomAssignment: {
-          include: {
-            room: true,
-            exam: {
-              include: {
-                subject: {
-                  include: {
-                    semester: { include: { course: true } },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      orderBy: { assignedAt: "asc" },
-    });
-
-    res.json({ success: true, assignments });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to fetch currently assigned invigilators", error: error.message });
-  }
-};
-
 // Your existing functions below:
 
 export const getAllInvigilatorAssignments = async (req, res) => {
@@ -183,23 +120,34 @@ export const getAllInvigilatorAssignments = async (req, res) => {
   }
 };
 
-export const getCurrentInvigilatorAssignments = async (req, res) => {
+export const getFilteredInvigilatorAssignments = async (req, res) => {
   try {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    const { status, startDate, endDate } = req.query;
+
+    // Build where filter object dynamically
+    const where = {};
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (startDate || endDate) {
+      where.roomAssignment = {
+        exam: {
+          date: {},
+        },
+      };
+      if (startDate) where.roomAssignment.exam.date.gte = new Date(startDate);
+      if (endDate) where.roomAssignment.exam.date.lte = new Date(endDate);
+    }
+
+    // If no date filters, remove empty object
+    if (where.roomAssignment?.exam?.date && Object.keys(where.roomAssignment.exam.date).length === 0) {
+      delete where.roomAssignment;
+    }
 
     const assignments = await prisma.invigilatorAssignment.findMany({
-      where: {
-        roomAssignment: {
-          exam: {
-            date: {
-              gte: startOfMonth,
-              lte: endOfMonth,
-            },
-          },
-        },
-      },
+      where,
       include: {
         invigilator: { include: { user: true } },
         roomAssignment: {
@@ -210,9 +158,7 @@ export const getCurrentInvigilatorAssignments = async (req, res) => {
                 subject: {
                   include: {
                     semester: {
-                      include: {
-                        course: true,
-                      },
+                      include: { course: true },
                     },
                   },
                 },
@@ -226,18 +172,16 @@ export const getCurrentInvigilatorAssignments = async (req, res) => {
       },
     });
 
-    res.json({
-      success: true,
-      assignments,
-    });
+    res.json({ success: true, assignments });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Failed to fetch current month invigilator assignments",
+      message: "Failed to fetch invigilator assignments",
       error: error.message,
     });
   }
 };
+
 
 export const getInvigilatorAssignmentsByRoom = async (req, res) => {
   const roomAssignmentId = Number(req.params.roomAssignmentId);

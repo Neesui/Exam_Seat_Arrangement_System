@@ -13,8 +13,7 @@ import {
   getAllInvigilatorAssignments,
   getInvigilatorAssignmentsByRoom,
   updateInvigilatorAssignmentStatus,
-  getCurrentInvigilatorAssignments,
-  getCurrentAssignedInvigilators,
+  getFilteredInvigilatorAssignments,
 } from "../controllers/invigilatorAssignmentControllers.js";
 
 import { authenticate } from "../middlewares/authenticate.js";
@@ -38,6 +37,6 @@ router.get("/meta-summary", authenticate, roleCheck(["INVIGILATOR"]), getInvigil
 router.get("/assignments/all", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getAllInvigilatorAssignments);
 router.get("/room/:roomAssignmentId", authenticate, roleCheck("ADMIN"), getInvigilatorAssignmentsByRoom);
 router.put("/assignments/:id", authenticate, roleCheck(["ADMIN"]), updateInvigilatorAssignmentStatus);
-router.get("/assignments/current", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getCurrentAssignedInvigilators);
+router.get("/assignments/current", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getFilteredInvigilatorAssignments);
 
 export default router;
