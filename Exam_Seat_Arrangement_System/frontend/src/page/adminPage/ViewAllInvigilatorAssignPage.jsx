@@ -1,101 +1,129 @@
 import React, { useState, useMemo } from "react";
-import { useGetAllInvigilatorAssignmentsQuery } from "../../redux/api/invigilatorAssignApi";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import {
+  useGetAllInvigilatorAssignmentsQuery,
+  useDeleteInvigilatorAssignMutation,
+} from "../../redux/api/invigilatorAssignApi";
 import SearchBox from "../../component/public/SearchBox";
 import Pagination from "../../component/public/Pagination";
 
 const ITEMS_PER_PAGE = 15;
 
 const ViewAllInvigilatorAssignPage = () => {
-  const { data, error, isLoading } = useGetAllInvigilatorAssignmentsQuery();
+  const navigate = useNavigate();
+  const { data, error, isLoading, refetch } = useGetAllInvigilatorAssignmentsQuery();
+  const [deleteAssign, { isLoading: isDeleting }] = useDeleteInvigilatorAssignMutation();
 
   // Search states
   const [searchName, setSearchName] = useState("");
+  const [searchEmail, setSearchEmail] = useState("");
   const [searchRoom, setSearchRoom] = useState("");
   const [searchSubject, setSearchSubject] = useState("");
-  const [searchStatus, setSearchStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const allAssignments = data?.allAssignments || [];
+  const handleDelete = async (assignmentId) => {
+    if (!window.confirm("Are you sure you want to delete this assignment?")) return;
+    try {
+      await deleteAssign(assignmentId).unwrap();
+      toast.success("Invigilator assignment deleted successfully!");
+      refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to delete assignment.");
+    }
+  };
 
-  // Filter assignments based on search inputs
-  const filteredAssignments = useMemo(() => {
-    return allAssignments.filter((a) => {
-      const invigilatorName = a.invigilator?.user?.name?.toLowerCase() || "";
-      const roomNumber = a.roomAssignment?.room?.roomNumber?.toLowerCase() || "";
-      const subjectName = a.roomAssignment?.exam?.subject?.subjectName?.toLowerCase() || "";
-      const status = a.status?.toLowerCase() || "";
+  const handleUpdate = (assignmentId) => navigate(`/updateInvigilatorAssign/${assignmentId}`);
+  const handleView = (examId) =>
+    examId ? navigate(`/viewInvigilatorAssignDetails/${examId}`) : toast.warning("Exam not found");
+
+  const getStatusBadge = (status) => {
+    const map = {
+      ASSIGNED: "bg-green-100 text-green-700",
+      COMPLETED: "bg-blue-100 text-blue-700",
+    };
+    return (
+      <span className={`${map[status] || "bg-gray-100 text-gray-700"} px-2 py-1 text-xs rounded font-semibold`}>
+        {status || "Unknown"}
+      </span>
+    );
+  };
+
+  // Use allAssignments from API data
+  const assignments = data?.allAssignments || [];
+
+  // Group by roomAssignmentId
+  const groupedAssignments = assignments.reduce((acc, curr) => {
+    const roomAssignmentId = curr.roomAssignmentId;
+    if (!acc[roomAssignmentId]) {
+      acc[roomAssignmentId] = {
+        roomAssignmentId,
+        examId: curr.roomAssignment?.exam?.id,
+        subject: curr.roomAssignment?.exam?.subject?.subjectName || "N/A",
+        room: curr.roomAssignment?.room?.roomNumber || "N/A",
+        invigilators: [],
+      };
+    }
+    acc[roomAssignmentId].invigilators.push({
+      name: curr.invigilator?.user?.name || "N/A",
+      email: curr.invigilator?.user?.email || "N/A",
+      assignId: curr.id,
+      status: curr.status,
+    });
+    return acc;
+  }, {});
+
+  const groupedList = Object.values(groupedAssignments);
+
+  // Filtered result based on search
+  const filteredList = useMemo(() => {
+    return groupedList.filter((group) => {
+      const invigilatorNames = group.invigilators.map((i) => i.name.toLowerCase()).join(" ");
+      const emails = group.invigilators.map((i) => i.email.toLowerCase()).join(" ");
+      const room = group.room?.toLowerCase() || "";
+      const subject = group.subject?.toLowerCase() || "";
 
       return (
-        invigilatorName.includes(searchName.toLowerCase()) &&
-        roomNumber.includes(searchRoom.toLowerCase()) &&
-        subjectName.includes(searchSubject.toLowerCase()) &&
-        status.includes(searchStatus.toLowerCase())
+        invigilatorNames.includes(searchName.toLowerCase()) &&
+        emails.includes(searchEmail.toLowerCase()) &&
+        room.includes(searchRoom.toLowerCase()) &&
+        subject.includes(searchSubject.toLowerCase())
       );
     });
-  }, [allAssignments, searchName, searchRoom, searchSubject, searchStatus]);
+  }, [groupedList, searchName, searchEmail, searchRoom, searchSubject]);
 
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredAssignments.length / ITEMS_PER_PAGE);
-  const paginatedAssignments = useMemo(() => {
+  // Pagination logic
+  const totalPages = Math.ceil(filteredList.length / ITEMS_PER_PAGE);
+  const paginatedList = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredAssignments.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredAssignments, currentPage]);
+    return filteredList.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredList, currentPage]);
 
-  // Handle page change
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const renderTable = () => (
-    <table className="min-w-full border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-      <thead className="bg-gray-200 text-gray-700">
-        <tr>
-          <th className="px-4 py-2 border">S.N</th>
-          <th className="px-4 py-2 border">Invigilator</th>
-          <th className="px-4 py-2 border">Room</th>
-          <th className="px-4 py-2 border">Exam</th>
-          <th className="px-4 py-2 border">Status</th>
-          <th className="px-4 py-2 border">Assigned At</th>
-        </tr>
-      </thead>
-      <tbody>
-        {paginatedAssignments.length === 0 ? (
-          <tr>
-            <td colSpan={6} className="text-center py-4">
-              No data available
-            </td>
-          </tr>
-        ) : (
-          paginatedAssignments.map((a) => (
-            <tr key={a.id} className="hover:bg-gray-100">
-              <td className="px-4 py-2 border">{a.id}</td>
-              <td className="px-4 py-2 border">{a.invigilator?.user?.name || "N/A"}</td>
-              <td className="px-4 py-2 border">{a.roomAssignment?.room?.roomNumber || "N/A"}</td>
-              <td className="px-4 py-2 border">{a.roomAssignment?.exam?.subject?.subjectName || "N/A"}</td>
-              <td className="px-4 py-2 border">{a.status}</td>
-              <td className="px-4 py-2 border">
-                {a.assignedAt ? new Date(a.assignedAt).toLocaleString() : "N/A"}
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  );
-
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-xl font-bold mb-6">All Invigilator Assignments</h1>
+    <div className="w-full px-4 py-6 mt-5 bg-white rounded-lg shadow-md max-w-7xl mx-auto">
+      <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">All Invigilator Assignments</h2>
 
       {/* Search Inputs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <SearchBox
           value={searchName}
           onChange={(v) => {
             setSearchName(v);
             setCurrentPage(1);
           }}
-          placeholder="Search by Invigilator Name"
+          placeholder="Search by Name"
+        />
+        <SearchBox
+          value={searchEmail}
+          onChange={(v) => {
+            setSearchEmail(v);
+            setCurrentPage(1);
+          }}
+          placeholder="Search by Email"
         />
         <SearchBox
           value={searchRoom}
@@ -103,7 +131,7 @@ const ViewAllInvigilatorAssignPage = () => {
             setSearchRoom(v);
             setCurrentPage(1);
           }}
-          placeholder="Search by Room Number"
+          placeholder="Search by Room"
         />
         <SearchBox
           value={searchSubject}
@@ -111,35 +139,79 @@ const ViewAllInvigilatorAssignPage = () => {
             setSearchSubject(v);
             setCurrentPage(1);
           }}
-          placeholder="Search by Exam Subject"
-        />
-        <SearchBox
-          value={searchStatus}
-          onChange={(v) => {
-            setSearchStatus(v);
-            setCurrentPage(1);
-          }}
-          placeholder="Search by Status"
+          placeholder="Search by Subject"
         />
       </div>
 
       {/* Table */}
       {isLoading ? (
-        <p className="text-center text-gray-500">Loading...</p>
+        <p className="text-center">Loading assignments...</p>
       ) : error ? (
-        <p className="text-center text-red-500">Failed to load assignments</p>
+        <p className="text-center text-red-500">Failed to load assignments.</p>
+      ) : paginatedList.length === 0 ? (
+        <p className="text-center text-gray-500">No invigilator assignments found.</p>
       ) : (
         <>
-          {renderTable()}
+          <table className="w-full table-auto border-collapse border border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border px-4 py-2">S.N.</th>
+                <th className="border px-4 py-2">Invigilator Names</th>
+                <th className="border px-4 py-2">Emails</th>
+                <th className="border px-4 py-2">Subject</th>
+                <th className="border px-4 py-2">Room</th>
+                <th className="border px-4 py-2">Status</th>
+                <th className="border px-4 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedList.map((group, index) => (
+                <tr key={group.roomAssignmentId}>
+                  <td className="border px-4 py-2 text-center">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</td>
+                  <td className="border px-4 py-2 whitespace-pre-line text-center">
+                    {group.invigilators.map((i) => i.name).join("\n")}
+                  </td>
+                  <td className="border px-4 py-2 whitespace-pre-line text-center">
+                    {group.invigilators.map((i) => i.email).join("\n")}
+                  </td>
+                  <td className="border px-4 py-2 text-center">{group.subject}</td>
+                  <td className="border px-4 py-2 text-center">{group.room}</td>
+                  <td className="border px-4 py-2 text-center">
+                    {group.invigilators.map((i, idx) => (
+                      <div key={idx} className="mb-1">
+                        {getStatusBadge(i.status)}
+                      </div>
+                    ))}
+                  </td>
+                  <td className="border px-4 py-2 text-center space-x-2">
+                    <button
+                      className="text-blue-600 hover:underline"
+                      onClick={() => handleUpdate(group.invigilators[0].assignId)}
+                      disabled={isDeleting}
+                    >
+                      Update
+                    </button>
+                    <button
+                      className="text-red-600 hover:underline"
+                      onClick={() => handleDelete(group.invigilators[0].assignId)}
+                      disabled={isDeleting}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      className="text-green-600 hover:underline"
+                      onClick={() => handleView(group.examId)}
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          )}
+          {/* Pagination Controls */}
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
         </>
       )}
     </div>
