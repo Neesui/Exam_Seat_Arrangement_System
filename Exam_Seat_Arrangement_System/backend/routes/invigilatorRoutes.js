@@ -27,6 +27,8 @@ router.post("/add",authenticate,roleCheck(["ADMIN"]), upload.single("image"), ad
 router.get("/all", authenticate, roleCheck(["ADMIN"]), getAllInvigilator);
 router.get("/:id", authenticate, roleCheck(["ADMIN"]), getInvigilatorById);
 router.post("/generate", authenticate, roleCheck(["ADMIN"]), runAndSaveInvigilatorAssignments);
+router.put("/assignments/:id", authenticate, roleCheck(["ADMIN"]), updateInvigilatorAssignmentStatus);
+
 
 // Invigilator-only routes
 router.get("/profile", authenticate, roleCheck(["INVIGILATOR"]), getProfile);
@@ -35,8 +37,7 @@ router.get("/meta-summary", authenticate, roleCheck(["INVIGILATOR"]), getInvigil
 
 // Shared by ADMIN & INVIGILATOR
 router.get("/assignments/all", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getAllInvigilatorAssignments);
-router.get("/room/:roomAssignmentId", authenticate, roleCheck("ADMIN"), getInvigilatorAssignmentsByRoom);
-router.put("/assignments/:id", authenticate, roleCheck(["ADMIN"]), updateInvigilatorAssignmentStatus);
+router.get("/room/:roomAssignmentId", authenticate, roleCheck("ADMIN", "INVIGILATOR"), getInvigilatorAssignmentsByRoom);
 router.get("/assignments/current", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getFilteredInvigilatorAssignments);
 
 export default router;

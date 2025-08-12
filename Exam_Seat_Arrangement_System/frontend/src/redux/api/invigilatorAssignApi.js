@@ -11,7 +11,8 @@ export const invigilatorAssignApi = apiSlice.injectEndpoints({
       providesTags: ["INV_ASSIGN"],
     }),
     getInvigilatorAssignmentsByRoom: builder.query({
-      query: (roomAssignmentId) => `/api/invigilator/assignments/${roomAssignmentId}`,
+      // Note: route is /room/:roomAssignmentId, not /assignments/:roomAssignmentId
+      query: (roomAssignmentId) => `/api/invigilator/room/${roomAssignmentId}`,
       providesTags: ["INV_ASSIGN"],
     }),
     generateInvigilatorAssignments: builder.mutation({
@@ -29,7 +30,7 @@ export const invigilatorAssignApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["INV_ASSIGN"],
     }),
-    
+    // Be sure you have a DELETE route in backend if you want to use this
     deleteInvigilatorAssign: builder.mutation({
       query: (id) => ({
         url: `/api/invigilator/assignments/${id}`,
@@ -42,9 +43,9 @@ export const invigilatorAssignApi = apiSlice.injectEndpoints({
 
 export const {
   useGetAllInvigilatorAssignmentsQuery,
-  useUpdateInvigilatorAssignMutation,
+  useGetCurrentAssignedInvigilatorsQuery,
   useGetInvigilatorAssignmentsByRoomQuery,
   useGenerateInvigilatorAssignmentsMutation,
+  useUpdateInvigilatorAssignMutation,
   useDeleteInvigilatorAssignMutation,
-  useGetCurrentAssignedInvigilatorsQuery,
 } = invigilatorAssignApi;

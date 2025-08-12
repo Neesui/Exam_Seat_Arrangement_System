@@ -81,19 +81,17 @@ export const runAndSaveInvigilatorAssignments = async (req, res) => {
   });
 };
 
-// Your existing functions below:
-
+// UPDATED: Return both all assignments and current assignments
 export const getAllInvigilatorAssignments = async (req, res) => {
   try {
+    // Get latest generationId
     const latest = await prisma.invigilatorAssignment.findFirst({
       orderBy: { assignedAt: "desc" },
       select: { generationId: true },
     });
 
-    if (!latest) return res.json({ success: true, assignments: [] });
-
-    const data = await prisma.invigilatorAssignment.findMany({
-      where: { generationId: latest.generationId },
+    // Fetch all assignments
+    const allAssignments = await prisma.invigilatorAssignment.findMany({
       include: {
         invigilator: { include: { user: true } },
         roomAssignment: {
@@ -114,7 +112,37 @@ export const getAllInvigilatorAssignments = async (req, res) => {
       orderBy: { assignedAt: "asc" },
     });
 
-    res.json({ success: true, assignments: data });
+    // Fetch only current/latest assignments
+    let currentAssignments = [];
+    if (latest) {
+      currentAssignments = await prisma.invigilatorAssignment.findMany({
+        where: { generationId: latest.generationId },
+        include: {
+          invigilator: { include: { user: true } },
+          roomAssignment: {
+            include: {
+              room: true,
+              exam: {
+                include: {
+                  subject: {
+                    include: {
+                      semester: { include: { course: true } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: { assignedAt: "asc" },
+      });
+    }
+
+    res.json({
+      success: true,
+      allAssignments,
+      currentAssignments,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Failed to fetch assignments", error: error.message });
   }
@@ -123,8 +151,6 @@ export const getAllInvigilatorAssignments = async (req, res) => {
 export const getFilteredInvigilatorAssignments = async (req, res) => {
   try {
     const { status, startDate, endDate } = req.query;
-
-    // Build where filter object dynamically
     const where = {};
 
     if (status) {
@@ -141,7 +167,6 @@ export const getFilteredInvigilatorAssignments = async (req, res) => {
       if (endDate) where.roomAssignment.exam.date.lte = new Date(endDate);
     }
 
-    // If no date filters, remove empty object
     if (where.roomAssignment?.exam?.date && Object.keys(where.roomAssignment.exam.date).length === 0) {
       delete where.roomAssignment;
     }
@@ -157,9 +182,7 @@ export const getFilteredInvigilatorAssignments = async (req, res) => {
               include: {
                 subject: {
                   include: {
-                    semester: {
-                      include: { course: true },
-                    },
+                    semester: { include: { course: true } },
                   },
                 },
               },
@@ -167,9 +190,7 @@ export const getFilteredInvigilatorAssignments = async (req, res) => {
           },
         },
       },
-      orderBy: {
-        assignedAt: "asc",
-      },
+      orderBy: { assignedAt: "asc" },
     });
 
     res.json({ success: true, assignments });
@@ -181,7 +202,6 @@ export const getFilteredInvigilatorAssignments = async (req, res) => {
     });
   }
 };
-
 
 export const getInvigilatorAssignmentsByRoom = async (req, res) => {
   const roomAssignmentId = Number(req.params.roomAssignmentId);

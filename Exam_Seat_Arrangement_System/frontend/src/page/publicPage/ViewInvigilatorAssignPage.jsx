@@ -6,7 +6,7 @@ import {
   useDeleteInvigilatorAssignMutation,
 } from "../../redux/api/invigilatorAssignApi";
 import SearchBox from "../../component/public/SearchBox";
-import Pagination from "../../component/public/Pagination"; 
+import Pagination from "../../component/public/Pagination";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -34,7 +34,8 @@ const ViewInvigilatorAssignPage = () => {
   };
 
   const handleUpdate = (assignmentId) => navigate(`/updateInvigilatorAssign/${assignmentId}`);
-  const handleView = (examId) => examId ? navigate(`/viewInvigilatorAssignDetails/${examId}`) : toast.warning("Exam not found");
+  const handleView = (examId) =>
+    examId ? navigate(`/viewInvigilatorAssignDetails/${examId}`) : toast.warning("Exam not found");
 
   const getStatusBadge = (status) => {
     const map = {
@@ -48,8 +49,11 @@ const ViewInvigilatorAssignPage = () => {
     );
   };
 
+  // Use currentAssignments (latest) from API data
+  const assignments = data?.currentAssignments || [];
+
   // Group by roomAssignmentId
-  const groupedAssignments = data?.assignments?.reduce((acc, curr) => {
+  const groupedAssignments = assignments.reduce((acc, curr) => {
     const roomAssignmentId = curr.roomAssignmentId;
     if (!acc[roomAssignmentId]) {
       acc[roomAssignmentId] = {
@@ -67,15 +71,15 @@ const ViewInvigilatorAssignPage = () => {
       status: curr.status,
     });
     return acc;
-  }, {}) || {};
+  }, {});
 
   const groupedList = Object.values(groupedAssignments);
 
   // Filtered result based on search
   const filteredList = useMemo(() => {
     return groupedList.filter((group) => {
-      const invigilatorNames = group.invigilators.map(i => i.name.toLowerCase()).join(" ");
-      const emails = group.invigilators.map(i => i.email.toLowerCase()).join(" ");
+      const invigilatorNames = group.invigilators.map((i) => i.name.toLowerCase()).join(" ");
+      const emails = group.invigilators.map((i) => i.email.toLowerCase()).join(" ");
       const room = group.room?.toLowerCase() || "";
       const subject = group.subject?.toLowerCase() || "";
 
@@ -101,9 +105,7 @@ const ViewInvigilatorAssignPage = () => {
 
   return (
     <div className="w-full px-4 py-6 mt-5 bg-white rounded-lg shadow-md">
-      <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
-        All Invigilator Assignments
-      </h2>
+      <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Current Invigilator Assignments</h2>
 
       {/* Search Inputs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 max-w-6xl mx-auto">
@@ -139,16 +141,18 @@ const ViewInvigilatorAssignPage = () => {
                 <tr key={group.roomAssignmentId}>
                   <td className="border px-4 py-2 text-center">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</td>
                   <td className="border px-4 py-2 whitespace-pre-line text-center">
-                    {group.invigilators.map(i => i.name).join("\n")}
+                    {group.invigilators.map((i) => i.name).join("\n")}
                   </td>
                   <td className="border px-4 py-2 whitespace-pre-line text-center">
-                    {group.invigilators.map(i => i.email).join("\n")}
+                    {group.invigilators.map((i) => i.email).join("\n")}
                   </td>
                   <td className="border px-4 py-2 text-center">{group.subject}</td>
                   <td className="border px-4 py-2 text-center">{group.room}</td>
                   <td className="border px-4 py-2 text-center">
                     {group.invigilators.map((i, idx) => (
-                      <div key={idx} className="mb-1">{getStatusBadge(i.status)}</div>
+                      <div key={idx} className="mb-1">
+                        {getStatusBadge(i.status)}
+                      </div>
                     ))}
                   </td>
                   <td className="border px-4 py-2 text-center space-x-2">
@@ -179,11 +183,7 @@ const ViewInvigilatorAssignPage = () => {
           </table>
 
           {/* Pagination Controls */}
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
         </>
       )}
     </div>

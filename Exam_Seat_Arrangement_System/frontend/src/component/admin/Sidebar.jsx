@@ -126,6 +126,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             setIsOpen={() => handleSectionToggle("Invigilator Assign")}
             links={[
               { path: "/assignInvigilator", label: "Assign Invigilator" },
+              { path: "/viewAllInvigilatorAssign", label: "View All Invigilator Assignment" },
               { path: "/viewInvigilatorAssign", label: "View Invigilator Assignment" },
             ]}
           />
