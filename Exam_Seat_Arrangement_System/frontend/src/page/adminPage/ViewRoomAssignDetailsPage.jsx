@@ -11,28 +11,20 @@ const ViewRoomAssignDetailsPage = () => {
   const assignments = data?.assignments || [];
   const exam = assignments.length > 0 ? assignments[0].exam : null;
 
-  const formatDate = (isoDate) => {
-    return isoDate ? new Date(isoDate).toISOString().split("T")[0] : "-";
-  };
+  const formatDate = (isoDate) => (isoDate ? new Date(isoDate).toISOString().split("T")[0] : "-");
 
   const formatTime = (isoDateTime) => {
     if (!isoDateTime) return "-";
     const dateObj = new Date(isoDateTime);
-    return dateObj.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
+    return dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
   };
 
   if (isLoading) return <p className="text-center mt-10">Loading...</p>;
-  if (error || !data?.success)
-    return (
-      <p className="text-center mt-10 text-red-500">
-        Failed to load room assignment details.
-      </p>
-    );
 
+  if (error || !data?.success)
+    return <p className="text-center mt-10 text-red-500">Failed to load room assignment details.</p>;
+
+  // Combine invigilator assignments with room info
   const allInvigilatorAssignments = assignments.flatMap(
     (assignment) =>
       assignment.invigilatorAssignments?.map((inv) => ({
@@ -43,9 +35,8 @@ const ViewRoomAssignDetailsPage = () => {
       })) || []
   );
 
-  const assignedRooms = assignments.filter(
-    (assignment) => assignment.room?.roomNumber
-  );
+  // Filter only assignments with assigned rooms
+  const assignedRooms = assignments.filter((assignment) => assignment.room?.roomNumber);
 
   return (
     <div className="max-w-6xl mx-auto mt-5 p-4">
@@ -59,18 +50,14 @@ const ViewRoomAssignDetailsPage = () => {
             <FaArrowLeft className="mr-2" />
             Back
           </button>
-          <h2 className="text-2xl font-bold text-center text-gray-800">
-            Room Assignment Details
-          </h2>
+          <h2 className="text-2xl font-bold text-center text-gray-800">Room Assignment Details</h2>
         </div>
 
         {/* Exam Details */}
         {exam ? (
           <>
             <div className="border border-gray-300 rounded p-4 mb-6 bg-gray-50">
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                Exam Information
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">Exam Information</h3>
               <table className="table-auto w-full text-sm text-gray-800">
                 <tbody>
                   <tr>
@@ -103,10 +90,6 @@ const ViewRoomAssignDetailsPage = () => {
                     <td className="font-semibold py-1">End Time</td>
                     <td className="py-1">{formatTime(exam.endTime)}</td>
                   </tr>
-                  <tr>
-                    <td className="font-semibold py-1">College</td>
-                    <td className="py-1">{exam.subject?.semester?.course?.college || "N/A"}</td>
-                  </tr>
                 </tbody>
               </table>
             </div>
@@ -116,9 +99,7 @@ const ViewRoomAssignDetailsPage = () => {
               <p className="text-center text-gray-600">No assigned rooms found.</p>
             ) : (
               <div className="mb-10">
-                <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                  Room Informations
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-700 mb-4">Room Information</h3>
                 <table className="w-full table-auto border border-gray-300 text-sm">
                   <thead className="bg-gray-100">
                     <tr>
@@ -127,6 +108,7 @@ const ViewRoomAssignDetailsPage = () => {
                       <th className="border px-4 py-2">Floor</th>
                       <th className="border px-4 py-2">Total Benches</th>
                       <th className="border px-4 py-2">Total Capacity</th>
+                      <th className="border px-4 py-2">Colleges</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -137,6 +119,11 @@ const ViewRoomAssignDetailsPage = () => {
                         <td className="border px-4 py-2">{assignment.room?.floor}</td>
                         <td className="border px-4 py-2 text-center">{assignment.room?.totalBench || 0}</td>
                         <td className="border px-4 py-2 text-center">{assignment.room?.totalCapacity || 0}</td>
+                        <td className="border px-4 py-2">
+                          {assignment.room.assignedColleges && assignment.room?.assignedColleges.length > 0
+                            ? assignment.room?.assignedColleges.join(", ")
+                            : "N/A"}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -146,9 +133,7 @@ const ViewRoomAssignDetailsPage = () => {
 
             {/* Invigilator Table */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                Invigilator Informations
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">Invigilator Information</h3>
               {allInvigilatorAssignments.length === 0 ? (
                 <p className="text-center text-gray-600">No invigilator assignments found.</p>
               ) : (

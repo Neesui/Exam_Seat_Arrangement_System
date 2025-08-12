@@ -248,13 +248,29 @@ export const getRoomAssignmentsByExam = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid exam ID" });
     }
 
+    // Find room assignments for this exam with related data
     const assignments = await prisma.roomAssignment.findMany({
       where: { examId },
       include: {
-        room: { include: { benches: true } },
+        room: {
+          include: {
+            benches: true,
+          },
+        },
         exam: {
           include: {
             subject: { include: { semester: { include: { course: true } } } },
+            seatingPlans: {
+              where: { isActive: true },
+              include: {
+                seats: {
+                  include: {
+                    student: true,
+                    bench: true,
+                  },
+                },
+              },
+            },
           },
         },
         invigilatorAssignments: {
@@ -263,8 +279,24 @@ export const getRoomAssignmentsByExam = async (req, res) => {
       },
     });
 
+    // Process each assignment to gather assigned colleges from students seated in this room
     const formatted = assignments.map((assignment) => {
       const benches = assignment.room.benches || [];
+
+      // Gather all seats in active seating plans for this exam
+      const allSeats = assignment.exam.seatingPlans.flatMap((sp) => sp.seats);
+
+      // Filter seats that belong to this room by matching bench.roomId
+      const seatsInRoom = allSeats.filter((seat) => seat.bench.roomId === assignment.room.id);
+
+      // Extract unique colleges from students assigned to this room
+      const uniqueCollegesSet = new Set(
+        seatsInRoom
+          .map((seat) => seat.student?.college)
+          .filter((college) => !!college) // filter out null/undefined
+      );
+      const uniqueColleges = Array.from(uniqueCollegesSet);
+
       return {
         ...assignment,
         room: {
@@ -272,6 +304,7 @@ export const getRoomAssignmentsByExam = async (req, res) => {
           totalBench: benches.length,
           totalCapacity: benches.reduce((sum, b) => sum + b.capacity, 0),
           benches: undefined,
+          assignedColleges: uniqueColleges,
         },
       };
     });

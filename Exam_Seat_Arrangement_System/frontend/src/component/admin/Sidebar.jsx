@@ -127,7 +127,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             links={[
               { path: "/assignInvigilator", label: "Assign Invigilator" },
               { path: "/viewAllInvigilatorAssign", label: "View All Invigilator Assignment" },
-              { path: "/viewInvigilatorAssign", label: "View Invigilator Assignment" },
+              // { path: "/viewInvigilatorAssign", label: "View Invigilator Assignment" },
             ]}
           />
 

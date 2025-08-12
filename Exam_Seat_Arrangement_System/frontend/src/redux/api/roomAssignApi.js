@@ -17,10 +17,7 @@ export const roomAssignApi = apiSlice.injectEndpoints({
         result?.assignments
           ? [
               { type: "ROOM_ASSIGN", id: "LIST" },
-              ...result.assignments.map(({ id }) => ({
-                type: "ROOM_ASSIGN",
-                id,
-              })),
+              ...result.assignments.map(({ id }) => ({ type: "ROOM_ASSIGN", id })),
             ]
           : [{ type: "ROOM_ASSIGN", id: "LIST" }],
     }),
@@ -31,10 +28,7 @@ export const roomAssignApi = apiSlice.injectEndpoints({
         result?.assignments
           ? [
               { type: "ROOM_ASSIGN", id: "LIST" },
-              ...result.assignments.map(({ id }) => ({
-                type: "ROOM_ASSIGN",
-                id,
-              })),
+              ...result.assignments.map(({ id }) => ({ type: "ROOM_ASSIGN", id })),
             ]
           : [{ type: "ROOM_ASSIGN", id: "LIST" }],
     }),
