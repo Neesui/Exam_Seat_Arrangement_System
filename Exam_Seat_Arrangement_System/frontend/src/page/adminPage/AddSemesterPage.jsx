@@ -71,8 +71,8 @@ const AddSemesterPage = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-5 p-6 bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">Add Semester</h2>
+    <div className="mx-auto max-w-6xl bg-white p-6 rounded-lg shadow-md mt-3">
+      <h2 className="text-2xl font-bold mb-4 underline">Add Semester</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

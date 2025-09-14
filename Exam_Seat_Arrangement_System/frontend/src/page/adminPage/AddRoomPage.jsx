@@ -36,8 +36,8 @@ const AddRoomPage = () => {
   };
 
   return (
-    <div className="w-[90%] mt-5 p-6 ml-6 bg-white rounded shadow">
-      <h2 className="text-2xl text-center font-bold mb-4">Add New Room</h2>
+    <div className="w-[95%] mt-3 p-6 ml-6 bg-white rounded shadow">
+      <h2 className="text-3xl font-bold mb-4 underline">Add New Room</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           id="roomNumber"

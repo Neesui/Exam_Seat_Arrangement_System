@@ -54,9 +54,8 @@ const AddExamPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-100 px-4 py-10 flex flex-col justify-center">
-      <div className="w-full bg-white p-10 rounded-lg shadow-xl max-w-screen-lg mx-auto">
-        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
+      <div className="mx-auto max-w-6xl bg-white p-6 rounded-lg shadow-md mt-3">
+        <h2 className="text-3xl font-bold mb-8 text-gray-800 underline">
           Add New Exam
         </h2>
 
@@ -132,7 +131,6 @@ const AddExamPage = () => {
           </button>
         </form>
       </div>
-    </div>
   );
 };
 

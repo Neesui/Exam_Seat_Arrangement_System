@@ -50,9 +50,8 @@ const AddBenchPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-100 flex flex-col justify-center px-4 py-10">
-      <div className="w-full bg-white p-10 rounded-lg shadow-xl">
-        <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Add New Bench</h2>
+    <div className="mx-auto max-w-6xl bg-white p-6 rounded-lg shadow-md mt-3">
+        <h2 className="text-3xl font-bold mb-8 text-gray-800 underline">Add New Bench</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Room Dropdown */}
@@ -127,7 +126,6 @@ const AddBenchPage = () => {
             {isLoading ? "Adding..." : "Add Bench"}
           </button>
         </form>
-      </div>
     </div>
   );
 };
