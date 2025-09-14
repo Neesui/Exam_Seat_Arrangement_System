@@ -18,8 +18,8 @@ const ViewStudentPage = () => {
 
   const [collegeSearch, setCollegeSearch] = useState("");
   const [symbolSearch, setSymbolSearch] = useState("");
-  const [searchType, setSearchType] = useState(""); // 'college' or 'symbol'
-  const [filterSemester, setFilterSemester] = useState("");
+  const [searchType, setSearchType] = useState(""); // 
+  const [filterSemester, setFilterSemester] = useState(null); // store as number
   const [currentPage, setCurrentPage] = useState(1);
 
   const semesters = useMemo(() => {
@@ -32,7 +32,7 @@ const ViewStudentPage = () => {
     });
     return Array.from(unique.entries())
       .map(([id, semesterNum]) => ({
-        value: id,
+        value: id, // keep numeric ID
         label: `Semester ${semesterNum}`,
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
@@ -57,7 +57,7 @@ const ViewStudentPage = () => {
 
     return data.students.filter((student) => {
       const matchesSemester = filterSemester
-        ? student.semester?.id === filterSemester
+        ? student.semester?.id === filterSemester // compare as number
         : true;
 
       if (searchType === "college") {
@@ -91,25 +91,31 @@ const ViewStudentPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-100 py-12 px-2 overflow-auto">
-      <div className="max-w-7xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold mb-8 text-gray-800 text-center">All Students</h2>
+    <div className="mx-auto max-w-6xl bg-white p-6 rounded-lg shadow-md mt-3">
+        <h2 className="text-3xl font-bold mb-8 text-gray-800 underline">
+          All Students
+        </h2>
 
         {/* Search & Filters */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-6 gap-4">
           <div className="flex gap-2">
             <SearchBox
               value={collegeSearch}
-              onChange={(val) => setCollegeSearch(val)}
+              onChange={(val) => {
+                setCollegeSearch(val);
+                setSearchType("college");
+              }}
               placeholder="Search by College"
             />
-            
           </div>
 
           <div className="flex gap-2">
             <SearchBox
               value={symbolSearch}
-              onChange={(val) => setSymbolSearch(val)}
+              onChange={(val) => {
+                setSymbolSearch(val);
+                setSearchType("symbol");
+              }}
               placeholder="Search by Symbol No."
             />
           </div>
@@ -117,9 +123,9 @@ const ViewStudentPage = () => {
           <SelectFilter
             label="All Semesters"
             options={semesters}
-            value={filterSemester}
+            value={filterSemester || ""}
             onChange={(val) => {
-              setFilterSemester(val);
+              setFilterSemester(val ? Number(val) : null); // ensure number
               setCurrentPage(1);
             }}
           />
@@ -151,7 +157,9 @@ const ViewStudentPage = () => {
               <tbody>
                 {paginatedStudents.map((student, idx) => (
                   <tr key={student.id || student._id} className="hover:bg-gray-50">
-                    <td className="border px-2 py-2">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</td>
+                    <td className="border px-2 py-2">
+                      {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
+                    </td>
                     <td className="border px-2 py-2">
                       {student.imageUrl ? (
                         <img
@@ -167,8 +175,12 @@ const ViewStudentPage = () => {
                     <td className="border px-2 py-2">{student.symbolNumber}</td>
                     <td className="border px-2 py-2">{student.regNumber}</td>
                     <td className="border px-2 py-2">{student.college}</td>
-                    <td className="border px-2 py-2">{student.course?.name || "-"}</td>
-                    <td className="border px-2 py-2">{student.semester?.semesterNum || "-"}</td>
+                    <td className="border px-2 py-2">
+                      {student.course?.name || "-"}
+                    </td>
+                    <td className="border px-2 py-2">
+                      {student.semester?.semesterNum || "-"}
+                    </td>
                     <td className="border px-2 py-2 space-x-2">
                       <button
                         onClick={() => handleEdit(student.id)}
@@ -195,7 +207,6 @@ const ViewStudentPage = () => {
             />
           </>
         )}
-      </div>
     </div>
   );
 };
