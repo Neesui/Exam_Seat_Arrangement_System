@@ -105,7 +105,7 @@ export const generateSeatingPlan = async (req, res) => {
       }
 
       try {
-        const parsedSeats = JSON.parse(result);
+        const parsedSeats = JSON.parse(result.trim());
 
         if (!Array.isArray(parsedSeats) || !parsedSeats.length) {
           return res.status(500).json({
@@ -157,7 +157,6 @@ export const generateSeatingPlan = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
 
 export const getAllSeatingPlan = async (req, res) => {
   try {
