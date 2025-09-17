@@ -3,7 +3,9 @@ import React from "react";
 const SeatingPlanVisual = ({ seatPlan }) => {
   if (!seatPlan || seatPlan.length === 0) {
     return (
-      <p className="text-center text-gray-500 italic">No seating data available.</p>
+      <p className="text-center text-gray-500 italic">
+        No seating data available.
+      </p>
     );
   }
 
@@ -18,7 +20,8 @@ const SeatingPlanVisual = ({ seatPlan }) => {
 
     if (!groupedByRoom[roomNo]) groupedByRoom[roomNo] = {};
     if (!groupedByRoom[roomNo][row]) groupedByRoom[roomNo][row] = {};
-    if (!groupedByRoom[roomNo][row][benchNo]) groupedByRoom[roomNo][row][benchNo] = [];
+    if (!groupedByRoom[roomNo][row][benchNo])
+      groupedByRoom[roomNo][row][benchNo] = [];
 
     groupedByRoom[roomNo][row][benchNo].push(seat);
   });
@@ -35,7 +38,14 @@ const SeatingPlanVisual = ({ seatPlan }) => {
   return (
     <div className="space-y-10">
       {Object.keys(groupedByRoom).map((roomNo) => (
-        <div key={roomNo} className="border border-gray-300 p-4 rounded-lg shadow">
+        <div
+          key={roomNo}
+          className="border border-gray-300 p-4 rounded-lg shadow"
+        >
+          <h3 className="text-xl font-bold text-center mb-6">
+            Room {roomNo}
+          </h3>
+
           {Object.keys(groupedByRoom[roomNo])
             .sort((a, b) => Number(a) - Number(b))
             .map((row) => {

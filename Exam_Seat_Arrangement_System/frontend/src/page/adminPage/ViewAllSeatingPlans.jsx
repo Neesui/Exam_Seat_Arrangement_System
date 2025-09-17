@@ -11,17 +11,25 @@ const ViewAllSeatingPlans = () => {
   const plansPerPage = 3;
 
   if (isLoading) {
-    return <p className="text-center mt-20 text-lg">Loading seating plans...</p>;
+    return (
+      <p className="text-center mt-20 text-lg">Loading seating plans...</p>
+    );
   }
 
   if (error || !data?.data?.length) {
-    return <p className="text-center mt-20 text-lg text-red-600">No seating plans found or failed to load.</p>;
+    return (
+      <p className="text-center mt-20 text-lg text-red-600">
+        No seating plans found or failed to load.
+      </p>
+    );
   }
 
   const filteredPlans = data.data.filter((plan) => {
     const subject = plan.exam.subject?.subjectName?.toLowerCase() || "";
-    const course = plan.exam.subject?.semester?.course?.name?.toLowerCase() || "";
-    const room = plan.seats?.[0]?.bench?.room?.roomNumber?.toLowerCase() || "";
+    const course =
+      plan.exam.subject?.semester?.course?.name?.toLowerCase() || "";
+    const room =
+      plan.seats?.[0]?.bench?.room?.roomNumber?.toLowerCase() || "";
     return (
       subject.includes(searchTerm) ||
       course.includes(searchTerm) ||
@@ -32,7 +40,10 @@ const ViewAllSeatingPlans = () => {
   const totalPlans = filteredPlans.length;
   const indexOfLastPlan = currentPage * plansPerPage;
   const indexOfFirstPlan = indexOfLastPlan - plansPerPage;
-  const currentPlans = filteredPlans.slice(indexOfFirstPlan, indexOfLastPlan);
+  const currentPlans = filteredPlans.slice(
+    indexOfFirstPlan,
+    indexOfLastPlan
+  );
   const totalPages = Math.ceil(totalPlans / plansPerPage);
 
   return (
@@ -57,7 +68,11 @@ const ViewAllSeatingPlans = () => {
 
       <div id="printable">
         {currentPlans.map((plan, index) => (
-          <SeatingPlanCard key={plan.id} plan={plan} index={indexOfFirstPlan + index} />
+          <SeatingPlanCard
+            key={plan.id}
+            plan={plan}
+            index={indexOfFirstPlan + index}
+          />
         ))}
       </div>
 
