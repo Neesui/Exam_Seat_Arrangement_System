@@ -2,128 +2,99 @@ import sys
 import json
 import random
 from collections import defaultdict
-from copy import deepcopy
 
-# ---- CONFIG ----
+# -------- CONFIG --------
 POPULATION_SIZE = 50
 GENERATIONS = 100
 MUTATION_RATE = 0.1
 
-# ---- UTILITIES ----
+# -------- UTILITIES --------
 def flatten_benches(rooms):
     benches = []
     for room in rooms:
         for bench in room['benches']:
             benches.append({
+                'roomId': room['id'],
                 'benchId': bench['id'],
-                'capacity': bench['capacity'],
-                'roomId': room['roomId'],
+                'capacity': bench['capacity']
             })
     return benches
 
-# ---- CHROMOSOME OPS ----
-def create_individual(students, benches):
-    student_pool = deepcopy(students)
-    random.shuffle(student_pool)
-    individual = []
-    index = 0
+def fitness(seating, students_by_college):
+    conflicts = 0
+    for bench in seating.values():
+        colleges = [s['college'] for s in bench]
+        if len(colleges) != len(set(colleges)):  # same college conflict
+            conflicts += 1
+    return -conflicts  # higher fitness is better
 
+def generate_individual(students, benches):
+    random.shuffle(students)
+    seating = {}
+    idx = 0
     for bench in benches:
-        for pos in range(1, bench['capacity'] + 1):
-            if index >= len(student_pool):
-                break
-            individual.append({
-                'studentId': student_pool[index]['id'],
-                'benchId': bench['benchId'],
-                'roomId': bench['roomId'],
-                'position': pos
-            })
-            index += 1
-
-    return individual
-
-def fitness(individual, student_colleges):
-    score = 0
-    bench_groups = defaultdict(list)
-
-    for seat in individual:
-        key = seat['benchId']
-        bench_groups[key].append(student_colleges[seat['studentId']])
-
-    for students in bench_groups.values():
-        unique_colleges = len(set(students))
-        score += unique_colleges * 10 - (len(students) - unique_colleges) * 5
-
-    score += len(individual)  
-    return score
+        seating[bench['benchId']] = []
+        for _ in range(bench['capacity']):
+            if idx < len(students):
+                seating[bench['benchId']].append(students[idx])
+                idx += 1
+    return seating
 
 def crossover(parent1, parent2):
-    split = len(parent1) // 2
-    child = parent1[:split] + parent2[split:]
-    seen = set()
-    result = []
-    for gene in child:
-        if gene['studentId'] not in seen:
-            result.append(gene)
-            seen.add(gene['studentId'])
-    return result
+    child = {}
+    for benchId in parent1:
+        if random.random() < 0.5:
+            child[benchId] = parent1[benchId]
+        else:
+            child[benchId] = parent2[benchId]
+    return child
 
-def mutate(individual, benches, student_pool):
-    if random.random() > MUTATION_RATE:
-        return individual
+def mutate(individual, benches):
+    if random.random() < MUTATION_RATE:
+        b1, b2 = random.sample(list(individual.keys()), 2)
+        if individual[b1] and individual[b2]:
+            i1 = random.randrange(len(individual[b1]))
+            i2 = random.randrange(len(individual[b2]))
+            individual[b1][i1], individual[b2][i2] = individual[b2][i2], individual[b1][i1]
+    return individual
 
-    mutant = deepcopy(individual)
-    i = random.randint(0, len(mutant) - 1)
-    available_students = list(set(s['id'] for s in student_pool) - set(g['studentId'] for g in mutant))
-    if not available_students:
-        return mutant
+def genetic_algorithm(students, rooms):
+    benches = flatten_benches(rooms)
+    students_by_college = defaultdict(list)
+    for s in students:
+        students_by_college[s['college']].append(s)
 
-    replacement = random.choice(available_students)
-    mutant[i]['studentId'] = replacement
-    return mutant
-
-# ---- MAIN ----
-def main():
-    input_data = sys.stdin.read()
-    data = json.loads(input_data)
-
-    students = data['students']
-    room_assignments = data['roomAssignments']
-    student_colleges = {s['id']: s['college'] for s in students}
-
-    all_rooms = [
-        {
-            'roomId': r['room']['id'],
-            'benches': sorted(r['room']['benches'], key=lambda b: (b['row'], b['column']))
-        }
-        for r in room_assignments
-    ]
-
-    benches = flatten_benches(all_rooms)
-
-    # --- GA START ---
-    population = [create_individual(students, benches) for _ in range(POPULATION_SIZE)]
+    population = [generate_individual(students[:], benches) for _ in range(POPULATION_SIZE)]
 
     for _ in range(GENERATIONS):
-        population.sort(key=lambda ind: fitness(ind, student_colleges), reverse=True)
-        next_gen = population[:5]  # elitism
-
+        population.sort(key=lambda ind: fitness(ind, students_by_college), reverse=True)
+        next_gen = population[:10]  # elitism
         while len(next_gen) < POPULATION_SIZE:
-            p1, p2 = random.choices(population[:25], k=2)
+            p1, p2 = random.sample(population[:20], 2)
             child = crossover(p1, p2)
-            child = mutate(child, benches, students)
-            next_gen.append(child)
-
+            next_gen.append(mutate(child, benches))
         population = next_gen
 
-    best = max(population, key=lambda ind: fitness(ind, student_colleges))
+    best = max(population, key=lambda ind: fitness(ind, students_by_college))
 
-    # ✅ Output JSON only
-    sys.stdout.write(json.dumps(best))
+    # Group seating by room
+    room_output = defaultdict(list)
+    for bench in benches:
+        benchId = bench['benchId']
+        roomId = bench['roomId']
+        room_output[roomId].append({
+            "benchId": benchId,
+            "students": best.get(benchId, [])
+        })
 
-if __name__ == '__main__':
-    try:
-        main()
-    except Exception as e:
-        sys.stdout.write(json.dumps({"error": str(e)}))
-        sys.exit(1)
+    return room_output
+
+# -------- MAIN --------
+if __name__ == "__main__":
+    data = json.load(sys.stdin)  # input from backend
+    students = data['students']
+    rooms = data['rooms']
+
+    seating_plan = genetic_algorithm(students, rooms)
+
+    print(json.dumps(seating_plan, indent=2))
