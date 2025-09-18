@@ -14,10 +14,25 @@ export const seatPlanApi = apiSlice.injectEndpoints({
       query: () => "/api/seating/all",
       providesTags: ["SEAT_PLAN"],
     }),
+
+    getActiveSeatingPlan: builder.query({
+      query: () => "/api/seating/active",
+      providesTags: ["SEAT_PLAN"],
+    }),
+
+    getStudentActiveSeating: builder.query({
+      query: ({ symbolNumber, college }) => {
+        if (!symbolNumber || !college) return ""; 
+        return `/api/seating/student/active?rollNumber=${symbolNumber}&college=${college}`;
+      },
+      providesTags: ["SEAT_PLAN"],
+    }),
   }),
 });
 
 export const {
   useGenerateSeatingPlanMutation,
   useGetAllSeatingPlansQuery,
+  useGetActiveSeatingPlanQuery,
+  useGetStudentActiveSeatingQuery,
 } = seatPlanApi;

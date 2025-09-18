@@ -139,6 +139,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             links={[
               { path: "/generateSeatingPlan", label: "Generate Seat Plan" },
               { path: "/viewSeatingPlan", label: "View Seat Plan" },
+              { path: "/viewActiveSeatPlan", label: "View Active Seat Plan" },
+
             ]}
           />
         </ul>
