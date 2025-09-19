@@ -14,6 +14,7 @@ import {
   getInvigilatorAssignmentsByRoom,
   updateInvigilatorAssignmentStatus,
   getFilteredInvigilatorAssignments,
+  deleteInvigilatorAssignment,
 } from "../controllers/invigilatorAssignmentControllers.js";
 
 import { authenticate } from "../middlewares/authenticate.js";
@@ -28,6 +29,7 @@ router.get("/all", authenticate, roleCheck(["ADMIN"]), getAllInvigilator);
 router.get("/:id", authenticate, roleCheck(["ADMIN"]), getInvigilatorById);
 router.post("/generate", authenticate, roleCheck(["ADMIN"]), runAndSaveInvigilatorAssignments);
 router.put("/assignments/:id", authenticate, roleCheck(["ADMIN"]), updateInvigilatorAssignmentStatus);
+router.delete("/delete/:id", authenticate, roleCheck(["ADMIN"]), deleteInvigilatorAssignment);
 
 
 // Invigilator-only routes

@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   useGetAllInvigilatorAssignmentsQuery,
   useDeleteInvigilatorAssignMutation,
@@ -12,7 +13,7 @@ const ITEMS_PER_PAGE = 10;
 
 const ViewInvigilatorAssignPage = () => {
   const navigate = useNavigate();
-  const { data, error, isLoading, refetch } = useGetAllInvigilatorAssignmentsQuery();
+  const { data, error, isLoading } = useGetAllInvigilatorAssignmentsQuery();
   const [deleteAssign, { isLoading: isDeleting }] = useDeleteInvigilatorAssignMutation();
 
   // Search states
@@ -22,14 +23,31 @@ const ViewInvigilatorAssignPage = () => {
   const [searchSubject, setSearchSubject] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const handleDelete = async (assignmentId) => {
-    if (!window.confirm("Are you sure you want to delete this assignment?")) return;
+  // Local copy of assignments for instant UI update
+  const [localAssignments, setLocalAssignments] = useState([]);
+
+  // Update localAssignments when API data changes
+  useEffect(() => {
+    if (data?.currentAssignments) {
+      setLocalAssignments(data.currentAssignments);
+    }
+  }, [data]);
+
+  // Delete all invigilators for a room
+  const handleDelete = async (roomAssignment) => {
+    if (!window.confirm("Are you sure you want to delete all invigilators for this room?")) return;
     try {
-      await deleteAssign(assignmentId).unwrap();
-      toast.success("Invigilator assignment deleted successfully!");
-      refetch();
+      for (const inv of roomAssignment.invigilators) {
+        await deleteAssign(inv.assignId).unwrap();
+      }
+      toast.success("All invigilators for this room deleted successfully!");
+
+      // Remove deleted assignments from local state
+      setLocalAssignments((prev) =>
+        prev.filter((item) => item.roomAssignmentId !== roomAssignment.roomAssignmentId)
+      );
     } catch (err) {
-      toast.error(err?.data?.message || "Failed to delete assignment.");
+      toast.error(err?.data?.message || "Failed to delete assignments.");
     }
   };
 
@@ -49,11 +67,8 @@ const ViewInvigilatorAssignPage = () => {
     );
   };
 
-  // Use currentAssignments (latest) from API data
-  const assignments = data?.currentAssignments || [];
-
   // Group by roomAssignmentId
-  const groupedAssignments = assignments.reduce((acc, curr) => {
+  const groupedAssignments = localAssignments.reduce((acc, curr) => {
     const roomAssignmentId = curr.roomAssignmentId;
     if (!acc[roomAssignmentId]) {
       acc[roomAssignmentId] = {
@@ -106,6 +121,9 @@ const ViewInvigilatorAssignPage = () => {
   return (
     <div className="w-full px-4 py-6 mt-5 bg-white rounded-lg shadow-md">
       <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Current Invigilator Assignments</h2>
+
+      {/* Toast Container */}
+      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
 
       {/* Search Inputs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 max-w-6xl mx-auto">
@@ -165,7 +183,7 @@ const ViewInvigilatorAssignPage = () => {
                     </button>
                     <button
                       className="text-red-600 hover:underline"
-                      onClick={() => handleDelete(group.invigilators[0].assignId)}
+                      onClick={() => handleDelete(group)}
                       disabled={isDeleting}
                     >
                       Delete

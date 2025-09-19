@@ -33,7 +33,7 @@ export const invigilatorAssignApi = apiSlice.injectEndpoints({
     // Be sure you have a DELETE route in backend if you want to use this
     deleteInvigilatorAssign: builder.mutation({
       query: (id) => ({
-        url: `/api/invigilator/assignments/${id}`,
+        url: `/api/invigilator/delete/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["INV_ASSIGN"],
