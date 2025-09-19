@@ -9,7 +9,6 @@ const ActiveSeatingPlan = () => {
     return <p className="text-center mt-20 text-lg">Loading active seating plan...</p>;
   }
 
-  // Check if data.data exists and has at least one plan
   if (error || !data?.data || data.data.length === 0) {
     return (
       <p className="text-center mt-20 text-lg text-red-600">
@@ -18,12 +17,31 @@ const ActiveSeatingPlan = () => {
     );
   }
 
-  // Assuming you want to show the first plan only
-  const plan = data.data[0];
+  const today = new Date();
+  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+
+  // Find today's exam first, otherwise fallback to tomorrow
+  let plan = data.data.find(
+    (plan) => new Date(plan.exam.date).toDateString() === today.toDateString()
+  );
+
+  if (!plan) {
+    plan = data.data.find(
+      (plan) => new Date(plan.exam.date).toDateString() === tomorrow.toDateString()
+    );
+  }
+
+  if (!plan) {
+    return (
+      <p className="text-center mt-20 text-lg text-gray-700">
+        No active seating plan for today or tomorrow.
+      </p>
+    );
+  }
 
   return (
     <div className="mt-5 p-6 max-w-screen-xl mx-auto bg-white rounded shadow">
-      <h2 className="text-4xl font-bold text-center mb-6">Active Seating Plan</h2>
+      <h2 className="text-4xl font-bold text-center mb-6"> Seating Plan</h2>
 
       <SeatingPlanCard plan={plan} index={0} />
 

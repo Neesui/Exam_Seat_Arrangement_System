@@ -6,6 +6,21 @@ const SeatingPlanCard = ({ plan, index }) => {
   const semester = subject?.semester;
   const course = semester?.course;
 
+  // Format exam date and time
+  const examDateObj = new Date(plan.exam.date);
+  const examDate = examDateObj.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  const examTime = plan.exam.startTime
+    ? new Date(plan.exam.startTime).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+    : "N/A";
+
   // Group seats by room
   const seatsByRoom = (plan.seats || []).reduce((acc, seat) => {
     const roomNo = seat.bench?.room?.roomNumber;
@@ -73,6 +88,18 @@ const SeatingPlanCard = ({ plan, index }) => {
                 </span>
               </span>
             </p>
+
+            {/* Exam Date and Time */}
+            <div className="text-sm text-gray-600 space-y-1 mb-4">
+              <p>
+                <span className="font-medium">Exam Date:</span>{" "}
+                <span className="font-normal">{examDate}</span>
+              </p>
+              <p>
+                <span className="font-medium">Exam Time:</span>{" "}
+                <span className="font-normal">{examTime}</span>
+              </p>
+            </div>
 
             {/* Room Info */}
             <p className="text-base text-gray-700 mb-4">
