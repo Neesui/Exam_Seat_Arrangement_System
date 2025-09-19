@@ -5,7 +5,8 @@ import {
   generateSeatingPlan,
   getAllSeatingPlan,
   getActiveSeatingPlan,
-  getStudentActiveSeating
+  getStudentActiveSeating,
+  getInvigilatorSeatingPlans
 } from "../controllers/seatControllers.js";
 
 const router = express.Router();
@@ -16,5 +17,8 @@ router.get("/all", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getAllSeat
 router.get("/active", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getActiveSeatingPlan);
 
 router.get("/student/active", getStudentActiveSeating);
+router.get("/invigilator/history", authenticate, roleCheck(["INVIGILATOR"]), getInvigilatorSeatingPlans);
+
+  
 
 export default router;

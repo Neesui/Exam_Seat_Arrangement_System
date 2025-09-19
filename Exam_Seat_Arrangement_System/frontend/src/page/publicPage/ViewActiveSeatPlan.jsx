@@ -20,7 +20,6 @@ const ActiveSeatingPlan = () => {
   const today = new Date();
   const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
-  // Find today's exam first, otherwise fallback to tomorrow
   let plan = data.data.find(
     (plan) => new Date(plan.exam.date).toDateString() === today.toDateString()
   );

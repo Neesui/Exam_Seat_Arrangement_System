@@ -38,6 +38,7 @@ import UpdateInvigilatorAssign from "../../page/adminPage/UpdateInvigilatorAssig
 import InvigilatorAssignPage from "../../page/adminPage/InvigilatorAssignPage";
 import ViewAllInvigilatorAssignPage from "../../page/adminPage/ViewAllInvigilatorAssignPage";
 import ViewInvigilatorAssignDetailsPage from "../../page/adminPage/ViewInvigilatorAssignDetailsPage";
+import ActiveSeatingPlan from "../../page/publicPage/ViewActiveSeatPlan";
 
 const adminRoutes = [
   {
@@ -201,6 +202,10 @@ const adminRoutes = [
   {
     path: "/viewSeatingPlan",
     element: <ViewAllSeatingPlans />,
+  },
+  {
+    path: "/viewActiveSeatPlan",
+    element: <ActiveSeatingPlan />,
   },
 ];
 
