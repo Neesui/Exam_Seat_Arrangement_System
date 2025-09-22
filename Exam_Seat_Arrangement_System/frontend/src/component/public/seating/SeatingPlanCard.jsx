@@ -2,18 +2,21 @@ import React from "react";
 import SeatingPlanVisual from "../../../layout/SeatingPlanVisual";
 
 const SeatingPlanCard = ({ plan, index }) => {
-  const subject = plan.exam.subject;
+  const subject = plan.exam?.subject;
   const semester = subject?.semester;
   const course = semester?.course;
 
-  // Format exam date and time
-  const examDateObj = new Date(plan.exam.date);
-  const examDate = examDateObj.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-  const examTime = plan.exam.startTime
+  // Format exam date and time safely
+  const examDateObj = plan.exam?.date ? new Date(plan.exam.date) : null;
+  const examDate = examDateObj
+    ? examDateObj.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "N/A";
+
+  const examTime = plan.exam?.startTime
     ? new Date(plan.exam.startTime).toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
@@ -32,9 +35,7 @@ const SeatingPlanCard = ({ plan, index }) => {
 
   return (
     <div className="mb-12">
-      {/* Loop each room separately */}
       {Object.entries(seatsByRoom).map(([roomNo, seats], idx) => {
-        // Roll ranges per college for this room
         const seatsByCollege = seats.reduce((acc, seat) => {
           const college = seat.student?.college || "Unknown College";
           if (!acc[college]) acc[college] = [];
@@ -83,9 +84,7 @@ const SeatingPlanCard = ({ plan, index }) => {
               </span>
               <span>
                 Exam Subject Name:{" "}
-                <span className="font-normal">
-                  {subject?.subjectName || "N/A"}
-                </span>
+                <span className="font-normal">{subject?.subjectName || "N/A"}</span>
               </span>
             </p>
 
