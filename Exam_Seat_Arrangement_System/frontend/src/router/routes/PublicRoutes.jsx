@@ -1,7 +1,7 @@
 import HomePage from "../../page/publicPage/HomePage";
 import NotFound from "../../page/publicPage/NotFound";
-// import ActiveSeatingPlan from "../../page/publicPage/ViewActiveSeatPlan";
 import ViewExamRoom from "../../page/publicPage/ViewExamRoom";
+import ViewSeatplan from "../../page/publicPage/viewSeatPlan";
 
 export const publicRoutes = [
   {
@@ -12,10 +12,10 @@ export const publicRoutes = [
     path: "/exam_room",
     element: <ViewExamRoom />,
   },
-  // {
-  //   path: "/viewActiveSeatPlan",
-  //   element: <ActiveSeatingPlan />,
-  // },
+  {
+    path: "/viewSeatPlan",
+    element: <ViewSeatplan />,
+  },
   {
     path: "*",
     element: <NotFound />,

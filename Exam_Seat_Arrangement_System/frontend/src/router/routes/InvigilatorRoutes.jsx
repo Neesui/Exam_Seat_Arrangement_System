@@ -3,7 +3,7 @@ import InvigilatorDashboard from "../../page/invigilatorPage/InvigilatorDashboar
 
  const invigilatorRoutes = [
     {
-      path: 'invigilator',
+      path: '/invigilator',
       element: <InvigilatorDashboard />
     },
   ];
