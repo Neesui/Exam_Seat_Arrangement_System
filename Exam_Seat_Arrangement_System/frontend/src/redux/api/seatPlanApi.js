@@ -22,11 +22,13 @@ export const seatPlanApi = apiSlice.injectEndpoints({
 
     getStudentActiveSeating: builder.query({
       query: ({ symbolNumber, college }) => {
-        if (!symbolNumber || !college) return ""; 
-        return `/api/seating/student/active?symbolNumber=${symbolNumber}&college=${college}`;
+        if (!symbolNumber || !college) return "";
+        return `/api/seating/student/active?symbolNumber=${encodeURIComponent(
+          symbolNumber
+        )}&college=${encodeURIComponent(college)}`;
       },
       providesTags: ["SEAT_PLAN"],
-    }),
+    }),    
   }),
 });
 

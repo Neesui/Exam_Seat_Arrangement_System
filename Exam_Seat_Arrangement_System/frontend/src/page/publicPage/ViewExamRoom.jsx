@@ -10,8 +10,12 @@ const ViewExamRoom = () => {
     e.preventDefault();
     if (!symbolNumber || !college) return;
 
-    // Navigate to Active Seatplan page with query params
-    navigate(`/viewSeatPlan?symbolNumber=${symbolNumber}&college=${college}`);
+    // Encode params before navigating
+    navigate(
+      `/viewSeatPlan?symbolNumber=${encodeURIComponent(
+        symbolNumber
+      )}&college=${encodeURIComponent(college)}`
+    );
   };
 
   return (
@@ -20,7 +24,6 @@ const ViewExamRoom = () => {
         Check Your Exam Seat
       </h2>
 
-      {/* Search Form */}
       <form
         onSubmit={handleSubmit}
         className="flex flex-col items-center gap-4 mb-6"
