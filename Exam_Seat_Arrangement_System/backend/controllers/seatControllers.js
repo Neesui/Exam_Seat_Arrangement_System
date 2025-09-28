@@ -9,10 +9,11 @@ const prisma = new PrismaClient();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Path to python script
+// Path to Python script
 const PY_SCRIPT_PATH = path.resolve(__dirname, "../algorithm/seating_algorithm.py");
 const pythonCmd = process.platform === "win32" ? "python" : "python3";
 
+// Run Python script
 const runPythonScript = (scriptPath, inputJson, timeoutMs = 60_000) =>
   new Promise((resolve, reject) => {
     const py = spawn(pythonCmd, [scriptPath], { stdio: ["pipe", "pipe", "pipe"] });
@@ -44,7 +45,7 @@ const runPythonScript = (scriptPath, inputJson, timeoutMs = 60_000) =>
     });
   });
 
-
+// -------- Generate Seating Plan (Admin) --------
 export const generateSeatingPlan = async (req, res) => {
   try {
     const { examId } = req.params;
@@ -55,7 +56,6 @@ export const generateSeatingPlan = async (req, res) => {
 
     await prisma.exam.updateMany({ where: { isActive: true }, data: { isActive: false } });
 
-    // Activate current exam
     const exam = await prisma.exam.update({
       where: { id: examIdInt },
       data: { isActive: true },
@@ -68,14 +68,16 @@ export const generateSeatingPlan = async (req, res) => {
       id: s.id,
       symbolNumber: s.symbolNumber,
       college: s.college,
+      studentName: s.studentName,
     }));
 
     const rooms = await prisma.room.findMany({ include: { benches: true } });
     const input = JSON.stringify({ students, rooms });
 
     let result;
-    try { result = await runPythonScript(PY_SCRIPT_PATH, input); }
-    catch (err) {
+    try {
+      result = await runPythonScript(PY_SCRIPT_PATH, input);
+    } catch (err) {
       console.error("Failed to run Python script:", err);
       return res.status(500).json({ success: false, message: "Failed to execute seating algorithm", error: err.message });
     }
@@ -89,8 +91,9 @@ export const generateSeatingPlan = async (req, res) => {
     if (!rawOutput) return res.status(500).json({ success: false, message: "Seating algorithm returned no output" });
 
     let seatingPlanData;
-    try { seatingPlanData = JSON.parse(rawOutput); }
-    catch (err) {
+    try {
+      seatingPlanData = JSON.parse(rawOutput);
+    } catch (err) {
       console.error("Failed to parse Python output:", err, "rawOutput:", rawOutput);
       return res.status(500).json({ success: false, message: "Failed to parse seating algorithm output", error: err.message });
     }
@@ -98,10 +101,15 @@ export const generateSeatingPlan = async (req, res) => {
     const seatsToInsert = [];
     for (const [roomIdKey, benches] of Object.entries(seatingPlanData)) {
       for (const bench of benches) {
-        if (!bench || typeof bench.benchId === "undefined" || !Array.isArray(bench.students)) continue;
+        if (!bench || !Array.isArray(bench.students)) continue;
         for (const student of bench.students) {
-          if (!student || typeof student.id === "undefined") continue;
-          seatsToInsert.push({ benchId: bench.benchId, studentId: student.id, seatingPlanId: 0, position: student.position ?? 1 });
+          if (!student?.id) continue;
+          seatsToInsert.push({
+            benchId: bench.benchId,
+            studentId: student.id,
+            seatingPlanId: 0, // placeholder
+            position: student.position,
+          });
         }
       }
     }
@@ -122,7 +130,7 @@ export const generateSeatingPlan = async (req, res) => {
   }
 };
 
-
+// -------- Get Active Seating Plan (Admin/Invigilator) --------
 export const getActiveSeatingPlan = async (req, res) => {
   try {
     const today = new Date();
@@ -130,13 +138,16 @@ export const getActiveSeatingPlan = async (req, res) => {
 
     const seatingPlans = await prisma.seatingPlan.findMany({
       where: {
-        exam: {
-          date: { gte: startOfDay(today), lte: endOfDay(tomorrow) },
-        },
+        exam: { date: { gte: startOfDay(today), lte: endOfDay(tomorrow) } },
       },
       include: {
         exam: { include: { subject: { include: { semester: { include: { course: true } } } } } },
-        seats: { include: { student: { select: { id: true, college: true, symbolNumber: true } }, bench: { include: { room: { select: { id: true, roomNumber: true, block: true, floor: true } } } } } },
+        seats: {
+          include: {
+            student: { select: { id: true, symbolNumber: true, college: true, studentName: true } },
+            bench: { include: { room: { select: { id: true, roomNumber: true, block: true, floor: true } } } },
+          },
+        },
       },
       orderBy: { id: "desc" },
     });
@@ -151,47 +162,64 @@ export const getActiveSeatingPlan = async (req, res) => {
   }
 };
 
+// -------- Get Student Seating Info (Student) --------
+export const getStudentSeating = async (req, res) => {
+  let { symbolNumber, college } = req.body;
 
-export const getStudentActiveSeating = async (req, res) => {
-  const { symbolNumber, college } = req.query;
-  if (!symbolNumber || !college)
+  if (!symbolNumber || !college) {
     return res.status(400).json({ success: false, message: "symbolNumber and college are required" });
+  }
+
+  symbolNumber = symbolNumber.trim();
+  college = college.trim();
 
   try {
     const today = new Date();
     const tomorrow = addDays(today, 1);
 
-    const seating = await prisma.seat.findMany({
+    const seating = await prisma.seat.findFirst({
       where: {
-        student: { symbolNumber, college },
-        seatingPlan: {
-          exam: { date: { gte: startOfDay(today), lte: endOfDay(tomorrow) } },
-        },
+        student: { symbolNumber, college: { equals: college, mode: "insensitive" } },
+        seatingPlan: { exam: { date: { gte: startOfDay(today), lte: endOfDay(tomorrow) } } },
       },
       include: {
-        student: { select: { id: true, symbolNumber: true, college: true } },
+        student: { select: { id: true, symbolNumber: true, college: true, studentName: true } },
         bench: { include: { room: { select: { roomNumber: true, block: true, floor: true } } } },
-        seatingPlan: { include: { exam: true } },
+        seatingPlan: {
+          include: { exam: { include: { subject: { include: { semester: { include: { course: true } } } } } } },
+        },
       },
     });
 
-    if (!seating || seating.length === 0)
-      return res.json({ success: true, message: "No seating assigned today or tomorrow", data: [] });
+    if (!seating) return res.json({ success: true, message: "No seating assigned today or tomorrow", data: null });
 
-    res.json({ success: true, message: "Seating info retrieved successfully", data: seating });
+    const responseData = {
+      student: seating.student,
+      exam: seating.seatingPlan.exam,
+      room: seating.bench.room,
+      benchId: seating.benchId,
+      position: seating.position,
+    };
+
+    res.json({ success: true, message: "Seating info retrieved successfully", data: responseData });
   } catch (err) {
     console.error("Error fetching student seating:", err);
     res.status(500).json({ success: false, message: "Failed to fetch seating info", error: err.message });
   }
 };
 
-
+// -------- Get All Seating Plans (Admin/Invigilator) --------
 export const getAllSeatingPlan = async (req, res) => {
   try {
     const seatingPlans = await prisma.seatingPlan.findMany({
       include: {
         exam: { include: { subject: { include: { semester: { include: { course: true } } } } } },
-        seats: { include: { student: { select: { id: true, college: true, symbolNumber: true } }, bench: { include: { room: { select: { id: true, roomNumber: true, block: true, floor: true } } } } } },
+        seats: {
+          include: {
+            student: { select: { id: true, symbolNumber: true, college: true, studentName: true } },
+            bench: { include: { room: { select: { id: true, roomNumber: true, block: true, floor: true } } } },
+          },
+        },
       },
       orderBy: { id: "desc" },
     });
@@ -203,7 +231,7 @@ export const getAllSeatingPlan = async (req, res) => {
   }
 };
 
-
+// -------- Get Seating Plans for Invigilator --------
 export const getInvigilatorSeatingPlans = async (req, res) => {
   try {
     const today = new Date();
@@ -212,7 +240,12 @@ export const getInvigilatorSeatingPlans = async (req, res) => {
     const seatingPlans = await prisma.seatingPlan.findMany({
       include: {
         exam: { include: { subject: { include: { semester: { include: { course: true } } } } } },
-        seats: { include: { student: { select: { id: true, college: true, symbolNumber: true } }, bench: { include: { room: { select: { id: true, roomNumber: true, block: true, floor: true } } } } } },
+        seats: {
+          include: {
+            student: { select: { id: true, symbolNumber: true, college: true, studentName: true } },
+            bench: { include: { room: { select: { id: true, roomNumber: true, block: true, floor: true } } } },
+          },
+        },
       },
       orderBy: { id: "desc" },
     });
@@ -226,6 +259,6 @@ export const getInvigilatorSeatingPlans = async (req, res) => {
     res.json({ success: true, message: "Invigilator seating plans retrieved", data: processed });
   } catch (err) {
     console.error("Error fetching invigilator seating plans:", err);
-    res.status(500).json({ success: false, message: "Failed to fetch seating plans", error: err.message });
+    res.status(500).json({ success: false, message: "Failed to fetch invigilator seating plans", error: err.message });
   }
 };

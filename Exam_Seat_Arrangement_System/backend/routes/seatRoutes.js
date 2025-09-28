@@ -5,20 +5,25 @@ import {
   generateSeatingPlan,
   getAllSeatingPlan,
   getActiveSeatingPlan,
-  getStudentActiveSeating,
+  getStudentSeating,
   getInvigilatorSeatingPlans
 } from "../controllers/seatControllers.js";
 
 const router = express.Router();
 
+// Admin generate new seating plan
 router.post("/generate/:examId", authenticate, roleCheck(["ADMIN"]), generateSeatingPlan);
 
+// Admin/Invigilator view all seating plans
 router.get("/all", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getAllSeatingPlan);
+
+// Admin/Invigilator view active seating plan
 router.get("/active", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getActiveSeatingPlan);
 
-router.get("/student/active", getStudentActiveSeating);
-router.get("/invigilator/history", authenticate, roleCheck(["INVIGILATOR"]), getInvigilatorSeatingPlans);
+// Student find their seating info
+router.post("/student/find", getStudentSeating);
 
-  
+// Invigilator view today's + history seating plans
+router.get("/invigilator/history", authenticate, roleCheck(["INVIGILATOR"]), getInvigilatorSeatingPlans);
 
 export default router;

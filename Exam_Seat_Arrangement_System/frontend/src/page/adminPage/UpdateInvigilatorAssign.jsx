@@ -9,7 +9,7 @@ import {
 import Input from "../../component/public/Input";
 
 const UpdateInvigilatorAssign = () => {
-  const { roomAssignmentId } = useParams(); // use roomAssignmentId instead of single assignId
+  const { roomAssignmentId } = useParams(); 
   const navigate = useNavigate();
 
   const { data, isLoading, error } = useGetAllInvigilatorAssignmentsQuery();

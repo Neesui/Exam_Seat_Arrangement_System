@@ -5,38 +5,56 @@ from collections import defaultdict
 
 # -------- CONFIG --------
 POPULATION_SIZE = 50
-GENERATIONS = 100
+GENERATIONS = 200
 MUTATION_RATE = 0.1
 
 # -------- UTILITIES --------
 def flatten_benches(rooms):
     benches = []
     for room in rooms:
-        for bench in room['benches']:
+        for bench in sorted(room["benches"], key=lambda b: b["id"]):
             benches.append({
-                'roomId': room['id'],
-                'benchId': bench['id'],
-                'capacity': bench['capacity']
+                "roomId": room["id"],
+                "benchId": bench["id"],
+                "capacity": bench["capacity"]
             })
     return benches
 
+def zigzag_order(benches):
+    """Reorder benches in zigzag pattern (left-right alternating)."""
+    zigzag = []
+    left = True
+    for i in range(0, len(benches), 2):
+        if left:
+            zigzag.extend(benches[i:i+2])
+        else:
+            zigzag.extend(reversed(benches[i:i+2]))
+        left = not left
+    return zigzag
+
 def fitness(seating, students_by_college):
+    """Fitness: fewer conflicts = better, also reward full usage of students."""
     conflicts = 0
+    total_students = 0
+
     for bench in seating.values():
-        colleges = [s['college'] for s in bench]
-        if len(colleges) != len(set(colleges)):  # same college conflict
+        colleges = [s["college"] for s in bench]
+        total_students += len(colleges)
+        if len(colleges) != len(set(colleges)):  # same-college conflict
             conflicts += 1
-    return -conflicts  # higher fitness is better
+
+    return -(conflicts * 10) + total_students  # prefer max students, penalize conflicts
 
 def generate_individual(students, benches):
     random.shuffle(students)
-    seating = {}
+    seating = {bench["benchId"]: [] for bench in benches}
     idx = 0
     for bench in benches:
-        seating[bench['benchId']] = []
-        for _ in range(bench['capacity']):
+        for pos in range(1, bench["capacity"] + 1):  # assign positions
             if idx < len(students):
-                seating[bench['benchId']].append(students[idx])
+                student = students[idx].copy()
+                student["position"] = pos   # 1=left, 2=right
+                seating[bench["benchId"]].append(student)
                 idx += 1
     return seating
 
@@ -44,9 +62,9 @@ def crossover(parent1, parent2):
     child = {}
     for benchId in parent1:
         if random.random() < 0.5:
-            child[benchId] = parent1[benchId]
+            child[benchId] = parent1[benchId][:]
         else:
-            child[benchId] = parent2[benchId]
+            child[benchId] = parent2[benchId][:]
     return child
 
 def mutate(individual, benches):
@@ -60,9 +78,11 @@ def mutate(individual, benches):
 
 def genetic_algorithm(students, rooms):
     benches = flatten_benches(rooms)
+    benches = zigzag_order(benches)
+
     students_by_college = defaultdict(list)
     for s in students:
-        students_by_college[s['college']].append(s)
+        students_by_college[s["college"]].append(s)
 
     population = [generate_individual(students[:], benches) for _ in range(POPULATION_SIZE)]
 
@@ -80,20 +100,20 @@ def genetic_algorithm(students, rooms):
     # Group seating by room
     room_output = defaultdict(list)
     for bench in benches:
-        benchId = bench['benchId']
-        roomId = bench['roomId']
+        benchId = bench["benchId"]
+        roomId = bench["roomId"]
         room_output[roomId].append({
             "benchId": benchId,
-            "students": best.get(benchId, [])
+            "students": sorted(best.get(benchId, []), key=lambda s: s["position"])
         })
 
     return room_output
 
 # -------- MAIN --------
 if __name__ == "__main__":
-    data = json.load(sys.stdin)  # input from backend
-    students = data['students']
-    rooms = data['rooms']
+    data = json.load(sys.stdin)
+    students = data["students"]
+    rooms = data["rooms"]
 
     seating_plan = genetic_algorithm(students, rooms)
 
