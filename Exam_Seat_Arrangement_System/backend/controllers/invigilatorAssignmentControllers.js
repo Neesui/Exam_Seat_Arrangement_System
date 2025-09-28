@@ -81,7 +81,6 @@ export const runAndSaveInvigilatorAssignments = async (req, res) => {
   });
 };
 
-// UPDATED: Return both all assignments and current assignments
 export const getAllInvigilatorAssignments = async (req, res) => {
   try {
     // Get latest generationId

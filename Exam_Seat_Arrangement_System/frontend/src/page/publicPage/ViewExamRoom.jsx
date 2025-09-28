@@ -10,7 +10,6 @@ const ViewExamRoom = () => {
     e.preventDefault();
     if (!symbolNumber || !college) return;
 
-    // Encode params before navigating
     navigate(
       `/viewSeatPlan?symbolNumber=${encodeURIComponent(
         symbolNumber
@@ -55,12 +54,11 @@ const ViewExamRoom = () => {
         </button>
       </form>
 
-      {/* Instructions */}
       <div className="mt-12">
         <h3 className="text-3xl font-bold text-center mb-4">
           Important Instructions for Examinees
         </h3>
-        <ul className="list-decimal list-inside space-y-3 text-justify text-[18px] leading-relaxed">
+        <ul className="list-decimal space-y-3 text-justify text-[18px] leading-relaxed">
           <li>
             Candidates must sit in their designated seat according to the seat
             plan prepared by the exam center.
@@ -91,8 +89,7 @@ const ViewExamRoom = () => {
             disqualified.
           </li>
           <li>
-            Answer sheets will only be accepted if submitted with the
-            invigilator’s approval.
+            Answer sheets will only be accepted if submitted with the invigilator’s approval.
           </li>
           <li>
             Candidates must submit their answer sheets before leaving the

@@ -8,15 +8,13 @@ def is_conflict(start1, end1, start2, end2):
 
 def main():
     try:
-        # Read and parse input JSON from stdin
         input_data = json.load(sys.stdin)
         exams = input_data.get("exams", [])
         rooms = input_data.get("rooms", [])
 
-        room_schedule = defaultdict(list)  # room_id -> list of (start, end)
-        assignments = []  # Output array
+        room_schedule = defaultdict(list) 
+        assignments = []  
 
-        # Sort exams by number of students (descending)
         exams.sort(key=lambda e: len(e.get("students", [])), reverse=True)
 
         for exam in exams:
@@ -26,13 +24,13 @@ def main():
             students = exam.get("students", [])
 
             if not exam_id or not start_str or not end_str or not students:
-                continue  # Skip invalid exam
+                continue 
 
             try:
                 start = datetime.fromisoformat(start_str)
                 end = datetime.fromisoformat(end_str)
             except ValueError:
-                continue  # Skip if date format is wrong
+                continue  
 
             students_remaining = len(students)
 
@@ -51,7 +49,6 @@ def main():
                 if not room_id:
                     continue
 
-                # Skip if this room has conflicting exam during this time
                 if any(is_conflict(start, end, s, e) for s, e in room_schedule[room_id]):
                     continue
 
@@ -70,10 +67,8 @@ def main():
 
                 students_remaining -= capacity
 
-        # Output assignments to stdout as JSON
         print(json.dumps(assignments))
     except Exception as e:
-        # Ensure Python always outputs valid JSON on error
         print(json.dumps({ "error": str(e) }))
         sys.exit(1)
 

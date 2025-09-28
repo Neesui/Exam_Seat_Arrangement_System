@@ -24,7 +24,6 @@ export const createRoom = async (req, res) => {
 };
 
 // Get all Rooms
-// Get all Rooms with total capacity from benches
 export const getRooms = async (req, res) => {
   try {
     const rooms = await prisma.room.findMany({

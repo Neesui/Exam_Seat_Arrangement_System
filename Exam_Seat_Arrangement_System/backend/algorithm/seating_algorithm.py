@@ -3,12 +3,12 @@ import json
 import random
 from collections import defaultdict
 
-# -------- CONFIG --------
+#  config 
 POPULATION_SIZE = 50
 GENERATIONS = 200
 MUTATION_RATE = 0.1
 
-# -------- UTILITIES --------
+#   utilities 
 def flatten_benches(rooms):
     benches = []
     for room in rooms:
@@ -43,7 +43,7 @@ def fitness(seating, students_by_college):
         if len(colleges) != len(set(colleges)):  # same-college conflict
             conflicts += 1
 
-    return -(conflicts * 10) + total_students  # prefer max students, penalize conflicts
+    return -(conflicts * 10) + total_students  
 
 def generate_individual(students, benches):
     random.shuffle(students)
@@ -109,7 +109,7 @@ def genetic_algorithm(students, rooms):
 
     return room_output
 
-# -------- MAIN --------
+# main
 if __name__ == "__main__":
     data = json.load(sys.stdin)
     students = data["students"]

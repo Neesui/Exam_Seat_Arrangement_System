@@ -45,7 +45,6 @@ const runPythonScript = (scriptPath, inputJson, timeoutMs = 60_000) =>
     });
   });
 
-// -------- Generate Seating Plan (Admin) --------
 export const generateSeatingPlan = async (req, res) => {
   try {
     const { examId } = req.params;
@@ -107,7 +106,7 @@ export const generateSeatingPlan = async (req, res) => {
           seatsToInsert.push({
             benchId: bench.benchId,
             studentId: student.id,
-            seatingPlanId: 0, // placeholder
+            seatingPlanId: 0, 
             position: student.position,
           });
         }
@@ -130,7 +129,6 @@ export const generateSeatingPlan = async (req, res) => {
   }
 };
 
-// -------- Get Active Seating Plan (Admin/Invigilator) --------
 export const getActiveSeatingPlan = async (req, res) => {
   try {
     const today = new Date();
@@ -162,7 +160,6 @@ export const getActiveSeatingPlan = async (req, res) => {
   }
 };
 
-// -------- Get Student Seating Info (Student) --------
 export const getStudentSeating = async (req, res) => {
   let { symbolNumber, college } = req.body;
 
@@ -208,7 +205,6 @@ export const getStudentSeating = async (req, res) => {
   }
 };
 
-// -------- Get All Seating Plans (Admin/Invigilator) --------
 export const getAllSeatingPlan = async (req, res) => {
   try {
     const seatingPlans = await prisma.seatingPlan.findMany({
@@ -231,7 +227,6 @@ export const getAllSeatingPlan = async (req, res) => {
   }
 };
 
-// -------- Get Seating Plans for Invigilator --------
 export const getInvigilatorSeatingPlans = async (req, res) => {
   try {
     const today = new Date();

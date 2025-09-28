@@ -241,7 +241,6 @@ export const importStudents = async (req, res) => {
       });
     }
 
-    // Optional: Validate fields here or trust frontend validation
 
     await prisma.student.createMany({
       data: students.map(s => ({

@@ -1,11 +1,9 @@
 import prisma from "../utils/db.js";
 
-// Create Bench — Auto-generate benchNo create garxa
 export const createBench = async (req, res) => {
   try {
     const { roomId, row, column, capacity } = req.body;
 
-    // check garxa duplicate row/column in the same room
     const existingBench = await prisma.bench.findUnique({
       where: {
         roomId_row_column: { roomId: Number(roomId), row: Number(row), column: Number(column) },
@@ -19,7 +17,6 @@ export const createBench = async (req, res) => {
       });
     }
 
-    // Get the highest benchNo for this room
     const lastBench = await prisma.bench.findFirst({
       where: { roomId: Number(roomId) },
       orderBy: { benchNo: "desc" },
@@ -121,7 +118,7 @@ export const getBenchesByRoom = async (req, res) => {
   }
 };
 
-// Update bench — allow only row, column, capacity update
+// Update bench 
 export const updateBench = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
