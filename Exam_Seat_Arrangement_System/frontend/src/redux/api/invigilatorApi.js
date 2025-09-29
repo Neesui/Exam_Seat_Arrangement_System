@@ -3,41 +3,35 @@ import { apiSlice } from "./apiSlice";
 export const invigilatorApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     addInvigilator: builder.mutation({
-      query: (newData) => ({
+      query: (formData) => ({
         url: "/api/invigilator/add",
         method: "POST",
-        body: newData,
+        body: formData, 
       }),
       invalidatesTags: ["INVIGILATOR"],
     }),
     getAllInvigilators: builder.query({
-        query: () => "/api/invigilator/all",
-        providesTags: ["INVIGILATOR"],
-      }),
-
-    getInvigilators: builder.query({
+      query: () => "/api/invigilator/all",
+      providesTags: ["INVIGILATOR"],
+    }),
+    getInvigilatorProfile: builder.query({
       query: () => "/api/invigilator/profile",
       providesTags: ["INVIGILATOR"],
     }),
-
     getInvigilatorById: builder.query({
       query: (id) => `/api/invigilator/${id}`,
     }),
-
     updateInvigilator: builder.mutation({
       query: ({ id, formData }) => ({
-        url: `/api/invigilator/${id}`,
+        url: `/api/invigilator/update-profile`, 
         method: "PUT",
         body: formData,
-        formData: true,
       }),
       invalidatesTags: ["INVIGILATOR"],
     }),
-    
-
     deleteInvigilator: builder.mutation({
       query: (id) => ({
-        url: `/api/invigilator/${id}`,
+        url: `/api/invigilator/delete/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["INVIGILATOR"],
@@ -46,10 +40,10 @@ export const invigilatorApi = apiSlice.injectEndpoints({
 });
 
 export const {
-  useGetInvigilatorsQuery,
-  useGetAllInvigilatorsQuery,
-  useGetInvigilatorByIdQuery,
   useAddInvigilatorMutation,
+  useGetAllInvigilatorsQuery,
+  useGetInvigilatorProfileQuery,
+  useGetInvigilatorByIdQuery,
   useUpdateInvigilatorMutation,
   useDeleteInvigilatorMutation,
 } = invigilatorApi;

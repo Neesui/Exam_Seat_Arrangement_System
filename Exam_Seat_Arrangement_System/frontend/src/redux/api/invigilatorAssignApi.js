@@ -11,7 +11,6 @@ export const invigilatorAssignApi = apiSlice.injectEndpoints({
       providesTags: ["INV_ASSIGN"],
     }),
     getInvigilatorAssignmentsByRoom: builder.query({
-      // Note: route is /room/:roomAssignmentId, not /assignments/:roomAssignmentId
       query: (roomAssignmentId) => `/api/invigilator/room/${roomAssignmentId}`,
       providesTags: ["INV_ASSIGN"],
     }),

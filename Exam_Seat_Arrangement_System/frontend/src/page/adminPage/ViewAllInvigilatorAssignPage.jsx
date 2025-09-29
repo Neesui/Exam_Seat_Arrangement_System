@@ -50,11 +50,12 @@ const ViewAllInvigilatorAssignPage = () => {
   };
 
   // Use allAssignments from API data
-  const assignments = data?.allAssignments || [];
+  const assignments = data?.assignments || [];
 
-  // Group by roomAssignmentId
+  // Group by roomAssignmentId and include multiple invigilators
   const groupedAssignments = assignments.reduce((acc, curr) => {
     const roomAssignmentId = curr.roomAssignmentId;
+
     if (!acc[roomAssignmentId]) {
       acc[roomAssignmentId] = {
         roomAssignmentId,
@@ -64,12 +65,16 @@ const ViewAllInvigilatorAssignPage = () => {
         invigilators: [],
       };
     }
-    acc[roomAssignmentId].invigilators.push({
-      name: curr.invigilator?.user?.name || "N/A",
-      email: curr.invigilator?.user?.email || "N/A",
-      assignId: curr.id,
-      status: curr.status,
+
+    curr.invigilators.forEach((inv) => {
+      acc[roomAssignmentId].invigilators.push({
+        name: inv.invigilator?.user?.name || "N/A",
+        email: inv.invigilator?.user?.email || "N/A",
+        assignId: curr.id,
+        status: curr.status,
+      });
     });
+
     return acc;
   }, {});
 

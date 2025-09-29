@@ -1,235 +1,244 @@
-generator client {
-  provider = "prisma-client-js"
-}
+  generator client {
+    provider = "prisma-client-js"
+  }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+  datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+  }
 
-enum Role {
-  ADMIN
-  INVIGILATOR
-}
+  enum Role {
+    ADMIN
+    INVIGILATOR
+  }
 
-enum RoomAssignmentStatus {
-  ACTIVE
-  COMPLETED
-  CANCELED
-}
+  enum RoomAssignmentStatus {
+    ACTIVE
+    COMPLETED
+    CANCELED
+  }
 
-enum InvigilatorStatus {
-  ASSIGNED
-  COMPLETED
-}
+  enum InvigilatorStatus {
+    ASSIGNED
+    COMPLETED
+  }
 
+  model User {
+    id          Int         @id @default(autoincrement())
+    name        String
+    email       String      @unique
+    password    String
+    role        Role        @default(INVIGILATOR)
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
 
-model User {
-  id          Int         @id @default(autoincrement())
-  name        String
-  email       String      @unique
-  password    String
-  role        Role        @default(INVIGILATOR)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+    invigilator Invigilator?
 
-  invigilator Invigilator?
+    @@map("user")
+  }
 
-  @@map("user")
-}
+  model Invigilator {
+    id           Int                      @id @default(autoincrement())
+    course       String
+    phone        String
+    address      String
+    gender       String
+    imageUrl     String?
+    createdAt    DateTime                 @default(now())
+    updatedAt    DateTime                 @updatedAt
 
-model Invigilator {
-  id                     Int                      @id @default(autoincrement())
-  course                 String
-  phone                  String
-  address                String
-  gender                 String
-  imageUrl               String?
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
+    userId       Int                      @unique
+    user         User                     @relation(fields: [userId], references: [id])
 
-  userId                 Int                      @unique
-  user                   User                     @relation(fields: [userId], references: [id])
+    assignments  InvigilatorOnAssignment[]
 
-  invigilatorAssignments InvigilatorAssignment[]
+    @@map("invigilator")
+  }
 
-  @@map("invigilator")
-}
+  model Course {
+    id        Int       @id @default(autoincrement())
+    name      String
+    duration  Int
+    batchYear Int
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
 
-model Course {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  duration  Int
-  batchYear Int
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+    semesters Semester[]
+    students  Student[]
 
-  semesters Semester[]
-  students  Student[]
+    @@unique([name, batchYear])
+    @@map("course")
+  }
 
-  @@unique([name, batchYear])
-  @@map("course")
-}
+  model Semester {
+    id          Int         @id @default(autoincrement())
+    semesterNum Int
+    courseId    Int
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
 
-model Semester {
-  id          Int         @id @default(autoincrement())
-  semesterNum Int
-  courseId    Int
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+    course      Course      @relation(fields: [courseId], references: [id])
+    subjects    Subject[]
+    students    Student[]
 
-  course      Course      @relation(fields: [courseId], references: [id])
-  subjects    Subject[]
-  students    Student[]
+    @@map("semester")
+  }
 
-  @@map("semester")
-}
+  model Subject {
+    id          Int       @id @default(autoincrement())
+    subjectName String
+    code        String    @unique
+    semesterId  Int
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
 
-model Subject {
-  id          Int       @id @default(autoincrement())
-  subjectName String
-  code        String    @unique
-  semesterId  Int
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+    semester    Semester  @relation(fields: [semesterId], references: [id])
+    exams       Exam[]
 
-  semester    Semester  @relation(fields: [semesterId], references: [id])
-  exams       Exam[]
+    @@map("subject")
+  }
 
-  @@map("subject")
-}
+  model Student {
+    id           Int         @id @default(autoincrement())
+    studentName  String
+    symbolNumber String
+    regNumber    String
+    college      String
+    courseId     Int
+    semesterId   Int
+    imageUrl     String?
+    createdAt    DateTime    @default(now())
+    updatedAt    DateTime    @updatedAt
 
-model Student {
-  id           Int         @id @default(autoincrement())
-  studentName  String
-  symbolNumber String
-  regNumber    String
-  college      String
-  courseId     Int
-  semesterId   Int
-  imageUrl     String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+    course       Course      @relation(fields: [courseId], references: [id])
+    semester     Semester    @relation(fields: [semesterId], references: [id])
+    seats        Seat[]
 
-  course       Course      @relation(fields: [courseId], references: [id])
-  semester     Semester    @relation(fields: [semesterId], references: [id])
-  seats        Seat[]     
+    @@unique([symbolNumber, college])
+    @@map("student")
+  }
 
-  @@unique([symbolNumber, college])
-  @@map("student")
-}
+  model Exam {
+    id              Int             @id @default(autoincrement())
+    date            DateTime
+    startTime       DateTime?
+    endTime         DateTime?
+    subjectId       Int
+    isActive        Boolean         @default(true)
+    createdAt       DateTime        @default(now())
+    updatedAt       DateTime        @updatedAt
 
-model Exam {
-  id              Int             @id @default(autoincrement())
-  date            DateTime
-  startTime       DateTime?
-  endTime         DateTime?
-  subjectId       Int
-  isActive    Boolean      @default(true)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+    subject         Subject         @relation(fields: [subjectId], references: [id])
+    roomAssignments RoomAssignment[]
+    seatingPlans    SeatingPlan[]
 
-  subject         Subject         @relation(fields: [subjectId], references: [id])
-  roomAssignments RoomAssignment[]
-  seatingPlans    SeatingPlan[]
+    @@map("exam")
+  }
 
-  @@map("exam")
-}
+  model Room {
+    id              Int      @id @default(autoincrement())
+    roomNumber      String
+    block           String
+    floor           String
+    totalBench      Int      @default(0)
+    totalCapacity   Int      @default(0)
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
 
-model Room {
-  id              Int      @id @default(autoincrement())
-  roomNumber      String
-  block           String
-  floor           String
-  totalBench      Int      @default(0)
-  totalCapacity   Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+    benches         Bench[]
+    roomAssignments RoomAssignment[]
 
-  benches         Bench[]
-  roomAssignments RoomAssignment[]
+    @@map("room")
+  }
 
-  @@map("room")
-}
+  model Bench {
+    id        Int       @id @default(autoincrement())
+    roomId    Int
+    benchNo   Int
+    row       Int
+    column    Int
+    capacity  Int
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
 
-model Bench {
-  id        Int       @id @default(autoincrement())
-  roomId    Int
-  benchNo   Int
-  row       Int
-  column    Int
-  capacity  Int
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+    room      Room      @relation(fields: [roomId], references: [id])
+    seats     Seat[]
 
-  room      Room      @relation(fields: [roomId], references: [id])
-  seats     Seat[]
+    @@unique([roomId, row, column])
+    @@unique([roomId, benchNo])
+    @@map("bench")
+  }
 
-  @@unique([roomId, row, column])
-  @@unique([roomId, benchNo])
-  @@map("bench")
-}
+  model Seat {
+    id             Int          @id @default(autoincrement())
+    benchId        Int
+    position       Int
+    studentId      Int
+    seatingPlanId  Int
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
 
-model Seat {
-  id             Int          @id @default(autoincrement())
-  benchId        Int
-  position       Int
-  studentId      Int
-  seatingPlanId  Int
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+    bench          Bench        @relation(fields: [benchId], references: [id])
+    student        Student      @relation(fields: [studentId], references: [id])
+    seatingPlan    SeatingPlan  @relation(fields: [seatingPlanId], references: [id])
 
-  bench          Bench        @relation(fields: [benchId], references: [id])
-  student        Student      @relation(fields: [studentId], references: [id])
-  seatingPlan    SeatingPlan  @relation(fields: [seatingPlanId], references: [id])
+    @@unique([studentId, seatingPlanId])
+    @@map("seat")
+  }
 
-  @@unique([studentId, seatingPlanId])
-  @@map("seat")
-}
+  model RoomAssignment {
+    id                     Int                      @id @default(autoincrement())
+    roomId                 Int
+    examId                 Int
+    status                 RoomAssignmentStatus     @default(ACTIVE)
+    assignedAt             DateTime                 @default(now())
+    completedAt            DateTime?
+    createdAt              DateTime                 @default(now())
+    updatedAt              DateTime                 @updatedAt
 
-model RoomAssignment {
-  id                     Int                      @id @default(autoincrement())
-  roomId                 Int
-  examId                 Int
-  status     RoomAssignmentStatus                 @default(ACTIVE)
-  assignedAt             DateTime                       @default(now())
-  completedAt            DateTime?                
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
+    room                   Room                     @relation(fields: [roomId], references: [id])
+    exam                   Exam                     @relation(fields: [examId], references: [id])
+    invigilatorAssignments InvigilatorAssignment[]
 
-  room                   Room                     @relation(fields: [roomId], references: [id])
-  exam                   Exam                     @relation(fields: [examId], references: [id])
-  invigilatorAssignments InvigilatorAssignment[]
+    @@map("roomAssignment")
+  }
 
-  @@map("roomAssignment")
-}
+  model InvigilatorAssignment {
+    id               Int                     @id @default(autoincrement())
+    roomAssignmentId Int
+    status           InvigilatorStatus       @default(ASSIGNED)
+    assignedAt       DateTime                @default(now())
+    completedAt      DateTime?
+    createdAt        DateTime                @default(now())
+    updatedAt        DateTime                @updatedAt
 
-model InvigilatorAssignment {
-  id               Int       @id @default(autoincrement())
-  invigilatorId    Int
-  roomAssignmentId Int
-  status           String    @default("ASSIGNED")
-  assignedAt       DateTime  @default(now())
-  completedAt      DateTime?
-  generationId     String    @default(uuid())
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+    roomAssignment   RoomAssignment          @relation(fields: [roomAssignmentId], references: [id])
+    invigilators     InvigilatorOnAssignment[]
 
-  invigilator      Invigilator     @relation(fields: [invigilatorId], references: [id])
-  roomAssignment   RoomAssignment  @relation(fields: [roomAssignmentId], references: [id], onDelete: Cascade)
+    @@map("invigilatorAssignment")
+  }
 
-  @@map("invigilatorAssignment")
-}
+  model InvigilatorOnAssignment {
+    id                       Int @id @default(autoincrement())
+    invigilatorId            Int
+    invigilatorAssignmentId  Int
 
-model SeatingPlan {
-  id        Int       @id @default(autoincrement())
-  examId    Int
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  isActive  Boolean   @default(true)
+    invigilator              Invigilator          @relation(fields: [invigilatorId], references: [id])
+    invigilatorAssignment    InvigilatorAssignment @relation(fields: [invigilatorAssignmentId], references: [id])
 
-  exam      Exam      @relation(fields: [examId], references: [id])
-  seats     Seat[]
+    @@unique([invigilatorId, invigilatorAssignmentId])
+    @@map("invigilatorOnAssignment")
+  }
 
-  @@map("seatingPlan")
-}
+  model SeatingPlan {
+    id        Int       @id @default(autoincrement())
+    examId    Int
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @default(now())
+    isActive  Boolean   @default(true)
+
+    exam      Exam      @relation(fields: [examId], references: [id])
+    seats     Seat[]
+
+    @@map("seatingPlan")
+  }

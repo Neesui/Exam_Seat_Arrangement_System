@@ -64,10 +64,13 @@ export const getAllInvigilator = async (req, res) => {
       include: { 
         invigilator: {
           include: {
-            invigilatorAssignments: {
-              where: { status: "ASSIGNED" },  // only currently assigned
-              orderBy: { assignedAt: "desc" },
-              take: 1, // latest active assignment
+            assignments: {
+              include: {
+                invigilatorAssignment: true, // include assignment info
+              },
+              where: { invigilatorAssignment: { status: "ASSIGNED" } },
+              orderBy: { invigilatorAssignment: { assignedAt: "desc" } },
+              take: 1, // only latest assignment
             }
           }
         }
@@ -76,7 +79,7 @@ export const getAllInvigilator = async (req, res) => {
     });
 
     const formatted = invigilators.map((user) => {
-      const assignment = user.invigilator?.invigilatorAssignments[0];
+      const assignment = user.invigilator?.assignments[0]?.invigilatorAssignment;
       return {
         id: user.id,
         name: user.name,
@@ -106,6 +109,7 @@ export const getAllInvigilator = async (req, res) => {
     res.status(500).json({ success: false, message: error.message || "Server Error" });
   }
 };
+
 
 
 // Get single invigilator by user id

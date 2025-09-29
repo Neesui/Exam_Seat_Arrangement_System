@@ -202,16 +202,20 @@ export const getAllRoomAssignments = async (req, res) => {
         room: { include: { benches: true } },
         exam: {
           include: {
-            subject: { include: { semester: { include: { course: true } } } }
-          }
+            subject: { include: { semester: { include: { course: true } } } },
+          },
         },
         invigilatorAssignments: {
           include: {
-            invigilator: { include: { user: true } }
-          }
-        }
+            invigilators: {
+              include: {
+                invigilator: { include: { user: true } },
+              },
+            },
+          },
+        },
       },
-      orderBy: [{ examId: "asc" }, { roomId: "asc" }]
+      orderBy: [{ examId: "asc" }, { roomId: "asc" }],
     });
 
     const formatted = assignments.map((a) => {
@@ -222,21 +226,22 @@ export const getAllRoomAssignments = async (req, res) => {
           ...a.room,
           totalBench: benches.length,
           totalCapacity: benches.reduce((sum, b) => sum + b.capacity, 0),
-          benches: undefined
-        }
+          benches: undefined,
+        },
       };
     });
 
     res.json({
       success: true,
       message: "Room assignments fetched",
-      assignments: formatted
+      assignments: formatted,
     });
   } catch (error) {
     console.error("Fetch error:", error);
     res.status(500).json({ success: false, message: "Error fetching assignments", error: error.message });
   }
 };
+
 
 export const getRoomAssignmentsByExam = async (req, res) => {
   try {
@@ -248,11 +253,7 @@ export const getRoomAssignmentsByExam = async (req, res) => {
     const assignments = await prisma.roomAssignment.findMany({
       where: { examId },
       include: {
-        room: {
-          include: {
-            benches: true,
-          },
-        },
+        room: { include: { benches: true } },
         exam: {
           include: {
             subject: { include: { semester: { include: { course: true } } } },
@@ -270,24 +271,25 @@ export const getRoomAssignmentsByExam = async (req, res) => {
           },
         },
         invigilatorAssignments: {
-          include: { invigilator: { include: { user: true } } },
+          include: {
+            invigilators: {
+              include: {
+                invigilator: { include: { user: true } },
+              },
+            },
+          },
         },
       },
     });
 
     const formatted = assignments.map((assignment) => {
       const benches = assignment.room.benches || [];
-
       const allSeats = assignment.exam.seatingPlans.flatMap((sp) => sp.seats);
-
       const seatsInRoom = allSeats.filter((seat) => seat.bench.roomId === assignment.room.id);
 
       const uniqueCollegesSet = new Set(
-        seatsInRoom
-          .map((seat) => seat.student?.college)
-          .filter((college) => !!college) 
+        seatsInRoom.map((seat) => seat.student?.college).filter(Boolean)
       );
-      const uniqueColleges = Array.from(uniqueCollegesSet);
 
       return {
         ...assignment,
@@ -296,7 +298,7 @@ export const getRoomAssignmentsByExam = async (req, res) => {
           totalBench: benches.length,
           totalCapacity: benches.reduce((sum, b) => sum + b.capacity, 0),
           benches: undefined,
-          assignedColleges: uniqueColleges,
+          assignedColleges: Array.from(uniqueCollegesSet),
         },
       };
     });
@@ -311,6 +313,7 @@ export const getRoomAssignmentsByExam = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch room assignments", error: error.message });
   }
 };
+
 
 export const updateRoomAssignment = async (req, res) => {
   try {

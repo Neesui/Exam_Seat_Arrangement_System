@@ -64,7 +64,7 @@ const ViewSeatplan = () => {
   );
 
   return (
-    <div className="mt-5 p-6 max-w-screen-xl mx-auto bg-white rounded shadow">
+    <div className="mt-5 p-6 w-full mx-auto bg-white rounded shadow">
       <h2 className="text-4xl font-bold text-center mb-6">Your Seating Plan</h2>
 
       {/* Exam & Room Info */}

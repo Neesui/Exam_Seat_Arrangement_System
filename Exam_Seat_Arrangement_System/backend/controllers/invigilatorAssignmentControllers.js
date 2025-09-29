@@ -15,173 +15,154 @@ export const runAndSaveInvigilatorAssignments = async (req, res) => {
 
   try {
     const invCount = await prisma.invigilator.count();
-    if (invCount < 2) {
-      return res.status(400).json({
-        success: false,
-        message: "Not enough invigilators to assign. At least 2 required.",
-      });
-    }
+    if (invCount < 2) return res.status(400).json({ success: false, message: "At least 2 invigilators required" });
   } catch (err) {
     return res.status(500).json({ success: false, message: "DB error", error: err.message });
   }
 
-  exec(`python "${scriptPath}"`, async (error, stdout) => {
-    if (error) {
-      return res.status(500).json({ success: false, message: "Algorithm execution failed", error: error.message });
-    }
+  exec(`python "${scriptPath}"`, async (error, stdout, stderr) => {
+    if (error) return res.status(500).json({ success: false, message: "Algorithm failed", error: error.message, stderr });
 
-    if (!stdout) {
-      return res.status(500).json({ success: false, message: "No output from Python script" });
-    }
+    if (!stdout) return res.status(500).json({ success: false, message: "No output from Python script" });
 
     let assignments;
     try {
       assignments = JSON.parse(stdout);
-      if (assignments.error) {
-        return res.status(400).json({ success: false, message: assignments.error });
-      }
+      if (assignments.error) return res.status(400).json({ success: false, message: assignments.error });
+      if (!Array.isArray(assignments)) return res.status(500).json({ success: false, message: "Invalid output" });
     } catch (err) {
-      return res.status(500).json({ success: false, message: "Invalid Python output", error: err.message });
+      return res.status(500).json({ success: false, message: "Invalid JSON", error: err.message });
     }
 
     try {
       const generationId = uuidv4();
-      const validAssignments = assignments.filter(
-        (a) => a.invigilatorId && a.roomAssignmentId && VALID_STATUSES.includes(a.status)
-      );
+      const createdAssignments = [];
 
-      await Promise.all(
-        validAssignments.map((a) => {
-          let assignedAtDate = new Date(a.assignedAt || Date.now());
-          if (isNaN(assignedAtDate.getTime())) assignedAtDate = new Date();
+      for (const a of assignments) {
+        const roomAssignmentId = Number(a.roomAssignmentId);
+        if (!roomAssignmentId) continue;
 
-          return prisma.invigilatorAssignment.create({
-            data: {
-              invigilatorId: a.invigilatorId,
-              roomAssignmentId: a.roomAssignmentId,
-              status: a.status,
-              assignedAt: assignedAtDate,
-              completedAt: null,
-              generationId,
-            },
+        const roomExists = await prisma.roomAssignment.findUnique({ where: { id: roomAssignmentId } });
+        if (!roomExists) continue;
+
+        const invAssignment = await prisma.invigilatorAssignment.create({
+          data: { roomAssignmentId, status: "ASSIGNED", assignedAt: new Date() },
+        });
+
+        for (const inv of a.invigilators) {
+          await prisma.invigilatorOnAssignment.create({
+            data: { invigilatorId: Number(inv.invigilatorId), invigilatorAssignmentId: invAssignment.id },
           });
-        })
-      );
+        }
+
+        const fullAssignment = await prisma.invigilatorAssignment.findUnique({
+          where: { id: invAssignment.id },
+          include: {
+            invigilators: { include: { invigilator: { include: { user: true } } } },
+            roomAssignment: { include: { room: true, exam: true } },
+          },
+        });
+
+        createdAssignments.push(fullAssignment);
+      }
 
       res.json({
         success: true,
         message: "Invigilator assignments generated and saved successfully",
         generationId,
-        totalAssigned: validAssignments.length,
-        totalSkipped: assignments.length - validAssignments.length,
+        totalAssignments: createdAssignments.length,
+        assignments: createdAssignments,
       });
     } catch (err) {
       res.status(500).json({ success: false, message: "DB save failed", error: err.message });
     }
   });
 };
-
+//get all invigilator assignments
+// get all invigilator assignments
 export const getAllInvigilatorAssignments = async (req, res) => {
   try {
-    // Get latest generationId
-    const latest = await prisma.invigilatorAssignment.findFirst({
-      orderBy: { assignedAt: "desc" },
-      select: { generationId: true },
-    });
-
-    // Fetch all assignments
     const allAssignments = await prisma.invigilatorAssignment.findMany({
       include: {
-        invigilator: { include: { user: true } },
+        invigilators: {
+          include: {
+            invigilator: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
         roomAssignment: {
           include: {
             room: true,
             exam: {
               include: {
-                subject: {
-                  include: {
-                    semester: { include: { course: true } },
-                  },
-                },
+                subject: true, 
               },
             },
           },
         },
       },
-      orderBy: { assignedAt: "asc" },
+      orderBy: {
+        assignedAt: "asc",
+      },
     });
 
-    // Fetch only current/latest assignments
-    let currentAssignments = [];
-    if (latest) {
-      currentAssignments = await prisma.invigilatorAssignment.findMany({
-        where: { generationId: latest.generationId },
-        include: {
-          invigilator: { include: { user: true } },
-          roomAssignment: {
-            include: {
-              room: true,
-              exam: {
-                include: {
-                  subject: {
-                    include: {
-                      semester: { include: { course: true } },
-                    },
-                  },
-                },
-              },
-            },
-          },
+    // Transform JSON response to add subjectName directly
+    const transformed = allAssignments.map((assignment) => ({
+      ...assignment,
+      roomAssignment: {
+        ...assignment.roomAssignment,
+        exam: {
+          ...assignment.roomAssignment.exam,
+          subjectName: assignment.roomAssignment.exam?.subject?.subjectName || "N/A", 
         },
-        orderBy: { assignedAt: "asc" },
-      });
-    }
+      },
+    }));
 
     res.json({
       success: true,
-      allAssignments,
-      currentAssignments,
+      message: "All Invigilator assignments fetched successfully",
+      assignments: transformed,
     });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to fetch assignments", error: error.message });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Fetch failed",
+      error: err.message,
+    });
   }
 };
 
+// Get only current active assignments
 export const getFilteredInvigilatorAssignments = async (req, res) => {
   try {
-    const { status, startDate, endDate } = req.query;
-    const where = {};
-
-    if (status) {
-      where.status = status;
-    }
-
-    if (startDate || endDate) {
-      where.roomAssignment = {
-        exam: {
-          date: {},
-        },
-      };
-      if (startDate) where.roomAssignment.exam.date.gte = new Date(startDate);
-      if (endDate) where.roomAssignment.exam.date.lte = new Date(endDate);
-    }
-
-    if (where.roomAssignment?.exam?.date && Object.keys(where.roomAssignment.exam.date).length === 0) {
-      delete where.roomAssignment;
-    }
-
     const assignments = await prisma.invigilatorAssignment.findMany({
-      where,
       include: {
-        invigilator: { include: { user: true } },
+        invigilators: {
+          include: {
+            invigilator: {
+              include: {
+                user: {   
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         roomAssignment: {
           include: {
             room: true,
             exam: {
               include: {
                 subject: {
-                  include: {
-                    semester: { include: { course: true } },
+                  select: {
+                    subjectName: true,
                   },
                 },
               },
@@ -189,105 +170,84 @@ export const getFilteredInvigilatorAssignments = async (req, res) => {
           },
         },
       },
-      orderBy: { assignedAt: "asc" },
+      orderBy: {
+        assignedAt: "asc",
+      },
     });
 
-    res.json({ success: true, assignments });
+    res.status(200).json({
+      success: true,
+      message: "Filtered Invigilator assignments fetched successfully",
+      assignments,
+    });
   } catch (error) {
+    console.error("Error fetching current assignments:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch invigilator assignments",
+      message: "Failed to fetch current invigilator assignments",
       error: error.message,
     });
   }
 };
 
+
+//get invigilator assignments by room id
 export const getInvigilatorAssignmentsByRoom = async (req, res) => {
-  const roomAssignmentId = Number(req.params.roomAssignmentId);
-  if (isNaN(roomAssignmentId)) {
-    return res.status(400).json({ success: false, message: "Invalid roomAssignmentId parameter" });
+  const { roomId } = req.params;
+
+  if (isNaN(roomId)) {
+    return res.status(400).json({ success: false, message: "Invalid roomId" });
   }
 
   try {
-    const data = await prisma.invigilatorAssignment.findMany({
-      where: { roomAssignmentId },
-      include: {
-        invigilator: { include: { user: true } },
+    const assignments = await prisma.invigilatorAssignment.findMany({
+      where: {
         roomAssignment: {
-          include: {
-            room: true,
-            exam: {
-              include: {
-                subject: {
-                  include: {
-                    semester: { include: { course: true } },
-                  },
-                },
-              },
-            },
-          },
-        },
+          is: { roomId: Number(roomId) } 
+        }
       },
+      include: {
+        invigilators: { include: { invigilator: { include: { user: true } } } },
+        roomAssignment: { include: { room: true, exam: true } }
+      },
+      orderBy: { assignedAt: "asc" },
     });
 
-    res.json({ success: true, assignments: data });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to fetch assignments", error: error.message });
+    res.json({
+      success: true,
+      message: "Invigilator assignments for room fetched successfully",
+      assignments,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Fetch failed", error: err.message });
   }
 };
 
+//update invigilator assignment status
 export const updateInvigilatorAssignmentStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-
-  if (!VALID_STATUSES.includes(status)) {
-    return res.status(400).json({ success: false, message: "Invalid status" });
-  }
+  if (!VALID_STATUSES.includes(status)) return res.status(400).json({ success: false, message: "Invalid status" });
 
   try {
-    const updateData = { status };
-    if (status === "COMPLETED") {
-      updateData.completedAt = new Date();
-    } else if (status === "ASSIGNED") {
-      updateData.completedAt = null;
-    }
-
     const updated = await prisma.invigilatorAssignment.update({
       where: { id: Number(id) },
-      data: updateData,
-      include: {
-        invigilator: { include: { user: true } },
-        roomAssignment: true,
-      },
+      data: { status, completedAt: status === "COMPLETED" ? new Date() : null },
+      include: { invigilators: { include: { invigilator: { include: { user: true } } } }, roomAssignment: { include: { room: true, exam: true } } },
     });
-
-    res.json({
-      success: true,
-      message: "Assignment status updated",
-      assignment: updated,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Update failed", error: error.message });
+    res.json({ success: true, message: "Assignment status updated", assignment: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Update failed", error: err.message });
   }
 };
 
+//delete invigilator assignment
 export const deleteInvigilatorAssignment = async (req, res) => {
   const { id } = req.params;
-
   try {
-    await prisma.invigilatorAssignment.delete({
-      where: { id: Number(id) },
-    });
-
-    res.json({
-      success: true,
-      message: "Invigilator assignment deleted successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete assignment",
-      error: error.message,
-    });
+    await prisma.invigilatorAssignment.delete({ where: { id: Number(id) } });
+    res.json({ success: true, message: "Assignment deleted" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Delete failed", error: err.message });
   }
 };
