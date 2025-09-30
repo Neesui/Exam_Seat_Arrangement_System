@@ -3,42 +3,36 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
-  useGetAllInvigilatorAssignmentsQuery,
+  useGetInvigilatorAssignmentsByIdQuery,
   useUpdateInvigilatorAssignMutation,
 } from "../../redux/api/invigilatorAssignApi";
 import Input from "../../component/public/Input";
 
 const UpdateInvigilatorAssign = () => {
-  const { roomAssignmentId } = useParams(); 
+  const { id } = useParams(); 
   const navigate = useNavigate();
 
-  const { data, isLoading, error } = useGetAllInvigilatorAssignmentsQuery();
-  const [updateAssign, { isLoading: isUpdating }] = useUpdateInvigilatorAssignMutation();
+  // Fetch single assignment
+  const { data, isLoading, error } =
+    useGetInvigilatorAssignmentsByIdQuery(id);
+  const [updateAssign, { isLoading: isUpdating }] =
+    useUpdateInvigilatorAssignMutation();
 
   const [status, setStatus] = useState("ASSIGNED");
   const [completedAt, setCompletedAt] = useState("");
 
-  // Load current assignments for this room
-  const [roomAssignments, setRoomAssignments] = useState([]);
-
+  // Populate form with assignment data
   useEffect(() => {
-    if (data?.currentAssignments && roomAssignmentId) {
-      const assignments = data.currentAssignments.filter(
-        (a) => String(a.roomAssignmentId) === String(roomAssignmentId)
+    if (data?.assignment) {
+      const a = data.assignment;
+      setStatus(a.status || "ASSIGNED");
+      setCompletedAt(
+        a.completedAt ? new Date(a.completedAt).toISOString().split("T")[0] : ""
       );
-      setRoomAssignments(assignments);
-      if (assignments.length) {
-        setStatus(assignments[0].status || "ASSIGNED");
-        setCompletedAt(
-          assignments[0].completedAt
-            ? new Date(assignments[0].completedAt).toISOString().split("T")[0]
-            : ""
-        );
-      }
     }
-  }, [data, roomAssignmentId]);
+  }, [data]);
 
-  // Auto set completedAt when status changes
+  // Auto fill completedAt
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
     if (status === "COMPLETED" || status === "CANCELED") {
@@ -51,36 +45,39 @@ const UpdateInvigilatorAssign = () => {
   const handleUpdateStatus = async (e) => {
     e.preventDefault();
 
-    if (!roomAssignments.length) {
-      toast.error("No assignments found for this room.");
+    if (!id) {
+      toast.error("Invalid assignment selected.");
       return;
     }
 
     try {
-      // Update all invigilators in this room
-      for (const assignment of roomAssignments) {
-        await updateAssign({
-          id: assignment.id,
-          status,
-          completedAt: completedAt ? new Date(completedAt).toISOString() : null,
-        }).unwrap();
-      }
+      await updateAssign({
+        id: id,
+        status,
+        completedAt: completedAt ? new Date(completedAt).toISOString() : null,
+      }).unwrap();
 
-      toast.success("All invigilator assignments updated successfully!");
+      toast.success("Assignment updated successfully!");
       navigate("/viewInvigilatorAssign");
     } catch (err) {
-      toast.error(err?.data?.message || "Failed to update assignments.");
+      toast.error(err?.data?.message || "Failed to update assignment.");
     }
   };
 
-  if (isLoading) return <p className="text-center mt-10">Loading assignments...</p>;
-  if (error) return <p className="text-red-500 text-center mt-10">Failed to load data.</p>;
+  if (isLoading)
+    return <p className="text-center mt-10">Loading assignment...</p>;
+  if (error)
+    return (
+      <p className="text-red-500 text-center mt-10">Failed to load data.</p>
+    );
 
   return (
     <div className="h-screen w-full flex items-center justify-center bg-gray-100 px-4">
       <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       <div className="bg-white w-full max-w-xl p-8 rounded shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Update Room Invigilator Assignments</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Update Invigilator Assignment
+        </h2>
 
         <form onSubmit={handleUpdateStatus} className="space-y-4">
           <div>
@@ -109,11 +106,13 @@ const UpdateInvigilatorAssign = () => {
           <button
             type="submit"
             className={`w-full p-3 mt-2 text-white font-semibold rounded ${
-              isUpdating ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+              isUpdating
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
             }`}
             disabled={isUpdating}
           >
-            {isUpdating ? "Updating..." : "Update Assignments"}
+            {isUpdating ? "Updating..." : "Update Assignment"}
           </button>
         </form>
       </div>

@@ -167,7 +167,7 @@ const adminRoutes = [
     element: <InvigilatorAssignPage />,
   },
   {
-    path: "/updateInvigilatorAssign/:invigilatorAssignId",
+    path: "/updateInvigilatorAssign/:id",
     element: <UpdateInvigilatorAssign />,
   },
   {
