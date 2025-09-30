@@ -159,7 +159,7 @@ const adminRoutes = [
     element: <ViewInvigilatorAssignPage />,
   },
   {
-    path: "/viewInvigilatorAssignDetails/:roomAssignmentId",
+    path: "/viewInvigilatorAssignDetails/:assignmentId",
     element: <ViewInvigilatorAssignDetailsPage />,
   },  
   {

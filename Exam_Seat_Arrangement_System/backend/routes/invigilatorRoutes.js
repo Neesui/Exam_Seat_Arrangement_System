@@ -11,7 +11,7 @@ import {
 import {
   runAndSaveInvigilatorAssignments,
   getAllInvigilatorAssignments,
-  getInvigilatorAssignmentsByRoom,
+  getInvigilatorAssignmentsById,
   updateInvigilatorAssignmentStatus,
   getFilteredInvigilatorAssignments,
   deleteInvigilatorAssignment,
@@ -38,7 +38,7 @@ router.get("/meta-summary", authenticate, roleCheck(["INVIGILATOR"]), getInvigil
 
 // Shared routes
 router.get("/assignments/all", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getAllInvigilatorAssignments);
-router.get("/room/:roomAssignmentId", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getInvigilatorAssignmentsByRoom);
+router.get("/assignments/:assignmentId", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getInvigilatorAssignmentsById);
 router.get("/assignments/current", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getFilteredInvigilatorAssignments);
 
 export default router;

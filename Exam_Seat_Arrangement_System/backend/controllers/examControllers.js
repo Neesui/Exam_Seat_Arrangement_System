@@ -104,9 +104,13 @@ export const getExamById = async (req, res) => {
             room: true,
             invigilatorAssignments: {
               include: {
-                invigilator: {
+                invigilators: {
                   include: {
-                    user: true,
+                    invigilator: {
+                      include: {
+                        user: true,
+                      },
+                    },
                   },
                 },
               },

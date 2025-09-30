@@ -10,8 +10,8 @@ export const invigilatorAssignApi = apiSlice.injectEndpoints({
       query: () => "/api/invigilator/assignments/current",
       providesTags: ["INV_ASSIGN"],
     }),
-    getInvigilatorAssignmentsByRoom: builder.query({
-      query: (roomAssignmentId) => `/api/invigilator/room/${roomAssignmentId}`,
+    getInvigilatorAssignmentsById: builder.query({
+      query: (assignmentId) => `/api/invigilator/assignments/${assignmentId}`,
       providesTags: ["INV_ASSIGN"],
     }),
     generateInvigilatorAssignments: builder.mutation({
@@ -42,7 +42,7 @@ export const invigilatorAssignApi = apiSlice.injectEndpoints({
 export const {
   useGetAllInvigilatorAssignmentsQuery,
   useGetCurrentAssignedInvigilatorsQuery,
-  useGetInvigilatorAssignmentsByRoomQuery,
+  useGetInvigilatorAssignmentsByIdQuery,
   useGenerateInvigilatorAssignmentsMutation,
   useUpdateInvigilatorAssignMutation,
   useDeleteInvigilatorAssignMutation,
