@@ -26,11 +26,11 @@ const ViewRoomPage = () => {
   };
 
   const handleUpdate = (roomId) => {
-    navigate(`/updateRoom/${roomId}`);
+    navigate(`/admin/updateRoom/${roomId}`);
   };
 
   const handleViewBenches = (roomId) => {
-    navigate(`/viewBenchByRoom/${roomId}`);
+    navigate(`/admin/viewBenchByRoom/${roomId}`);
   };
 
   const filteredRooms = useMemo(() => {

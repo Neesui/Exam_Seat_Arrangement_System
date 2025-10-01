@@ -50,9 +50,9 @@ const ViewCurrentInvigilatorAssignPage = () => {
     }
   };
 
-  const handleUpdate = (id) => navigate(`/updateInvigilatorAssign/${id}`);
+  const handleUpdate = (id) => navigate(`/admin/updateInvigilatorAssign/${id}`);
   const handleView = (assignmentId) =>
-    assignmentId ? navigate(`/viewInvigilatorAssignDetails/${assignmentId}`) : toast.warning("Exam not found");
+    assignmentId ? navigate(`/admin/viewInvigilatorAssignDetails/${assignmentId}`) : toast.warning("Exam not found");
 
   const getStatusBadge = (status) => {
     const map = { ASSIGNED: "bg-green-100 text-green-700", COMPLETED: "bg-blue-100 text-blue-700" };

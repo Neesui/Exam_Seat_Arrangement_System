@@ -30,11 +30,11 @@ const ViewInvigilatorPage = () => {
   };
 
   const handleEdit = (invigilatorId) => {
-    navigate(`/updateInvigilator/${invigilatorId}`);
+    navigate(`/admin/updateInvigilator/${invigilatorId}`);
   };
 
   const handleView = (invigilatorId) => {
-    navigate(`/viewInvigilatorDetails/${invigilatorId}`);
+    navigate(`/admin/viewInvigilatorDetails/${invigilatorId}`);
   };
 
   const filteredInvigilators = useMemo(() => {

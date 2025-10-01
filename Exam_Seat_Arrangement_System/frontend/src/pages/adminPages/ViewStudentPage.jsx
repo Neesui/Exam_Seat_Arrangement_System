@@ -49,7 +49,7 @@ const ViewStudentPage = () => {
   };
 
   const handleEdit = (studentId) => {
-    navigate(`/updateStudent/${studentId}`);
+    navigate(`/admin/updateStudent/${studentId}`);
   };
 
   const filteredStudents = useMemo(() => {

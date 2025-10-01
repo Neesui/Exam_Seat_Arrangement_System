@@ -33,9 +33,9 @@ const ViewAllInvigilatorAssignPage = () => {
     }
   };
 
-  const handleUpdate = (assignmentId) => navigate(`/updateInvigilatorAssign/${assignmentId}`);
+  const handleUpdate = (assignmentId) => navigate(`/admin/updateInvigilatorAssign/${assignmentId}`);
   const handleView = (examId) =>
-    examId ? navigate(`/viewInvigilatorAssignDetails/${examId}`) : toast.warning("Exam not found");
+    examId ? navigate(`/admin/viewInvigilatorAssignDetails/${examId}`) : toast.warning("Exam not found");
 
   const getStatusBadge = (status) => {
     const map = {

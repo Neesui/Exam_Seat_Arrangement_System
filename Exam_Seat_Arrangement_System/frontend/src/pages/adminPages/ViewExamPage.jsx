@@ -26,11 +26,11 @@ const ViewExamPage = () => {
   };
 
   const handleUpdate = (examId) => {
-    navigate(`/updateExam/${examId}`);
+    navigate(`/admin/updateExam/${examId}`);
   };
 
   const handleView = (examId) => {
-    navigate(`/viewExamDetails/${examId}`);
+    navigate(`/admin/viewExamDetails/${examId}`);
   };
 
   const formatTime = (dateTimeStr) => {

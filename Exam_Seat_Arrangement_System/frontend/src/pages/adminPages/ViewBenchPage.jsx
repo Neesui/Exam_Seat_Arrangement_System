@@ -26,7 +26,7 @@ const ViewBenchPage = () => {
   };
 
   const handleUpdate = (benchId) => {
-    navigate(`/updateBench/${benchId}`);
+    navigate(`/admin/updateBench/${benchId}`);
   };
 
   const filteredBenches = useMemo(() => {

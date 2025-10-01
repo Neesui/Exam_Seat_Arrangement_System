@@ -1,3 +1,4 @@
+// roomAssignmentControllers.js
 import { PrismaClient } from "@prisma/client";
 import { spawn, spawnSync } from "child_process";
 import path from "path";
@@ -118,46 +119,37 @@ export const runAndSaveRoomAssignments = async (req, res) => {
         });
       }
 
+      // Create day range for same-day checks WITHOUT mutating exam.startTime
+      const examStartDay = new Date(exam.startTime);
+      examStartDay.setHours(0, 0, 0, 0);
+      const examEndDay = new Date(exam.startTime);
+      examEndDay.setHours(23, 59, 59, 999);
+
+      // Basic conflict checks for each assignment
       for (const a of assignments) {
         const existing = await prisma.roomAssignment.findFirst({
           where: {
             examId: Number(a.examId),
             roomId: Number(a.roomId),
             assignedAt: {
-              gte: new Date(exam.startTime.setHours(0, 0, 0, 0)),
-              lt: new Date(exam.startTime.setHours(23, 59, 59, 999))
+              gte: examStartDay,
+              lt: examEndDay
             }
           }
         });
 
-        if (existing) {
-          const isSameTime =
-            exam.startTime.toISOString() === existing.exam.startTime.toISOString() &&
-            exam.endTime.toISOString() === existing.exam.endTime.toISOString();
-
-          if (isSameTime && existing.status === "ACTIVE") {
-            return res.status(400).json({
-              success: false,
-              message: `Room ${a.roomId} is already assigned for this exam at the same time`
-            });
-          }
-
-          if (!isSameTime && existing.status === "ACTIVE") {
-            return res.status(400).json({
-              success: false,
-              message: `Room ${a.roomId} is already assigned earlier today and still active`
-            });
-          }
-
-          if (!isSameTime && !statusAllowsReassignment(existing)) {
-            return res.status(400).json({
-              success: false,
-              message: `Room ${a.roomId} is already assigned earlier today and cannot be reassigned`
-            });
-          }
+        // If there is already an active assignment for this room that day, block it.
+        if (existing && existing.status === "ACTIVE") {
+          return res.status(400).json({
+            success: false,
+            message: `Room ${a.roomId} is already assigned and active for the same day.`
+          });
         }
+
+        // You can add more checks here, e.g. allow reassignment only if existing.status in allowed list
       }
 
+      // Cancel existing active assignments for this exam
       await prisma.roomAssignment.updateMany({
         where: { examId: Number(examId), status: "ACTIVE" },
         data: { status: "CANCELED" }
@@ -207,19 +199,40 @@ export const getAllRoomAssignments = async (req, res) => {
         },
         invigilatorAssignments: {
           include: {
+            // include the join table entries so we can fetch the invigilator + user
             invigilators: {
               include: {
-                invigilator: { include: { user: true } },
-              },
-            },
-          },
+                invigilator: { include: { user: true } }
+              }
+            }
+          }
         },
       },
       orderBy: [{ examId: "asc" }, { roomId: "asc" }],
     });
 
+    // Format & flatten the shape so frontend can read `invigilatorAssignments[].invigilator.user`
     const formatted = assignments.map((a) => {
-      const benches = a.room.benches || [];
+      const benches = a.room?.benches || [];
+      // transform invigilatorAssignments: each invigilatorAssignment can contain multiple invigilators (join rows)
+      const flattenedInvigilatorAssignments = (a.invigilatorAssignments || []).flatMap((ia) =>
+        (ia.invigilators || []).map((joinRow) => {
+          return {
+            id: ia.id,
+            status: ia.status,
+            assignedAt: ia.assignedAt,
+            completedAt: ia.completedAt,
+            // put the invigilator directly here (frontend expects inv.invigilator)
+            invigilator: joinRow.invigilator ? {
+              id: joinRow.invigilator.id,
+              phone: joinRow.invigilator.phone,
+              course: joinRow.invigilator.course,
+              user: joinRow.invigilator.user || null
+            } : null
+          };
+        })
+      );
+
       return {
         ...a,
         room: {
@@ -228,6 +241,7 @@ export const getAllRoomAssignments = async (req, res) => {
           totalCapacity: benches.reduce((sum, b) => sum + b.capacity, 0),
           benches: undefined,
         },
+        invigilatorAssignments: flattenedInvigilatorAssignments
       };
     });
 
@@ -242,7 +256,7 @@ export const getAllRoomAssignments = async (req, res) => {
   }
 };
 
-
+// Get room assignments for a specific exam
 export const getRoomAssignmentsByExam = async (req, res) => {
   try {
     const examId = Number(req.params.examId);
@@ -250,6 +264,7 @@ export const getRoomAssignmentsByExam = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid exam ID" });
     }
 
+    // Fetch room assignments with exam and seating plans
     const assignments = await prisma.roomAssignment.findMany({
       where: { examId },
       include: {
@@ -260,21 +275,7 @@ export const getRoomAssignmentsByExam = async (req, res) => {
             seatingPlans: {
               where: { isActive: true },
               include: {
-                seats: {
-                  include: {
-                    student: true,
-                    bench: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        invigilatorAssignments: {
-          include: {
-            invigilators: {
-              include: {
-                invigilator: { include: { user: true } },
+                seats: { include: { student: true, bench: true } },
               },
             },
           },
@@ -282,37 +283,65 @@ export const getRoomAssignmentsByExam = async (req, res) => {
       },
     });
 
-    const formatted = assignments.map((assignment) => {
-      const benches = assignment.room.benches || [];
-      const allSeats = assignment.exam.seatingPlans.flatMap((sp) => sp.seats);
-      const seatsInRoom = allSeats.filter((seat) => seat.bench.roomId === assignment.room.id);
+    if (!assignments || assignments.length === 0) {
+      return res.json({ success: true, message: "Room assignments fetched successfully", assignments: [] });
+    }
 
-      const uniqueCollegesSet = new Set(
-        seatsInRoom.map((seat) => seat.student?.college).filter(Boolean)
-      );
+    // Get all room assignment IDs
+    const assignmentIds = assignments.map(a => a.id);
+
+    // Fetch invigilators for these room assignments
+    const invAssignments = await prisma.invigilatorAssignment.findMany({
+      where: { roomAssignmentId: { in: assignmentIds } },
+      include: {
+        invigilators: {
+          include: { invigilator: { include: { user: true } } },
+        },
+      },
+    });
+
+    // Create a map of invigilators by roomAssignmentId
+    const invMap = {};
+    invAssignments.forEach(inv => {
+      invMap[inv.roomAssignmentId] = (inv.invigilators || []).map(i => ({
+        name: i.invigilator?.user?.name || null,
+        email: i.invigilator?.user?.email || null,
+        phone: i.invigilator?.phone || null, 
+        status: inv.status,
+        assignedAt: inv.assignedAt,
+        completedAt: inv.completedAt,
+      }));
+    });
+
+    // Format assignments for response
+    const formatted = assignments.map(a => {
+      const benches = a.room?.benches || [];
+      const allSeats = (a.exam?.seatingPlans || []).flatMap(sp => sp.seats || []);
+      const seatsInRoom = allSeats.filter(seat => seat.bench?.roomId === a.room.id);
+
+      const uniqueColleges = [...new Set(seatsInRoom.map(s => s.student?.college).filter(Boolean))];
 
       return {
-        ...assignment,
+        ...a,
         room: {
-          ...assignment.room,
+          ...a.room,
           totalBench: benches.length,
           totalCapacity: benches.reduce((sum, b) => sum + b.capacity, 0),
-          benches: undefined,
-          assignedColleges: Array.from(uniqueCollegesSet),
+          benches: undefined, 
+          assignedColleges: uniqueColleges,
         },
+        invigilatorAssignments: invMap[a.id] || [],
       };
     });
 
-    res.json({
-      success: true,
-      message: "Room assignments fetched successfully",
-      assignments: formatted,
-    });
+    res.json({ success: true, message: "Room assignments fetched successfully", assignments: formatted });
+
   } catch (error) {
-    console.error("Fetch assignments by exam error:", error);
+    console.error("Error fetching room assignments:", error);
     res.status(500).json({ success: false, message: "Failed to fetch room assignments", error: error.message });
   }
 };
+
 
 
 export const updateRoomAssignment = async (req, res) => {
@@ -337,10 +366,8 @@ export const updateRoomAssignment = async (req, res) => {
       updateData.status = status;
 
       if (status === "COMPLETED") {
-        // Use provided completedAt or default to now()
         updateData.completedAt = completedAt ? new Date(completedAt) : new Date();
       } else {
-        // Clear completedAt if status is not COMPLETED
         updateData.completedAt = null;
       }
     } else if (completedAt !== undefined) {

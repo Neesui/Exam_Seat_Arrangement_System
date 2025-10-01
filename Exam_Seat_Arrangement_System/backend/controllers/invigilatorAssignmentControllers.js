@@ -79,7 +79,6 @@ export const runAndSaveInvigilatorAssignments = async (req, res) => {
   });
 };
 //get all invigilator assignments
-// get all invigilator assignments
 export const getAllInvigilatorAssignments = async (req, res) => {
   try {
     const allAssignments = await prisma.invigilatorAssignment.findMany({

@@ -56,8 +56,8 @@ const ViewRoomAssignPage = () => {
     }
   };
 
-  const handleUpdate = (id) => navigate(`/updateRoomAssign/${id}`);
-  const handleView = (examId) => navigate(`/viewRoomAssignDetails/${examId}`);
+  const handleUpdate = (id) => navigate(`/admin/updateRoomAssign/${id}`);
+  const handleView = (examId) => navigate(`/admin/viewRoomAssignDetails/${examId}`);
 
   // Filtered based on 3 search fields
   const filteredAssignments = useMemo(() => {

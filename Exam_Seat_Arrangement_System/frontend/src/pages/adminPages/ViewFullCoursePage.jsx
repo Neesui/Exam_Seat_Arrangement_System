@@ -49,15 +49,15 @@ const ViewFullCoursePage = () => {
   };
 
   const handleAddSemester = (courseId) => {
-    navigate(`/addSemester/${courseId}`);
+    navigate(`/admin/addSemester/${courseId}`);
   };
 
   const handleAddSubject = (semesterId) => {
-    navigate(`/addSubject/${semesterId}`);
+    navigate(`/admin/addSubject/${semesterId}`);
   };
 
   const handleUpdateSubject = (subjectId) => {
-    navigate(`/updateSubject/${subjectId}`);
+    navigate(`/admin/updateSubject/${subjectId}`);
   };
 
   // Filter courses based on search type

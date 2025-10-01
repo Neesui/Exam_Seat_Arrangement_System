@@ -28,6 +28,7 @@ import ViewExamDetailsPage from "../../pages/adminPages/ViewExamDetailsPage";
 import ViewExamPage from "../../pages/adminPages/ViewExamPage";
 import ViewFullCoursePage from "../../pages/adminPages/ViewFullCoursePage";
 import ViewInvigilatorAssignDetailsPage from "../../pages/adminPages/ViewInvigilatorAssignDetailsPage";
+import ViewInvigilatorDetailsPage from "../../pages/adminPages/ViewInvigilatorDetailsPage";
 import ViewInvigilatorPage from "../../pages/adminPages/ViewInvigilatorPage";
 import ViewRoomAssignDetailsPage from "../../pages/adminPages/ViewRoomAssignDetailsPage";
 import ViewRoomAssignPage from "../../pages/adminPages/ViewRoomAssignPage";
@@ -101,7 +102,7 @@ const adminRoutes = [
       element: <ViewRoomAssignPage />,
     },
     {
-      path: "/admin/viewRoomAssign/:examId",
+      path: "/admin/viewRoomAssignDetails/:examId",
       element: <ViewRoomAssignDetailsPage />,
     },
     {
@@ -119,6 +120,10 @@ const adminRoutes = [
     {
       path: "/admin/viewExamDetails/:examId",
       element: <ViewExamDetailsPage />,
+    },
+    {
+      path: "/admin/viewInvigilatorDetails/:id",
+      element: <ViewInvigilatorDetailsPage />,
     },
     {
       path: "/admin/viewAllInvigilatorAssign",
