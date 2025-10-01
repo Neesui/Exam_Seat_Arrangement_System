@@ -1,5 +1,5 @@
 import React from "react";
-import SeatingPlanVisual from "../../../layout/SeatingPlanVisual";
+import SeatingPlanVisualLayout from "../../../layout/SeatingPlanVisualLayout";
 
 const SeatingPlanCard = ({ plan, index }) => {
   const subject = plan.exam?.subject;
@@ -108,7 +108,7 @@ const SeatingPlanCard = ({ plan, index }) => {
             </p>
 
             {/* Visual seating for THIS room only */}
-            <SeatingPlanVisual seatPlan={seats} />
+            <SeatingPlanVisualLayout seatPlan={seats} />
           </div>
         );
       })}

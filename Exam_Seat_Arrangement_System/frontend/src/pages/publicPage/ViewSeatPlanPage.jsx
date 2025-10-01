@@ -2,7 +2,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { useGetStudentActiveSeatingQuery } from "../../redux/api/seatPlanApi";
 
-const ViewSeatplan = () => {
+const ViewSeatPlanPage = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const symbolNumber = searchParams.get("symbolNumber");
@@ -126,4 +126,4 @@ const ViewSeatplan = () => {
   );
 };
 
-export default ViewSeatplan;
+export default ViewSeatPlanPage;

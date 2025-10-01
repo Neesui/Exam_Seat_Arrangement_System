@@ -14,7 +14,7 @@ import { useGetAllRoomAssignmentsQuery } from "../../redux/api/roomAssignApi";
 import { useGetAllSeatingPlansQuery } from "../../redux/api/seatPlanApi";
 import { useGetExamsQuery } from "../../redux/api/examApi";
 
-const DashboardStats = () => {
+const InvDashboardStatus = () => {
   const navigate = useNavigate();
 
   const {
@@ -155,4 +155,4 @@ const DashboardStats = () => {
   );
 };
 
-export default DashboardStats;
+export default InvDashboardStatus;

@@ -11,7 +11,7 @@ import Pagination from "../../component/public/Pagination";
 
 const ITEMS_PER_PAGE = 10;
 
-const ViewInvigilatorAssignPage = () => {
+const ViewCurrentInvigilatorAssignPage = () => {
   const navigate = useNavigate();
   const { data, error, isLoading } = useGetAllInvigilatorAssignmentsQuery();
   const [deleteAssign, { isLoading: isDeleting }] = useDeleteInvigilatorAssignMutation();
@@ -183,4 +183,4 @@ const ViewInvigilatorAssignPage = () => {
   );
 };
 
-export default ViewInvigilatorAssignPage;
+export default ViewCurrentInvigilatorAssignPage;

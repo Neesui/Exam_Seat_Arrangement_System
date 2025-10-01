@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const ViewExamRoom = () => {
+const ViewExamRoomPage = () => {
   const [symbolNumber, setSymbolNumber] = useState("");
   const [college, setCollege] = useState("");
   const navigate = useNavigate();
@@ -101,4 +101,4 @@ const ViewExamRoom = () => {
   );
 };
 
-export default ViewExamRoom;
+export default ViewExamRoomPage;

@@ -3,7 +3,7 @@ import { FaEnvelope, FaLock } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useLoginMutation } from '../../redux/api/authApi';
-import { loginSuccess } from '../../redux/features/authReduer';
+import { loginSuccess } from '../../redux/features/authReducer';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

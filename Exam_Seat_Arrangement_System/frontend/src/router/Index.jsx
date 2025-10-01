@@ -2,13 +2,12 @@ import { createBrowserRouter } from "react-router-dom";
 import AdminLayout from "../layout/AdminLayout";
 import InvigilatorLayout from "../layout/InvigilatorLayout";
 import PublicLayout from "../layout/PublicLayout";
-import LoginPage from "../page/publicPage/LoginPage";
 import AuthGuard from "./guards/AuthGuard";
 import RoleGuard from "./guards/RoleGuard";
 import adminRoutes from "./routes/AdminRoutes";
 import invigilatorRoutes from "./routes/InvigilatorRoutes";
 import { publicRoutes } from "./routes/PublicRoutes";
-
+import LoginPage from "../pages/publicPage/LoginPage";
 
 const admin = ["ADMIN"];
 const invigilator = ["INVIGILATOR"];
@@ -25,6 +24,7 @@ const protectedRoutes = [
     children: adminRoutes,
   },
   {
+    path: "/invigilator", 
     element: (
       <AuthGuard>
         <RoleGuard allowedRoles={invigilator}>
@@ -35,7 +35,6 @@ const protectedRoutes = [
     children: invigilatorRoutes,
   },
 ];
-
 
 const router = createBrowserRouter([
   {

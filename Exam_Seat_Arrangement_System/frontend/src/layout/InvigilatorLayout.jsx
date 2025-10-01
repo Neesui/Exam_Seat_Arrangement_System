@@ -1,11 +1,9 @@
-import { Outlet } from "react-router-dom";
 import InvNavbar from "../component/invigilator/InvNavbar";
 
-const InvigilatorLayout = () => {
+const  InvigilatorLayout = () => {
   return (
     <>
-    <InvNavbar />
-      <Outlet />
+      <InvNavbar />
     </>
   );
 };

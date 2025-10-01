@@ -1,5 +1,4 @@
-import InvigilatorDashboard from "../../page/invigilatorPage/InvigilatorDashboard";
-
+import InvigilatorDashboard from "../../pages/invigilatorPage/InvigilatorDashboard";
 
  const invigilatorRoutes = [
     {

@@ -2,7 +2,7 @@ import React from "react";
 import { useGetActiveSeatingPlanQuery } from "../../redux/api/seatPlanApi";
 import SeatingPlanCard from "../../component/public/seating/SeatingPlanCard";
 
-const ActiveSeatingPlan = () => {
+const ViewActiveSeatingPlan = () => {
   const { data, isLoading, error } = useGetActiveSeatingPlanQuery();
 
   if (isLoading) {
@@ -56,4 +56,4 @@ const ActiveSeatingPlan = () => {
   );
 };
 
-export default ActiveSeatingPlan;
+export default ViewActiveSeatingPlan;

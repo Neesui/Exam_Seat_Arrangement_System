@@ -11,7 +11,7 @@ import Pagination from "../../component/public/Pagination";
 
 const ITEMS_PER_PAGE = 10;
 
-const ViewCoursePage = () => {
+const ViewFullCoursePage = () => {
   const navigate = useNavigate();
   const { data, error, isLoading } = useGetCoursesQuery();
   const [deleteCourse] = useDeleteCoursesMutation();
@@ -237,4 +237,4 @@ const ViewCoursePage = () => {
   );
 };
 
-export default ViewCoursePage;
+export default ViewFullCoursePage;

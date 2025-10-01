@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import SidebarSection from "./SidebarSection";
 import {
   FaTachometerAlt,
   FaUserGraduate,
@@ -12,6 +11,7 @@ import {
   FaClipboardList,
   FaTable,
 } from "react-icons/fa";
+import SidebarSection from "./Sidebarsection";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [activeSection, setActiveSection] = useState(null);
@@ -48,8 +48,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Students"}
             setIsOpen={() => handleSectionToggle("Students")}
             links={[
-              { path: "/addStudents", label: "Add Students" },
-              { path: "/viewStudents", label: "View Student Details" },
+              { path: "/admin/addStudents", label: "Add Students" },
+              { path: "/admin/viewStudents", label: "View Student Details" },
             ]}
           />
 
@@ -59,8 +59,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Invigilator"}
             setIsOpen={() => handleSectionToggle("Invigilator")}
             links={[
-              { path: "/addInvigilator", label: "Add Invigilator" },
-              { path: "/viewInvigilator", label: "View Invigilator" },
+              { path: "/admin/addInvigilator", label: "Add Invigilator" },
+              { path: "/admin/viewInvigilator", label: "View Invigilator" },
             ]}
           />
 
@@ -70,8 +70,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Courses"}
             setIsOpen={() => handleSectionToggle("Courses")}
             links={[
-              { path: "/addfullCourse", label: "Add Courses" },
-              { path: "/viewCourse", label: "View Courses" },
+              { path: "/admin/addfullCourse", label: "Add Courses" },
+              { path: "/admin/viewCourse", label: "View Courses" },
             ]}
           />
 
@@ -81,8 +81,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Room"}
             setIsOpen={() => handleSectionToggle("Room")}
             links={[
-              { path: "/addRoom", label: "Add Room" },
-              { path: "/viewRoom", label: "View Room Details" },
+              { path: "/admin/addRoom", label: "Add Room" },
+              { path: "/admin/viewRoom", label: "View Room Details" },
             ]}
           />
 
@@ -92,8 +92,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Bench"}
             setIsOpen={() => handleSectionToggle("Bench")}
             links={[
-              { path: "/addBench", label: "Add Bench" },
-              { path: "/viewBench", label: "View Bench Details" },
+              { path: "/admin/addBench", label: "Add Bench" },
+              { path: "/admin/viewBench", label: "View Bench Details" },
             ]}
           />
 
@@ -103,8 +103,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Exam"}
             setIsOpen={() => handleSectionToggle("Exam")}
             links={[
-              { path: "/createExam", label: "Create Exam" },
-              { path: "/viewExam", label: "View Exam" },
+              { path: "/admin/createExam", label: "Create Exam" },
+              { path: "/admin/viewExam", label: "View Exam" },
             ]}
           />
 
@@ -114,8 +114,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Room Assign"}
             setIsOpen={() => handleSectionToggle("Room Assign")}
             links={[
-              { path: "/assignRoom", label: "Assign Room for Exam" },
-              { path: "/viewRoomAssign", label: "View Room Assign" },
+              { path: "/admin/assignRoom", label: "Assign Room for Exam" },
+              { path: "/admin/viewRoomAssign", label: "View Room Assign" },
             ]}
           />
 
@@ -125,9 +125,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Invigilator Assign"}
             setIsOpen={() => handleSectionToggle("Invigilator Assign")}
             links={[
-              { path: "/assignInvigilator", label: "Assign Invigilator" },
-              { path: "/viewAllInvigilatorAssign", label: "View All Invigilator Assignment" },
-              // { path: "/viewInvigilatorAssign", label: "View Invigilator Assignment" },
+              { path: "/admin/assignInvigilator", label: "Assign Invigilator" },
+              { path: "/admin/viewAllInvigilatorAssign", label: "View All Invigilator Assignment" },
+              // { path: "/admin/viewInvigilatorAssign", label: "View Invigilator Assignment" },
             ]}
           />
 
@@ -137,9 +137,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Seat Plan"}
             setIsOpen={() => handleSectionToggle("Seat Plan")}
             links={[
-              { path: "/generateSeatingPlan", label: "Generate Seat Plan" },
-              { path: "/viewSeatingPlan", label: "View Seat Plan" },
-              { path: "/viewActiveSeatPlan", label: "View Active Seat Plan" },
+              { path: "/admin/generateSeatingPlan", label: "Generate Seat Plan" },
+              { path: "/admin/viewSeatingPlan", label: "View Seat Plan" },
+              { path: "/admin/viewActiveSeatPlan", label: "View Active Seat Plan" },
 
             ]}
           />

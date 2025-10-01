@@ -8,7 +8,7 @@ import {
 } from "../../redux/api/invigilatorAssignApi";
 import Input from "../../component/public/Input";
 
-const UpdateInvigilatorAssign = () => {
+const UpdateInvigilatorAssignPage = () => {
   const { id } = useParams(); 
   const navigate = useNavigate();
 
@@ -120,4 +120,4 @@ const UpdateInvigilatorAssign = () => {
   );
 };
 
-export default UpdateInvigilatorAssign;
+export default UpdateInvigilatorAssignPage;

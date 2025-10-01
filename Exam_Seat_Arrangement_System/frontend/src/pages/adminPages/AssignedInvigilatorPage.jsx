@@ -4,7 +4,7 @@ import {
   useGenerateInvigilatorAssignmentsMutation,
   useGetAllInvigilatorAssignmentsQuery,
 } from "../../redux/api/invigilatorAssignApi";
-import ViewInvigilatorAssignPage from "../publicPage/ViewInvigilatorAssignPage";
+import ViewCurrentInvigilatorAssignPage from "./ViewCurrentInvigilatorAssignPage";
 
 const AssignedInvigilatorPage = () => {
   const { error, isLoading, refetch } = useGetAllInvigilatorAssignmentsQuery();
@@ -36,7 +36,7 @@ const AssignedInvigilatorPage = () => {
       >
         {generating ? "Generating..." : "Generate Invigilator Assignments"}
       </button>
-      <ViewInvigilatorAssignPage />
+      <ViewCurrentInvigilatorAssignPage />
     </div>
   );
 };

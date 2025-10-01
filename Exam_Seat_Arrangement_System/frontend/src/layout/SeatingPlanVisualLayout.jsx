@@ -1,6 +1,6 @@
 import React from "react";
 
-const SeatingPlanVisual = ({ seatPlan }) => {
+const SeatingPlanVisualLayout = ({ seatPlan }) => {
   if (!seatPlan || seatPlan.length === 0) {
     return (
       <p className="text-center text-gray-500 italic">
@@ -121,4 +121,4 @@ const SeatingPlanVisual = ({ seatPlan }) => {
   );
 };
 
-export default SeatingPlanVisual;
+export default SeatingPlanVisualLayout;

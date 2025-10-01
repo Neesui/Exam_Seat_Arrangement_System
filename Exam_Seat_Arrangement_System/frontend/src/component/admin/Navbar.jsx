@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { logout as logoutAction } from "../../redux/features/authReduer";
+import { logout as logoutAction } from "../../redux/features/authReducer";
 import { useLogoutMutation } from "../../redux/api/authApi";
 import { useDispatch } from "react-redux";
 import { Outlet } from "react-router-dom";
