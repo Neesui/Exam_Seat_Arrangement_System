@@ -201,42 +201,26 @@ export const getInvigilatorAssignmentsById = async (req, res) => {
     const assignment = await prisma.invigilatorAssignment.findUnique({
       where: { id },
       include: {
-        // Include multiple invigilators
         invigilators: {
-          include: {
-            invigilator: {
-              include: {
-                user: true,
-              },
-            },
-          },
+          include: { invigilator: { include: { user: true } } },
         },
-        // Room assignment with room and exam
         roomAssignment: {
           include: {
-            room: {
-              select: {
-                roomNumber: true,
-                block: true,
-                floor: true,
-                totalBench: true,
-                totalCapacity: true,
-              },
-            },
+            room: { include: { benches: true } },
             exam: {
               include: {
-                subject: true,
+                subject: {
+                  include: {
+                    semester: {
+                      include: { course: true },
+                    },
+                  },
+                },
                 seatingPlans: {
                   include: {
                     seats: {
                       include: {
-                        student: {
-                          select: {
-                            id: true,
-                            studentName: true,
-                            college: true,
-                          },
-                        },
+                        student: { select: { id: true, studentName: true, college: true } },
                       },
                     },
                   },
@@ -252,19 +236,50 @@ export const getInvigilatorAssignmentsById = async (req, res) => {
       return res.status(404).json({ success: false, message: "Assignment not found" });
     }
 
+    const benches = assignment.roomAssignment.room.benches || [];
+    const totalBench = benches.length;
+    const totalCapacity = benches.reduce((sum, b) => sum + b.capacity, 0);
+
     let students = [];
     assignment.roomAssignment.exam.seatingPlans.forEach(plan => {
       plan.seats.forEach(seat => {
-        if (seat.student) students.push(seat.student);
+        if (seat.student) {
+          students.push({
+            studentName: seat.student.studentName,
+            college: seat.student.college,
+          });
+        }
       });
     });
 
+    const invigilators = assignment.invigilators.map(i => ({
+      ...i,
+      status: assignment.status,
+      assignedAt: assignment.assignedAt,
+      completedAt: assignment.completedAt,
+    }));
+
+    const exam = assignment.roomAssignment.exam;
+    const subject = exam.subject;
+    const semester = subject?.semester;
+    const course = semester?.course;
+
     const response = {
       ...assignment,
+      invigilators,
       roomAssignment: {
         ...assignment.roomAssignment,
+        room: {
+          ...assignment.roomAssignment.room,
+          totalBench,
+          totalCapacity,
+        },
         exam: {
-          ...assignment.roomAssignment.exam,
+          ...exam,
+          subjectName: subject?.subjectName || "N/A",
+          courseName: course?.name || "N/A",
+          semesterName: semester?.semesterNum ? `Semester ${semester.semesterNum}` : "N/A",
+          batchName: course?.batchYear ? `Batch ${course.batchYear}` : "N/A",
           students,
         },
       },
@@ -284,7 +299,6 @@ export const getInvigilatorAssignmentsById = async (req, res) => {
     });
   }
 };
-
 
 //update invigilator assignment status
 export const updateInvigilatorAssignmentStatus = async (req, res) => {

@@ -4,161 +4,175 @@ import { FaArrowLeft } from "react-icons/fa";
 import { useGetInvigilatorAssignmentsByIdQuery } from "../../redux/api/invigilatorAssignApi";
 
 const ViewInvigilatorAssignDetailsPage = () => {
-  const { assignmentId } = useParams();
+  const { assignmentId: rawId } = useParams();
   const navigate = useNavigate();
-  const numericId = Number(assignmentId);
+  const assignmentId = Number(rawId);
 
-  const { data, error, isLoading } = useGetInvigilatorAssignmentsByIdQuery(numericId);
-  const assignment = data?.assignment || null;
+  const { data, error, isLoading } = useGetInvigilatorAssignmentsByIdQuery(
+    assignmentId,
+    { skip: !assignmentId }
+  );
 
-  const formatDate = (isoDate) => {
-    if (!isoDate) return "-";
-    const dateObj = new Date(isoDate);
-    return dateObj.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
+  if (isLoading) {
+    return <div className="p-6">Loading assignment details...</div>;
+  }
+  if (error) {
+    return (
+      <div className="p-6 text-red-500">
+        Error loading assignment: {error.message}
+      </div>
+    );
+  }
+  if (!data?.assignment) {
+    return <div className="p-6">No assignment found.</div>;
+  }
+
+  const { assignment } = data;
+
+  // Format date like "2 Oct 2025"
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   };
 
-  const formatTime = (isoDate) => {
-    if (!isoDate) return "-";
-    const dateObj = new Date(isoDate);
-    return dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+  // Format time like "09:00 AM" without using Date object
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A";
+    let [hour, minute] = timeString.split(":").map(Number);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12 || 12;
+    return `${hour.toString().padStart(2, "0")}:${minute
+      .toString()
+      .padStart(2, "0")} ${ampm}`;
   };
-
-  if (isNaN(numericId)) return <p className="text-center mt-10 text-red-500">Invalid Assignment ID</p>;
-  if (isLoading) return <p className="text-center mt-10">Loading...</p>;
-  if (error || !data?.success) return <p className="text-center mt-10 text-red-500">Failed to load assignment details.</p>;
-  if (!assignment) return <p className="text-center mt-10 text-gray-600">No assignment found.</p>;
-
-  const room = assignment.roomAssignment?.room || {};
-  const exam = assignment.roomAssignment?.exam || {};
-  const invigilators = assignment.invigilators || [];
-  const students = exam.students || [];
 
   return (
-    <div className="max-w-6xl mx-auto mt-5 p-4">
-      <div className="bg-white shadow rounded border border-gray-200 p-6">
-        {/* Header */}
-        <div className="relative mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center text-white bg-blue-700 px-4 py-2 rounded hover:bg-blue-800"
-          >
-            <FaArrowLeft className="mr-2" /> Back
-          </button>
-          <h2 className="text-2xl font-bold text-center text-gray-800">Room & Invigilator Details</h2>
-        </div>
+    <div className="p-6 space-y-8">
+      {/* Back button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4"
+      >
+        <FaArrowLeft /> Back
+      </button>
 
-        {/* Exam Details */}
-        {exam ? (
-          <div className="border border-gray-300 rounded p-4 mb-6 bg-gray-50">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">Exam Information</h3>
-            <table className="table-auto w-full text-sm text-gray-800">
-              <tbody>
-                <tr>
-                  <td className="font-semibold w-1/3 py-1">Subject</td>
-                  <td className="py-1">{exam.subject?.subjectName || "N/A"}</td>
-                </tr>
-                <tr>
-                  <td className="font-semibold py-1">Date</td>
-                  <td className="py-1">{formatDate(exam.date)}</td>
-                </tr>
-                <tr>
-                  <td className="font-semibold py-1">Start Time</td>
-                  <td className="py-1">{formatTime(exam.startTime)}</td>
-                </tr>
-                <tr>
-                  <td className="font-semibold py-1">End Time</td>
-                  <td className="py-1">{formatTime(exam.endTime)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-center text-gray-600 mb-6">No exam details found.</p>
-        )}
+      {/* Room Information Table */}
+      <section>
+        <h2 className="text-xl font-semibold mb-3">Room Information</h2>
+        <table className="min-w-full border border-gray-300 rounded">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="p-2 border">Room Number</th>
+              <th className="p-2 border">Block</th>
+              <th className="p-2 border">Floor</th>
+              <th className="p-2 border">Total Benches</th>
+              <th className="p-2 border">Total Capacity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="odd:bg-white even:bg-gray-50">
+              <td className="p-2 border">{assignment.roomAssignment?.room?.roomNumber || "N/A"}</td>
+              <td className="p-2 border">{assignment.roomAssignment?.room?.block || "N/A"}</td>
+              <td className="p-2 border">{assignment.roomAssignment?.room?.floor || "N/A"}</td>
+              <td className="p-2 border">{assignment.roomAssignment?.room?.totalBench ?? 0}</td>
+              <td className="p-2 border">{assignment.roomAssignment?.room?.totalCapacity ?? 0}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
-        {/* Room Details */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Room Assignment</h3>
-          <table className="w-full table-auto border border-gray-300 text-sm">
-            <thead className="bg-gray-100">
+      {/* Exam Information Table */}
+      <section>
+        <h2 className="text-xl font-semibold mb-3">Exam Information</h2>
+        <table className="min-w-full border border-gray-300 rounded">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="p-2 border">Subject</th>
+              <th className="p-2 border">Course</th>
+              <th className="p-2 border">Semester</th>
+              <th className="p-2 border">Batch</th>
+              <th className="p-2 border">Date</th>
+              <th className="p-2 border">Start Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="odd:bg-white even:bg-gray-50">
+              <td className="p-2 border">{assignment.roomAssignment?.exam?.subjectName || "N/A"}</td>
+              <td className="p-2 border">{assignment.roomAssignment?.exam?.courseName || "N/A"}</td>
+              <td className="p-2 border">{assignment.roomAssignment?.exam?.semesterName || "N/A"}</td>
+              <td className="p-2 border">{assignment.roomAssignment?.exam?.batchName || "N/A"}</td>
+              <td className="p-2 border">{formatDate(assignment.roomAssignment?.exam?.date)}</td>
+              <td className="p-2 border">{formatTime(assignment.roomAssignment?.exam?.startTime)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      {/* Invigilators Table */}
+      <section>
+        <h2 className="text-xl font-semibold mb-3">Invigilators</h2>
+        <table className="min-w-full border border-gray-300 rounded">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Email</th>
+              <th className="p-2 border">Phone</th>
+              <th className="p-2 border">Status</th>
+              <th className="p-2 border">Assigned At</th>
+              <th className="p-2 border">Completed At</th>
+            </tr>
+          </thead>
+          <tbody>
+            {assignment.invigilators?.length > 0 ? (
+              assignment.invigilators.map((inv, idx) => (
+                <tr key={idx} className="odd:bg-white even:bg-gray-50">
+                  <td className="p-2 border">{inv.invigilator?.user?.name || "N/A"}</td>
+                  <td className="p-2 border">{inv.invigilator?.user?.email || "-"}</td>
+                  <td className="p-2 border">{inv.invigilator?.phone || "-"}</td>
+                  <td className="p-2 border">{inv.status || "-"}</td>
+                  <td className="p-2 border">{inv.assignedAt ? formatDate(inv.assignedAt) : "-"}</td>
+                  <td className="p-2 border">{inv.completedAt ? formatDate(inv.completedAt) : "-"}</td>
+                </tr>
+              ))
+            ) : (
               <tr>
-                <th className="border px-4 py-2">Room Number</th>
-                <th className="border px-4 py-2">Block</th>
-                <th className="border px-4 py-2">Floor</th>
-                <th className="border px-4 py-2">Total Benches</th>
-                <th className="border px-4 py-2">Total Capacity</th>
+                <td colSpan="6" className="p-2 text-center border">No invigilators assigned</td>
               </tr>
-            </thead>
-            <tbody>
+            )}
+          </tbody>
+        </table>
+      </section>
+
+      {/* Students Table */}
+      <section>
+        <h2 className="text-xl font-semibold mb-3">Students</h2>
+        <table className="min-w-full border border-gray-300 rounded">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="p-2 border">Student Name</th>
+              <th className="p-2 border">College</th>
+            </tr>
+          </thead>
+          <tbody>
+            {assignment.roomAssignment?.exam?.students?.length > 0 ? (
+              assignment.roomAssignment.exam.students.map((student, idx) => (
+                <tr key={idx} className="odd:bg-white even:bg-gray-50">
+                  <td className="p-2 border">{student.studentName}</td>
+                  <td className="p-2 border">{student.college}</td>
+                </tr>
+              ))
+            ) : (
               <tr>
-                <td className="border px-4 py-2">{room.roomNumber || "N/A"}</td>
-                <td className="border px-4 py-2">{room.block || "N/A"}</td>
-                <td className="border px-4 py-2">{room.floor || "N/A"}</td>
-                <td className="border px-4 py-2">{room.totalBench ?? "-"}</td>
-                <td className="border px-4 py-2">{room.totalCapacity ?? "-"}</td>
+                <td colSpan="2" className="p-2 text-center border">No students assigned</td>
               </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Invigilators Table */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Invigilators</h3>
-          {invigilators.length === 0 ? (
-            <p className="text-center text-gray-600">No invigilators assigned.</p>
-          ) : (
-            <table className="w-full table-auto border border-gray-300 text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="border px-4 py-2">Name</th>
-                  <th className="border px-4 py-2">Email</th>
-                  <th className="border px-4 py-2">Phone</th>
-                  <th className="border px-4 py-2">Status</th>
-                  <th className="border px-4 py-2">Assigned At</th>
-                  <th className="border px-4 py-2">Completed At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invigilators.map((i) => (
-                  <tr key={i.id}>
-                    <td className="border px-4 py-2">{i.invigilator?.user?.name || "N/A"}</td>
-                    <td className="border px-4 py-2">{i.invigilator?.user?.email || "-"}</td>
-                    <td className="border px-4 py-2">{i.invigilator?.phone || "-"}</td>
-                    <td className="border px-4 py-2">{i.status || "-"}</td>
-                    <td className="border px-4 py-2">{formatDate(i.assignedAt)} {formatTime(i.assignedAt)}</td>
-                    <td className="border px-4 py-2">{formatDate(i.completedAt)} {formatTime(i.completedAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-
-        {/* Students Table */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Students</h3>
-          {students.length === 0 ? (
-            <p className="text-center text-gray-600">No students found for this exam.</p>
-          ) : (
-            <table className="w-[550px] table-auto border border-gray-300 text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="border px-4 py-2">Name</th>
-                  <th className="border px-4 py-2">College</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((s) => (
-                  <tr key={s.id}>
-                    <td className="border px-4 py-2">{s.studentName || "N/A"}</td>
-                    <td className="border px-4 py-2">{s.college || "-"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
+            )}
+          </tbody>
+        </table>
+      </section>
     </div>
   );
 };
