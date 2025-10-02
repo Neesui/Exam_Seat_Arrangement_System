@@ -11,16 +11,25 @@ const ViewRoomAssignDetailsPage = () => {
   const assignments = data?.assignments || [];
   const exam = assignments.length > 0 ? assignments[0].exam : null;
 
-  const formatDate = (isoDate) =>
-    isoDate ? new Date(isoDate).toISOString().split("T")[0] : "-";
+  // Format date as "2 Oct 2025"
+  const formatDate = (isoDate) => {
+    if (!isoDate) return "-";
+    const date = new Date(isoDate);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
+  // Format time as "10:30 AM"
   const formatTime = (isoDateTime) => {
     if (!isoDateTime) return "-";
     const dateObj = new Date(isoDateTime);
     return dateObj.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false,
+      hour12: true,
     });
   };
 
@@ -36,20 +45,20 @@ const ViewRoomAssignDetailsPage = () => {
 
   // Flatten invigilator assignments to match backend structure
   const allInvigilatorAssignments = assignments.flatMap(
-  (assignment) =>
-    assignment.invigilatorAssignments?.map((inv) => ({
-      id: inv.id,
-      name: inv.invigilator?.user?.name || "N/A",
-      email: inv.invigilator?.user?.email || "-",
-      phone: inv.invigilator?.phone || "-",
-      status: inv.status,
-      assignedAt: inv.assignedAt,
-      completedAt: inv.completedAt,
-      roomNumber: assignment.room?.roomNumber,
-      block: assignment.room?.block,
-      floor: assignment.room?.floor,
-    })) || []
-);
+    (assignment) =>
+      assignment.invigilatorAssignments?.map((inv) => ({
+        id: inv.id,
+        name: inv.invigilator?.user?.name || "N/A",
+        email: inv.invigilator?.user?.email || "-",
+        phone: inv.invigilator?.phone || "-",
+        status: inv.status,
+        assignedAt: inv.assignedAt,
+        completedAt: inv.completedAt,
+        roomNumber: assignment.room?.roomNumber,
+        block: assignment.room?.block,
+        floor: assignment.room?.floor,
+      })) || []
+  );
 
   // Filter only assignments with assigned rooms
   const assignedRooms = assignments.filter(

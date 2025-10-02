@@ -15,6 +15,7 @@ const ViewExamPage = () => {
   const [subjectSearch, setSubjectSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Delete exam
   const handleDelete = async (examId) => {
     if (!window.confirm("Are you sure you want to delete this exam?")) return;
     try {
@@ -25,20 +26,35 @@ const ViewExamPage = () => {
     }
   };
 
+  // Update exam
   const handleUpdate = (examId) => {
     navigate(`/admin/updateExam/${examId}`);
   };
 
+  // View exam details
   const handleView = (examId) => {
     navigate(`/admin/viewExamDetails/${examId}`);
   };
 
+  // Format date as "2 Oct 2025"
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  // Format time as "10:30 AM"
   const formatTime = (dateTimeStr) => {
     if (!dateTimeStr) return "-";
     const date = new Date(dateTimeStr);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
+  // Filter exams by subject
   const filteredExams = useMemo(() => {
     if (!data?.exams) return [];
     return data.exams.filter((exam) =>
@@ -101,7 +117,7 @@ const ViewExamPage = () => {
                       {(currentPage - 1) * ITEMS_PER_PAGE + index + 1}
                     </td>
                     <td className="border px-4 py-2">{exam.subject?.subjectName || "N/A"}</td>
-                    <td className="border px-4 py-2">{exam.date?.split("T")[0]}</td>
+                    <td className="border px-4 py-2">{formatDate(exam.date)}</td>
                     <td className="border px-4 py-2">{formatTime(exam.startTime)}</td>
                     <td className="border px-4 py-2">{formatTime(exam.endTime)}</td>
                     <td className="border px-4 py-2 space-x-2">

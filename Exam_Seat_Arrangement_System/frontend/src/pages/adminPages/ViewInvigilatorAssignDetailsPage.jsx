@@ -59,6 +59,9 @@ const ViewInvigilatorAssignDetailsPage = () => {
       >
         <FaArrowLeft /> Back
       </button>
+      <h1 className="text-2xl font-bold text-center">
+        Invigilator Assignment Details
+      </h1>
 
       {/* Room Information Table */}
       <section>

@@ -10,11 +10,23 @@ const ViewExamDetailsPage = () => {
   const { data, error, isLoading } = useGetExamByIdQuery(Number(examId));
   const exam = data?.exam;
 
-  const formatDate = (isoDate) => (isoDate ? new Date(isoDate).toISOString().split("T")[0] : "-");
-  const formatTime = (isoTime) =>
-    isoTime
-      ? new Date(isoTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })
-      : "-";
+  // Format date as "2 Oct 2025"
+  const formatDate = (isoDate) => {
+    if (!isoDate) return "-";
+    const date = new Date(isoDate);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  // Format time as "10:30 AM"
+  const formatTime = (isoTime) => {
+    if (!isoTime) return "-";
+    const date = new Date(isoTime);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+  };
 
   if (isLoading) return <p className="text-center mt-10">Loading...</p>;
   if (error || !exam)
@@ -22,7 +34,6 @@ const ViewExamDetailsPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto mt-6 p-6 bg-white rounded shadow">
-
       <button
         onClick={() => navigate(-1)}
         className="mb-6 flex items-center text-blue-700 hover:text-blue-900"
