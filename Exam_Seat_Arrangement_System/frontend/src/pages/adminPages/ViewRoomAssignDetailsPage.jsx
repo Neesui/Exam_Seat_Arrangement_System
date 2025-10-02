@@ -36,20 +36,20 @@ const ViewRoomAssignDetailsPage = () => {
 
   // Flatten invigilator assignments to match backend structure
   const allInvigilatorAssignments = assignments.flatMap(
-    (assignment) =>
-      assignment.invigilatorAssignments?.map((inv) => ({
-        id: inv.id,
-        name: inv.invigilator?.user?.name || "N/A",
-        email: inv.invigilator?.user?.email || "-",
-        phone: inv.invigilator?.phone || "-",
-        status: inv.status,
-        assignedAt: inv.assignedAt,
-        completedAt: inv.completedAt,
-        roomNumber: assignment.room?.roomNumber,
-        block: assignment.room?.block,
-        floor: assignment.room?.floor,
-      })) || []
-  );
+  (assignment) =>
+    assignment.invigilatorAssignments?.map((inv) => ({
+      id: inv.id,
+      name: inv.invigilator?.user?.name || "N/A",
+      email: inv.invigilator?.user?.email || "-",
+      phone: inv.invigilator?.phone || "-",
+      status: inv.status,
+      assignedAt: inv.assignedAt,
+      completedAt: inv.completedAt,
+      roomNumber: assignment.room?.roomNumber,
+      block: assignment.room?.block,
+      floor: assignment.room?.floor,
+    })) || []
+);
 
   // Filter only assignments with assigned rooms
   const assignedRooms = assignments.filter(

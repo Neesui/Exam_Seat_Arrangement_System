@@ -264,7 +264,6 @@ export const getRoomAssignmentsByExam = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid exam ID" });
     }
 
-    // Fetch room assignments with exam and seating plans
     const assignments = await prisma.roomAssignment.findMany({
       where: { examId },
       include: {
@@ -287,10 +286,8 @@ export const getRoomAssignmentsByExam = async (req, res) => {
       return res.json({ success: true, message: "Room assignments fetched successfully", assignments: [] });
     }
 
-    // Get all room assignment IDs
     const assignmentIds = assignments.map(a => a.id);
 
-    // Fetch invigilators for these room assignments
     const invAssignments = await prisma.invigilatorAssignment.findMany({
       where: { roomAssignmentId: { in: assignmentIds } },
       include: {
@@ -300,20 +297,26 @@ export const getRoomAssignmentsByExam = async (req, res) => {
       },
     });
 
-    // Create a map of invigilators by roomAssignmentId
     const invMap = {};
     invAssignments.forEach(inv => {
       invMap[inv.roomAssignmentId] = (inv.invigilators || []).map(i => ({
-        name: i.invigilator?.user?.name || null,
-        email: i.invigilator?.user?.email || null,
-        phone: i.invigilator?.phone || null, 
+        id: inv.id,
         status: inv.status,
         assignedAt: inv.assignedAt,
         completedAt: inv.completedAt,
+        invigilator: i.invigilator ? {
+          id: i.invigilator.id,
+          phone: i.invigilator.phone,
+          course: i.invigilator.course,
+          user: i.invigilator.user ? {
+            id: i.invigilator.user.id,
+            name: i.invigilator.user.name,
+            email: i.invigilator.user.email
+          } : null
+        } : null
       }));
     });
 
-    // Format assignments for response
     const formatted = assignments.map(a => {
       const benches = a.room?.benches || [];
       const allSeats = (a.exam?.seatingPlans || []).flatMap(sp => sp.seats || []);
@@ -341,8 +344,6 @@ export const getRoomAssignmentsByExam = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch room assignments", error: error.message });
   }
 };
-
-
 
 export const updateRoomAssignment = async (req, res) => {
   try {
