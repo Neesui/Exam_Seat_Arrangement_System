@@ -4,7 +4,6 @@ import {
   getAllInvigilator,
   getProfile,
   updateProfile,
-  getInvigilatorExamMetaSummary,
   getInvigilatorById,
 } from "../controllers/invigilatorController.js";
 
@@ -23,6 +22,9 @@ import upload from "../middlewares/uploadImages.js";
 
 const router = express.Router();
 
+router.get("/profile", authenticate, roleCheck(["INVIGILATOR"]), getProfile);
+
+
 // Admin routes
 router.post("/add", authenticate, roleCheck(["ADMIN"]), upload.single("image"), addInvigilatorController);
 router.get("/all", authenticate, roleCheck(["ADMIN"]), getAllInvigilator);
@@ -32,12 +34,11 @@ router.put("/assignments/:id", authenticate, roleCheck(["ADMIN"]), updateInvigil
 router.delete("/delete/:id", authenticate, roleCheck(["ADMIN"]), deleteInvigilatorAssignment);
 
 // Invigilator-only routes
-router.get("/profile", authenticate, roleCheck(["INVIGILATOR"]), getProfile);
 router.put("/update-profile", authenticate, roleCheck(["INVIGILATOR"]), updateProfile);
-router.get("/meta-summary", authenticate, roleCheck(["INVIGILATOR"]), getInvigilatorExamMetaSummary);
+// router.get("/my/assignments", authenticate, roleCheck(["INVIGILATOR"]), getMyAssignments);
 
 // Shared routes
-router.get("/assignments/all", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getAllInvigilatorAssignments);
+router.get("/assignments/all", authenticate, roleCheck(["ADMIN"]), getAllInvigilatorAssignments);
 router.get("/assignments/:assignmentId", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getInvigilatorAssignmentsById);
 router.get("/assignments/current", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getFilteredInvigilatorAssignments);
 
