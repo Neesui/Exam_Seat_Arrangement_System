@@ -26,7 +26,7 @@ const InvDashboardStatus = () => {
       value: exams.length,
       icon: <FaBookOpen className="text-purple-600" size={32} />,
       iconBg: "bg-purple-100",
-      route: "/invigilator/viewExam",
+      route: "/invigilator/viewAssignedExams",
     },
     {
       label: "Active Room Assignments",

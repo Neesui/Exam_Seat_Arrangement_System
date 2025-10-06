@@ -1,9 +1,10 @@
 import InvigilatorDashboard from "../../pages/invigilatorPage/InvigilatorDashboard";
-import ViewInvigilatorAssignmentPage from "../../pages/invigilatorPage/ViewInvigilatorAssignmentPage";
 import ViewRoomAssignDetailsPage from "../../pages/adminPages/ViewRoomAssignDetailsPage";
-import ViewRoomAssignPage from "../../pages/adminPages/ViewRoomAssignPage";
 import InvigilatorProfilePage from "../../pages/invigilatorPage/InvigilatorProfilePage";
 import EditInvigilatorProfilePage from "../../pages/invigilatorPage/EditInvigilatorProfilePage";
+import ViewAssignedExamsTablePage from "../../pages/invigilatorPage/ViewAssignedExamsTablePage";
+import ViewExamDetailsPage from "../../pages/adminPages/ViewExamDetailsPage";
+import ViewRoomAssignmentPage from "../../pages/invigilatorPage/ViewRoomAssignmentPage";
 
  const invigilatorRoutes = [
     {
@@ -18,13 +19,17 @@ import EditInvigilatorProfilePage from "../../pages/invigilatorPage/EditInvigila
       path: '/invigilator/update-profile',
       element: <EditInvigilatorProfilePage />
     },
-    // {
-    //   path: '/invigilator/viewRoomAssign',
-    //   element: <ViewInvigilatorAssignmentPage />
-    // },
     {
-      path: "/invigilator/viewRoomAssign",
-      element: <ViewRoomAssignPage />,
+      path: '/invigilator/viewAssignedExams',
+      element: <ViewAssignedExamsTablePage />
+    },
+    {
+      path: "/invigilator/viewExamDetails/:examId",
+      element: <ViewExamDetailsPage />,
+    },
+    {
+      path: '/invigilator/viewRoomAssignment',
+      element: <ViewRoomAssignmentPage />
     },
     {
       path: "/invigilator/viewRoomAssignDetails/:examId",

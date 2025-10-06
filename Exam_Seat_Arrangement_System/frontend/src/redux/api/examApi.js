@@ -24,6 +24,11 @@ export const examApi = apiSlice.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "EXAM", id }],
     }),
 
+    getExamsForInvigilator: builder.query({
+      query: () => "/api/exam/assigned",
+      providesTags: ["EXAM"],
+    }),
+
 
     updateExam: builder.mutation({
       query: ({ id, ...data }) => ({
@@ -49,6 +54,7 @@ export const {
   useAddExamMutation,
   useGetExamsQuery,
   useGetExamByIdQuery,
+  useGetExamsForInvigilatorQuery,
   useUpdateExamMutation,
   useDeleteExamMutation,
 } = examApi;

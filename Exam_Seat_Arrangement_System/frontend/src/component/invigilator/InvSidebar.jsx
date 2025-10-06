@@ -67,7 +67,7 @@ const InvSidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Exam"}
             setIsOpen={() => handleSectionToggle("Exam")}
             links={[
-              { path: "/invigilator/viewExam", label: "View Exam" },
+              { path: "/invigilator/viewAssignedExams", label: "View Assigned Exams" },
             ]}
           />
 
@@ -81,7 +81,7 @@ const InvSidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
-          <SidebarSection
+          {/* <SidebarSection
             icon={<FaClipboardList className="mr-3" />}
             label="Invigilator Assign"
             isOpen={activeSection === "Invigilator Assign"}
@@ -89,7 +89,7 @@ const InvSidebar = ({ isOpen, toggleSidebar }) => {
             links={[
               { path: "/invigilator/viewInvigilatorAssign", label: "View Invigilator Assignment" },
             ]}
-          />
+          /> */}
 
           <SidebarSection
             icon={<FaTable className="mr-3" />}

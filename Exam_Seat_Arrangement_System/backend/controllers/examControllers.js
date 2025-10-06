@@ -149,6 +149,66 @@ export const getExamById = async (req, res) => {
   }
 };
 
+export const getExamsForInvigilator = async (req, res) => {
+  try {
+    const invigilatorUserId = req.user.id;
+
+    const exams = await prisma.exam.findMany({
+      where: {
+        roomAssignments: {
+          some: {
+            invigilatorAssignments: {
+              some: {
+                invigilators: {
+                  some: {
+                    invigilator: {
+                      userId: invigilatorUserId,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+        date: true,
+        startTime: true,
+        isActive: true,
+        subject: {
+          select: {
+            subjectName: true,
+            semester: {   // Keep this to get course
+              select: {
+                course: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { date: "asc" },
+    });
+
+    res.json({
+      success: true,
+      message: "Exams assigned to invigilator retrieved successfully",
+      exams,
+    });
+  } catch (error) {
+    console.error("Get Exams For Invigilator Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch exams",
+      error: error.message,
+    });
+  }
+};
+
 // Update Exam
 export const updateExam = async (req, res) => {
   try {
