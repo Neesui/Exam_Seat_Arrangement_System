@@ -43,14 +43,14 @@ const InvSidebar = ({ isOpen, toggleSidebar }) => {
 
           <SidebarSection
             icon={<FaUserGraduate className="mr-3" />}
-            label="Students"
-            isOpen={activeSection === "Students"}
-            setIsOpen={() => handleSectionToggle("Students")}
+            label="profile"
+            isOpen={activeSection === "profile"}
+            setIsOpen={() => handleSectionToggle("profile")}
             links={[
-              { path: "/invigilator/viewStudents", label: "View Student Details" },
+              { path: "/invigilator/profile", label: "View Profile" },
             ]}
           />
-
+{/* 
           <SidebarSection
             icon={<FaDoorOpen className="mr-3" />}
             label="Room"
@@ -59,7 +59,7 @@ const InvSidebar = ({ isOpen, toggleSidebar }) => {
             links={[
               { path: "/invigilator/viewRoom", label: "View Room Details" },
             ]}
-          />
+          /> */}
 
           <SidebarSection
             icon={<FaBookOpen className="mr-3" />}
