@@ -2,6 +2,7 @@ import express from "express";
 import {
   runAndSaveRoomAssignments,
   getAllRoomAssignments,
+  getInvigilatorRoomAssignments,
   getRoomAssignmentsByExam,
   updateRoomAssignment,
   deleteRoomAssignment,
@@ -14,6 +15,7 @@ const router = express.Router();
 
 router.post("/generate", authenticate, roleCheck(["ADMIN"]), runAndSaveRoomAssignments);
 router.get("/all", authenticate, roleCheck(["ADMIN"]), getAllRoomAssignments);
+router.get("/roomAssign", authenticate, roleCheck(["INVIGILATOR"]), getInvigilatorRoomAssignments);
 router.get("/all/:examId", authenticate, roleCheck(["ADMIN", "INVIGILATOR"]), getRoomAssignmentsByExam);
 router.put("/:id", authenticate, roleCheck(["ADMIN"]), updateRoomAssignment);
 router.delete("/:id", authenticate, roleCheck(["ADMIN"]), deleteRoomAssignment);

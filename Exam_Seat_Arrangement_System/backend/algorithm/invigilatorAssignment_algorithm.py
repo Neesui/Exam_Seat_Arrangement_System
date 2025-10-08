@@ -2,7 +2,6 @@ import json
 from datetime import datetime, timezone
 from db_connection import get_db_connection
 
-# ------------------ Helper Functions ------------------
 
 def parse_time(dt):
     if dt is None:
@@ -21,7 +20,6 @@ def has_conflict(existing_assignments, new_start, new_end):
             return True
     return False
 
-# ------------------ Fetch Data ------------------
 
 def fetch_room_assignments(conn):
     with conn.cursor() as cur:
@@ -53,7 +51,6 @@ def fetch_invigilators(conn):
             inv["assignments"] = [{"start": row[0], "end": row[1]} for row in cur.fetchall()]
         return invigilators
 
-# ------------------ Assignment Algorithm ------------------
 
 def auto_assign(room_assignments, invigilators, min_per_room=2, max_per_invigilator=2):
     if len(invigilators) < min_per_room:
@@ -93,7 +90,7 @@ def auto_assign(room_assignments, invigilators, min_per_room=2, max_per_invigila
             assigned_count += 1
 
         if assigned_count < min_per_room:
-            return {"error": f"Cannot assign {min_per_room} invigilators to room {room['id']} due to conflicts."}
+            return {"error": f"Cannot assign {min_per_room} invigilators to room due to conflicts."}
 
     output = []
     for room_id, inv_list in assignments_by_room.items():
