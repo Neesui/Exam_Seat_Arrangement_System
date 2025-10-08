@@ -57,7 +57,7 @@ const UpdateRoomAssignPage = () => {
 
       if (result.success) {
         toast.success("Room assignment updated successfully!");
-        navigate("/viewRoomAssign");
+        // navigate("/viewRoomAssign");
       } else {
         toast.error(result.message || "Something went wrong");
       }

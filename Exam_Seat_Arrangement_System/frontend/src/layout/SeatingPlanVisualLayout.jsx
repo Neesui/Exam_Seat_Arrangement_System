@@ -55,8 +55,8 @@ const SeatingPlanVisualLayout = ({ seatPlan }) => {
               );
 
               return (
-                <div key={row} className="mb-3">
-                  <div className="flex flex-wrap justify-center gap-8">
+                <div key={row} className="mb-3 ml-50">
+                  <div className="flex flex-wrap gap-8">
                     {benchNosSorted.map((benchNo) => {
                       const seats = benches[benchNo];
                       const benchCapacity = seats[0]?.bench?.capacity || 2;

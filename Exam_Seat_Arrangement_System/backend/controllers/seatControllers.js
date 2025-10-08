@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
-import { startOfDay, endOfDay, addDays } from "date-fns";
+import { startOfDay, endOfDay, addDays,isAfter  } from "date-fns";
 
 const prisma = new PrismaClient();
 
@@ -160,11 +160,15 @@ export const getActiveSeatingPlan = async (req, res) => {
   }
 };
 
+
 export const getStudentSeating = async (req, res) => {
   let { symbolNumber, college } = req.body;
 
   if (!symbolNumber || !college) {
-    return res.status(400).json({ success: false, message: "symbolNumber and college are required" });
+    return res.status(400).json({
+      success: false,
+      message: "symbolNumber and college are required",
+    });
   }
 
   symbolNumber = symbolNumber.trim();
@@ -172,60 +176,169 @@ export const getStudentSeating = async (req, res) => {
 
   try {
     const today = new Date();
-    const tomorrow = addDays(today, 1);
 
-    const seating = await prisma.seat.findFirst({
+    const allStudentSeats = await prisma.seat.findMany({
       where: {
-        student: { symbolNumber, college: { equals: college, mode: "insensitive" } },
-        seatingPlan: { exam: { date: { gte: startOfDay(today), lte: endOfDay(tomorrow) } } },
+        student: {
+          symbolNumber,
+          college: { equals: college, mode: "insensitive" },
+        },
+        seatingPlan: {
+          exam: {
+            date: { gte: today },
+          },
+        },
       },
       include: {
-        student: { select: { id: true, symbolNumber: true, college: true, studentName: true } },
-        bench: { include: { room: { select: { roomNumber: true, block: true, floor: true } } } },
-        seatingPlan: {
-          include: { exam: { include: { subject: { include: { semester: { include: { course: true } } } } } } },
+        student: true,
+        bench: {
+          include: {
+            room: {
+              include: {
+                benches: true, 
+              },
+            },
+          },
         },
+        seatingPlan: {
+          include: {
+            exam: {
+              include: {
+                subject: { include: { semester: { include: { course: true } } } },
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        seatingPlan: { exam: { date: "asc" } },
       },
     });
 
-    if (!seating) return res.json({ success: true, message: "No seating assigned today or tomorrow", data: null });
+    if (!allStudentSeats.length) {
+      return res.json({
+        success: true,
+        message: "No upcoming exam seat plan found",
+        data: [],
+      });
+    }
 
-    const responseData = {
-      student: seating.student,
-      exam: seating.seatingPlan.exam,
-      room: seating.bench.room,
-      benchId: seating.benchId,
-      position: seating.position,
-    };
+    const roomsMap = new Map();
 
-    res.json({ success: true, message: "Seating info retrieved successfully", data: responseData });
-  } catch (err) {
-    console.error("Error fetching student seating:", err);
-    res.status(500).json({ success: false, message: "Failed to fetch seating info", error: err.message });
+    for (const seat of allStudentSeats) {
+      const roomId = seat.bench.room.id;
+      const examId = seat.seatingPlan.exam.id;
+      const key = `${examId}-${roomId}`;
+
+      if (!roomsMap.has(key)) {
+        roomsMap.set(key, {
+          exam: seat.seatingPlan.exam,
+          room: {
+            ...seat.bench.room,
+            benches: seat.bench.room.benches.map((b) => ({
+              id: b.id,
+              benchNo: b.benchNo,
+              row: b.row,
+              column: b.column,
+              capacity: b.capacity,
+            })),
+          },
+          seats: [],
+        });
+      }
+
+      roomsMap.get(key).seats.push({
+        id: seat.id,
+        benchId: seat.benchId,
+        position: seat.position,
+        student: seat.student,
+        bench: seat.bench,
+      });
+    }
+
+    const roomPlans = Array.from(roomsMap.values());
+
+    return res.json({
+      success: true,
+      message: "Upcoming student seating info retrieved successfully",
+      data: roomPlans,
+    });
+  } catch (error) {
+    console.error("Error fetching student seating:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch seating info",
+      error: error.message,
+    });
   }
 };
+
 
 export const getAllSeatingPlan = async (req, res) => {
   try {
     const seatingPlans = await prisma.seatingPlan.findMany({
       include: {
-        exam: { include: { subject: { include: { semester: { include: { course: true } } } } } },
+        exam: {
+          include: {
+            subject: {
+              include: {
+                semester: { include: { course: true } },
+              },
+            },
+          },
+        },
         seats: {
           include: {
             student: { select: { id: true, symbolNumber: true, college: true, studentName: true } },
-            bench: { include: { room: { select: { id: true, roomNumber: true, block: true, floor: true } } } },
+            bench: {
+              include: {
+                room: {
+                  include: {
+                    benches: true, 
+                  },
+                  select: { id: true, roomNumber: true, block: true, floor: true },
+                },
+              },
+            },
           },
         },
       },
       orderBy: { id: "desc" },
     });
 
-    res.json({ success: true, message: "Seating plans retrieved successfully", data: seatingPlans });
+    const processedPlans = seatingPlans.map((plan) => {
+      const roomIdMap = new Map();
+      plan.seats.forEach((seat) => {
+        const room = seat.bench.room;
+        if (!roomIdMap.has(room.id)) {
+          roomIdMap.set(room.id, {
+            ...room,
+            benches: room.benches.map((b) => ({
+              benchNo: b.benchNo,
+              capacity: b.capacity,
+            })),
+          });
+        }
+      });
+
+      return {
+        ...plan,
+        seats: plan.seats,
+        rooms: Array.from(roomIdMap.values()),
+      };
+    });
+
+    res.json({
+      success: true,
+      message: "Seating plans retrieved successfully with benches",
+      data: processedPlans,
+    });
   } catch (error) {
     console.error("Error fetching seating plans:", error);
     res.status(500).json({ success: false, message: "Failed to fetch seating plans", error: error.message });
   }
 };
+
 
 export const getInvigilatorSeatingPlans = async (req, res) => {
   try {
