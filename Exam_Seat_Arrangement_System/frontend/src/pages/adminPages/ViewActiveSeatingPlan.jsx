@@ -6,7 +6,11 @@ const ViewActiveSeatingPlan = () => {
   const { data, isLoading, error } = useGetActiveSeatingPlanQuery();
 
   if (isLoading) {
-    return <p className="text-center mt-20 text-lg">Loading active seating plan...</p>;
+    return (
+      <p className="text-center mt-20 text-lg">
+        Loading active seating plan...
+      </p>
+    );
   }
 
   if (error || !data?.data || data.data.length === 0) {
@@ -40,18 +44,17 @@ const ViewActiveSeatingPlan = () => {
 
   return (
     <div className="mt-5 p-6 max-w-screen-xl mx-auto bg-white rounded shadow">
-      <h2 className="text-4xl font-bold text-center mb-6"> Seating Plan</h2>
-
-      <SeatingPlanCard plan={plan} index={0} />
-
-      <div className="flex justify-center mt-6 gap-4 print:hidden">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-4xl font-bold">Seating Plan</h2>
         <button
           onClick={() => window.print()}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 print:hidden"
         >
           Download / Print
         </button>
       </div>
+
+      <SeatingPlanCard plan={plan} index={0} />
     </div>
   );
 };

@@ -22,6 +22,17 @@ export const roomAssignApi = apiSlice.injectEndpoints({
           : [{ type: "ROOM_ASSIGN", id: "LIST" }],
     }),
 
+    getInvigilatorRoomAssignments: builder.query({
+      query: () => `/api/room-assignments/roomAssign`,
+      providesTags: (result) =>
+        result?.assignments
+          ? [
+              { type: "ROOM_ASSIGN", id: "LIST" },
+              ...result.assignments.map(({ id }) => ({ type: "ROOM_ASSIGN", id })),
+            ]
+          : [{ type: "ROOM_ASSIGN", id: "LIST" }],
+    }),
+
     getRoomAssignByExam: builder.query({
       query: (examId) => `/api/room-assignments/all/${examId}`,
       providesTags: (result) =>
@@ -61,6 +72,7 @@ export const roomAssignApi = apiSlice.injectEndpoints({
 export const {
   useGenerateRoomAssignmentsMutation,
   useGetAllRoomAssignmentsQuery,
+  useGetInvigilatorRoomAssignmentsQuery,
   useGetRoomAssignByExamQuery,
   useUpdateRoomAssignMutation,
   useDeleteRoomAssignMutation,
