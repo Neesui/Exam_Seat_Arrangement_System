@@ -77,7 +77,7 @@ const InvSidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Room Assign"}
             setIsOpen={() => handleSectionToggle("Room Assign")}
             links={[
-              { path: "/invigilator/viewRoomAssign", label: "View Room Assign" },
+              { path: "/invigilator/viewRoomAssignment", label: "View Room Assignments" },
             ]}
           />
 
