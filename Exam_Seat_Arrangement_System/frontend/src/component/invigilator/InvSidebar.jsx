@@ -97,7 +97,7 @@ const InvSidebar = ({ isOpen, toggleSidebar }) => {
             isOpen={activeSection === "Seat Plan"}
             setIsOpen={() => handleSectionToggle("Seat Plan")}
             links={[
-              { path: "/admin/viewActiveSeatPlan", label: "View Active Seat Plan" },
+              { path: "/invigilator/viewActiveSeatPlan", label: "View Active Seat Plan" },
 
             ]}
           />

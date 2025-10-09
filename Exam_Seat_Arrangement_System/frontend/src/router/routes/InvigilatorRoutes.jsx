@@ -5,6 +5,7 @@ import EditInvigilatorProfilePage from "../../pages/invigilatorPage/EditInvigila
 import ViewAssignedExamsTablePage from "../../pages/invigilatorPage/ViewAssignedExamsTablePage";
 import ViewExamDetailsPage from "../../pages/adminPages/ViewExamDetailsPage";
 import ViewRoomAssignmentPage from "../../pages/invigilatorPage/ViewRoomAssignmentPage";
+import ViewActiveSeatingPlan from "../../pages/adminPages/ViewActiveSeatingPlan";
 
  const invigilatorRoutes = [
     {
@@ -35,6 +36,10 @@ import ViewRoomAssignmentPage from "../../pages/invigilatorPage/ViewRoomAssignme
       path: "/invigilator/viewRoomAssignDetails/:examId",
       element: <ViewRoomAssignDetailsPage />,
     },
+    {
+      path: '/invigilator/viewActiveSeatPlan',
+      element: <ViewActiveSeatingPlan />
+    }
   ];
 
   export default invigilatorRoutes;

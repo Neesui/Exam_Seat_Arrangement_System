@@ -16,7 +16,10 @@ export const seatPlanApi = apiSlice.injectEndpoints({
     }),
 
     getActiveSeatingPlan: builder.query({
-      query: () => "/api/seating/active",
+      query: () => ({
+        url: "/api/seating/active",
+        method: "GET",
+      }),
       providesTags: ["SEAT_PLAN"],
     }),
 
