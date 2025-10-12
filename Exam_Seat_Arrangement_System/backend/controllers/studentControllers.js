@@ -1,4 +1,5 @@
 import prisma from "../utils/db.js";
+import XLSX from "xlsx";
 
 // Create Student
 export const createStudent = async (req, res) => {
@@ -230,34 +231,83 @@ export const deleteStudent = async (req, res) => {
 };
 
 // Bulk Import Students (array of student objects)
+
 export const importStudents = async (req, res) => {
   try {
-    const students = req.body;
-
-    if (!Array.isArray(students) || students.length === 0) {
+    if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "No student data provided.",
+        message: "No file uploaded.",
       });
     }
 
+    // Read Excel
+    const workbook = XLSX.readFile(req.file.path);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+    if (jsonData.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Excel file is empty.",
+      });
+    }
+
+    const studentData = [];
+
+    for (const s of jsonData) {
+      // ✅ Find courseId using course name and batchYear
+      const course = await prisma.course.findFirst({
+        where: {
+          name: s.courseName, // fixed field name
+          batchYear: Number(s.batchYear),
+        },
+        select: { id: true },
+      });
+
+      if (!course) {
+        return res.status(400).json({
+          success: false,
+          message: `Course '${s.courseName}' (${s.batchYear}) not found in database.`,
+        });
+      }
+
+      // ✅ Find semesterId using semesterNum and courseId
+      const semester = await prisma.semester.findFirst({
+        where: {
+          semesterNum: Number(s.semesterNum),
+          courseId: course.id,
+        },
+        select: { id: true },
+      });
+
+      if (!semester) {
+        return res.status(400).json({
+          success: false,
+          message: `Semester ${s.semesterNum} for course '${s.courseName}' not found.`,
+        });
+      }
+
+      studentData.push({
+        studentName: s.studentName,
+        symbolNumber: String(s.symbolNumber),
+        regNumber: String(s.regNumber),
+        college: s.college,
+        courseId: course.id,     // ✅ correct mapping
+        semesterId: semester.id, // ✅ correct mapping
+        imageUrl: s.imageUrl || null,
+      });
+    }
 
     await prisma.student.createMany({
-      data: students.map(s => ({
-        studentName: s.studentName,
-        symbolNumber: s.symbolNumber,
-        regNumber: s.regNumber,
-        college: s.college,
-        courseId: Number(s.courseId),
-        semesterId: Number(s.semesterId),
-        imageUrl: s.imageUrl || null,
-      })),
+      data: studentData,
       skipDuplicates: true,
     });
 
     res.status(200).json({
       success: true,
       message: "Students imported successfully!",
+      count: studentData.length,
     });
   } catch (error) {
     console.error("Import Students Error:", error);
@@ -268,3 +318,7 @@ export const importStudents = async (req, res) => {
     });
   }
 };
+
+
+
+

@@ -18,13 +18,17 @@
     "body-parser": "^2.2.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "fast-csv": "^5.0.5",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "nodemon": "^3.1.10",
-    "uuid": "^11.1.0"
+    "pdf-parse": "^2.2.11",
+    "uuid": "^11.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "prisma": "^6.9.0"
