@@ -23,20 +23,22 @@ const ViewStudentPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const semesters = useMemo(() => {
-    if (!data?.students) return [];
-    const unique = new Map();
-    data.students.forEach((s) => {
-      if (s.semester?.id && !unique.has(s.semester.id)) {
-        unique.set(s.semester.id, s.semester.semesterNum);
-      }
-    });
-    return Array.from(unique.entries())
-      .map(([id, semesterNum]) => ({
-        value: id, // keep numeric ID
-        label: `Semester ${semesterNum}`,
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label));
-  }, [data]);
+  if (!data?.students) return [];
+  const unique = new Map();
+  data.students.forEach((s) => {
+    if (s.semester?.id && !unique.has(s.semester.id)) {
+      // Include course name in the label
+      const courseName = s.course?.name || "Unknown Course";
+      unique.set(s.semester.id, `${courseName} - Semester ${s.semester.semesterNum}`);
+    }
+  });
+  return Array.from(unique.entries())
+    .map(([id, label]) => ({
+      value: id, // numeric ID
+      label,     // now includes course name
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}, [data]);
 
   const handleDelete = async (studentId) => {
     if (!window.confirm("Are you sure you want to delete this student?")) return;

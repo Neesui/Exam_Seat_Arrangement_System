@@ -95,7 +95,6 @@ const ViewAssignedExamsTablePage = () => {
                 <th className="border border-gray-300 px-4 py-2">Course</th>
                 <th className="border border-gray-300 px-4 py-2">Exam Date</th>
                 <th className="border border-gray-300 px-4 py-2">Start Time</th>
-                <th className="border border-gray-300 px-4 py-2">Status</th>
                 <th className="border border-gray-300 px-4 py-2">Action</th>
               </tr>
             </thead>
@@ -111,7 +110,6 @@ const ViewAssignedExamsTablePage = () => {
                       ? new Date(exam.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
                       : "-"}
                   </td>
-                  <td className="border px-4 py-2">{getStatusBadge(exam.isActive)}</td>
                   <td className="border px-4 py-2">
                     <button
                       className="text-blue-500 hover:text-blue-700"
