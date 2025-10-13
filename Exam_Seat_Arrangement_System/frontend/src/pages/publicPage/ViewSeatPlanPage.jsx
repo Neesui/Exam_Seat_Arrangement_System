@@ -32,7 +32,7 @@ const ViewSeatPlanPage = () => {
 
   if (isError || !data?.data || data.data.length === 0) {
     return (
-      <p className="text-center mt-20 text-lg text-red-600">
+      <p className="text-center m-10 text-lg text-red-600">
         No active seating plan found for your details.
       </p>
     );
