@@ -31,6 +31,7 @@
     role        Role        @default(INVIGILATOR)
     createdAt   DateTime    @default(now())
     updatedAt   DateTime    @updatedAt
+    notifications Notification[]  
 
     invigilator Invigilator?
 
@@ -113,6 +114,8 @@
     course       Course      @relation(fields: [courseId], references: [id])
     semester     Semester    @relation(fields: [semesterId], references: [id])
     seats        Seat[]
+    notifications Notification[]  
+
 
     @@unique([symbolNumber, college])
     @@map("student")
@@ -242,3 +245,20 @@
 
     @@map("seatingPlan")
   }
+
+model Notification {
+  id          Int       @id @default(autoincrement())
+  message     String
+  // Link to either a User (invigilator/admin) OR a Student.
+  userId      Int?      // for invigilators/admins who have a User record
+  studentId   Int?      // for students (who are in Student table)
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User?     @relation(fields: [userId], references: [id])
+  student     Student?  @relation(fields: [studentId], references: [id])
+
+  @@map("notification")
+}
+
