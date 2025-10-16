@@ -45,6 +45,10 @@
     address      String
     gender       String
     imageUrl     String?
+    qualification     String
+    dateOfBirth       DateTime
+    specialization    String
+    description  String
     createdAt    DateTime                 @default(now())
     updatedAt    DateTime                 @updatedAt
 
@@ -102,6 +106,7 @@
   model Student {
     id           Int         @id @default(autoincrement())
     studentName  String
+    email        String     @unique
     symbolNumber String
     regNumber    String
     college      String
