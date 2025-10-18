@@ -106,7 +106,7 @@
   model Student {
     id           Int         @id @default(autoincrement())
     studentName  String
-    email        String     @unique
+    email        String?     @unique
     symbolNumber String
     regNumber    String
     college      String

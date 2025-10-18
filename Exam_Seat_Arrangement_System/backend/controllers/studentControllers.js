@@ -7,6 +7,7 @@ export const createStudent = async (req, res) => {
     const {
       studentName,
       symbolNumber,
+      email,
       regNumber,
       college,
       courseId,
@@ -18,6 +19,7 @@ export const createStudent = async (req, res) => {
       data: {
         studentName,
         symbolNumber,
+        email,
         regNumber,
         college,
         courseId: Number(courseId),
@@ -256,10 +258,10 @@ export const importStudents = async (req, res) => {
     const studentData = [];
 
     for (const s of jsonData) {
-      // ✅ Find courseId using course name and batchYear
+      // Find courseId using course name and batchYear
       const course = await prisma.course.findFirst({
         where: {
-          name: s.courseName, // fixed field name
+          name: s.courseName, 
           batchYear: Number(s.batchYear),
         },
         select: { id: true },
@@ -272,7 +274,7 @@ export const importStudents = async (req, res) => {
         });
       }
 
-      // ✅ Find semesterId using semesterNum and courseId
+      // Find semesterId using semesterNum and courseId
       const semester = await prisma.semester.findFirst({
         where: {
           semesterNum: Number(s.semesterNum),
@@ -293,8 +295,9 @@ export const importStudents = async (req, res) => {
         symbolNumber: String(s.symbolNumber),
         regNumber: String(s.regNumber),
         college: s.college,
-        courseId: course.id,     // ✅ correct mapping
-        semesterId: semester.id, // ✅ correct mapping
+        courseId: course.id,     
+        semesterId: semester.id, 
+        email: s.email || `${s.symbolNumber}@collegea.com`,
         imageUrl: s.imageUrl || null,
       });
     }
