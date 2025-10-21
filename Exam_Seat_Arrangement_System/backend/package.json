@@ -25,8 +25,11 @@
     "fast-csv": "^5.0.5",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.9",
     "nodemon": "^3.1.10",
     "pdf-parse": "^2.2.11",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "uuid": "^11.1.0",
     "xlsx": "^0.18.5"
   },

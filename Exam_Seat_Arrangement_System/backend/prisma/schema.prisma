@@ -45,10 +45,10 @@
     address      String
     gender       String
     imageUrl     String?
-    qualification     String
-    dateOfBirth       DateTime
-    specialization    String
-    description  String
+    qualification     String?
+    dateOfBirth       DateTime?
+    specialization    String?
+    description  String?
     createdAt    DateTime                 @default(now())
     updatedAt    DateTime                 @updatedAt
 
@@ -106,7 +106,7 @@
   model Student {
     id           Int         @id @default(autoincrement())
     studentName  String
-    email        String?     @unique
+    email        String     @unique
     symbolNumber String
     regNumber    String
     college      String
@@ -254,12 +254,12 @@
 model Notification {
   id          Int       @id @default(autoincrement())
   message     String
-  // Link to either a User (invigilator/admin) OR a Student.
-  userId      Int?      // for invigilators/admins who have a User record
-  studentId   Int?      // for students (who are in Student table)
+  title       String
   isRead      Boolean   @default(false)
+  // Link to either a User (invigilator/admin) OR a Student.
+  userId      Int?      
+  studentId   Int?      
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
 
   user        User?     @relation(fields: [userId], references: [id])
   student     Student?  @relation(fields: [studentId], references: [id])
