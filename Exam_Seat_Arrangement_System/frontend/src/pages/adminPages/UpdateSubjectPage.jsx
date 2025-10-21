@@ -38,7 +38,7 @@ const UpdateSubjectPage = () => {
       // Note: removed subjectId from body
       await updateSubject({ subjectId, subjectName, code }).unwrap();
       toast.success("Subject updated successfully!");
-      navigate("/viewCourse");
+      // navigate("/viewCourse");
     } catch (err) {
       console.error("Error updating subject:", err);
       toast.error(err?.data?.message || "Failed to update subject.");

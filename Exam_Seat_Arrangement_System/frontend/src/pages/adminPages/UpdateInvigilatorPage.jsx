@@ -23,7 +23,7 @@ const UpdateInvigilatorPage = () => {
     gender: '',
   });
 
-  const [image, setImage] = useState(null); // ✅ Image state
+  const [image, setImage] = useState(null); 
 
   useEffect(() => {
     if (invigilatorData) {
@@ -55,11 +55,11 @@ const UpdateInvigilatorPage = () => {
       for (const key in formData) {
         fd.append(key, formData[key]);
       }
-      if (image) fd.append("image", image); // ✅ Append image
+      if (image) fd.append("image", image); 
 
       await updateInvigilator({ id, formData: fd }).unwrap();
       toast.success('Invigilator updated successfully!');
-      navigate('/viewInvigilator');
+      // navigate('/viewInvigilator');
     } catch (err) {
       toast.error(err.data?.message || 'Failed to update invigilator.');
     }
@@ -104,7 +104,7 @@ const UpdateInvigilatorPage = () => {
           </div>
         ))}
 
-        {/* ✅ Image Upload */}
+        {/*Image Upload */}
         <div>
           <label htmlFor="image" className="block text-gray-600 mb-1">
             Image:

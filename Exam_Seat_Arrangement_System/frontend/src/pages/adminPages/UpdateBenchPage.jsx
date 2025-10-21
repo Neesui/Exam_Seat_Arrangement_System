@@ -46,7 +46,7 @@ const UpdateBenchPage = () => {
 
       if (result.success) {
         toast.success("Bench updated successfully!");
-        navigate(`/viewBenchByRoom/${roomId}`);
+        // navigate(`/viewBenchByRoom/${roomId}`);
       } else {
         toast.error(result.message || "Something went wrong");
       }

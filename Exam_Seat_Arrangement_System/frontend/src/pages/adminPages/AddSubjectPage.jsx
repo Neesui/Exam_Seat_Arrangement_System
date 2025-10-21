@@ -22,7 +22,7 @@ const AddSubjectPage = () => {
     try {
       await addSubject({ semesterId: Number(semesterId), subjectName, code }).unwrap();
       toast.success('Subject added successfully!');
-      navigate('/admin/viewCourses');
+      // navigate('/admin/viewCourses');
     } catch (err) {
       console.error(err);
       toast.error(err?.data?.message || 'Failed to add subject');

@@ -58,7 +58,7 @@ const UpdateInvigilatorAssignPage = () => {
       }).unwrap();
 
       toast.success("Assignment updated successfully!");
-      navigate("/viewInvigilatorAssign");
+      // navigate("/viewInvigilatorAssign");
     } catch (err) {
       toast.error(err?.data?.message || "Failed to update assignment.");
     }

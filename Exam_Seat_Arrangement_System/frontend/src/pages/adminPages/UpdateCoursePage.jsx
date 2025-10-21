@@ -37,7 +37,7 @@ const UpdateCoursePage = () => {
         batchYear: Number(batchYear),
       }).unwrap();
       toast.success("Course updated successfully!");
-      navigate("/admin/viewCourses");
+      // navigate("/admin/viewCourses");
     } catch (err) {
       console.error("Update error:", err);
       toast.error(err?.data?.message || "Failed to update course.");

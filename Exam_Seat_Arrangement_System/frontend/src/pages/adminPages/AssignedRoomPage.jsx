@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useGenerateRoomAssignmentsMutation } from "../../redux/api/roomAssignApi";
 import { useGetExamsQuery } from "../../redux/api/examApi";
-import { useGetAllRoomAssignmentsQuery } from "../../redux/api/roomAssignApi"; // ✅ Import API for assignments
+import { useGetAllRoomAssignmentsQuery } from "../../redux/api/roomAssignApi"; // 
 
 const AssignedRoomPage = () => {
   const {
@@ -15,7 +15,7 @@ const AssignedRoomPage = () => {
     data: roomAssignmentsData,
     isLoading: assignmentsLoading,
     refetch: refetchAssignments,
-  } = useGetAllRoomAssignmentsQuery(); // ✅ Get all room assignments
+  } = useGetAllRoomAssignmentsQuery(); 
 
   const [selectedExam, setSelectedExam] = useState("");
 
@@ -37,19 +37,19 @@ const AssignedRoomPage = () => {
     try {
       const response = await generateAssignments({ examId: Number(selectedExam) }).unwrap();
 
-      // ✅ Show backend success message dynamically
+      // Show backend success message dynamically
       if (response?.message) {
         toast.success(response.message);
       } else {
         toast.success("Room assignments generated successfully");
       }
 
-      // ✅ Refresh the assignment data so the dropdown updates immediately
+      // Refresh the assignment data so the dropdown updates immediately
       refetchAssignments();
-      setSelectedExam(""); // clear the selection after assignment
+      setSelectedExam(""); 
 
     } catch (err) {
-      // ✅ Show backend error message dynamically
+      // Show backend error message dynamically
       const backendMessage =
         err?.data?.message ||
         err?.error ||
@@ -58,25 +58,25 @@ const AssignedRoomPage = () => {
     }
   };
 
-  // ✅ Filter exams that are upcoming
+  // Filter exams that are upcoming
   const today = new Date().setHours(0, 0, 0, 0);
   const upcomingExams = examsData?.exams?.filter(
     (exam) => new Date(exam.date) >= new Date(today)
   );
 
-  // ✅ Get exam IDs that already have ACTIVE room assignments
+  // Get exam IDs that already have ACTIVE room assignments
   const assignedExamIds =
     roomAssignmentsData?.assignments
       ?.filter((a) => a.status === "ACTIVE")
       ?.map((a) => a.examId) || [];
 
-  // ✅ Filter exams that do not have active room assignments
+  // Filter exams that do not have active room assignments
   const availableExams = upcomingExams?.filter(
     (exam) => !assignedExamIds.includes(exam.id)
   );
 
   return (
-    <div className="mx-auto max-w-6xl bg-white p-6 rounded-lg shadow-md mt-3">
+    <div className="mx-auto  max-w-[99%]  bg-white p-6 rounded-lg shadow-md mt-3">
       <h1 className="text-2xl font-bold mb-5 underline">Assigned Rooms</h1>
 
       {examsLoading || assignmentsLoading ? (

@@ -36,7 +36,7 @@ const UpdateRoomPage = () => {
     try {
       await updateRoom({ id: Number(roomId), roomNumber, block, floor }).unwrap(); 
       toast.success("Room updated successfully!");
-      navigate("/viewRoom");
+      // navigate("/viewRoom");
     } catch (err) {
       console.error("Update error:", err);
       toast.error(err?.data?.message || "Failed to update room.");

@@ -1,4 +1,3 @@
-// roomAssignmentControllers.js
 import { PrismaClient } from "@prisma/client";
 import { spawn, spawnSync } from "child_process";
 import path from "path";

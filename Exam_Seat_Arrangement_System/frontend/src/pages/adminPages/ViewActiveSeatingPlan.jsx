@@ -1,4 +1,3 @@
-import React from "react";
 import { useGetActiveSeatingPlanQuery } from "../../redux/api/seatPlanApi";
 import SeatingPlanCard from "../../component/public/seating/SeatingPlanCard";
 

@@ -88,7 +88,7 @@ const AddCourseFullPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto mt-5 p-6 bg-white rounded shadow">
+    <div className=" max-w-[99%]  mx-auto mt-5 p-6 bg-white rounded shadow">
       <h2 className="text-3xl font-bold mb-6 text-gray-800 underline">Add Course with Semesters & Subjects</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">

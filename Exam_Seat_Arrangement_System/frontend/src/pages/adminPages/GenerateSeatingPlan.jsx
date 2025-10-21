@@ -32,8 +32,8 @@ const GenerateSeatingPlan = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Generate Seating Plan</h2>
+    <div className="p-4  max-w-[99%] mx-auto bg-white rounded shadow-md mt-3">
+      <h2 className="text-2xl font-bold mb-4 underline">Generate Seating Plan</h2>
       <div className="flex items-center gap-4">
         <select
           value={examId}

@@ -27,7 +27,7 @@ const AssignedInvigilatorPage = () => {
   };
 
   return (
-    <div className="mx-auto max-w-6xl bg-white p-6 rounded-lg shadow-md mt-3">
+    <div className="mx-auto  max-w-[99%]  bg-white p-6 rounded-lg shadow-md mt-3">
       <h1 className="text-2xl font-bold mb-6 underline">Assigned Invigilators</h1>
       <button
         onClick={handleGenerate}
