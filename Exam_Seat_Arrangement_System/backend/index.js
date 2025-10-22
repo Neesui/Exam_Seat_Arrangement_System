@@ -32,19 +32,24 @@ const port = 3000;
 // Create HTTP + Socket server
 const server = createServer(app);
 const io = new Server(server, {
-  cors: { origin: "http://localhost:5173", methods: ["GET", "POST"] },
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true,
+  },
 });
 
-// Store io instance globally
+// Store io instance globally for controllers (notificationControllers.js)
 app.set("io", io);
 
 // Socket.IO logic
 io.on("connection", (socket) => {
   console.log("New client connected:", socket.id);
 
-  socket.on("joinRoom", (room) => {
-    socket.join(room);
-    console.log(`Client joined room: ${room}`);
+  // When user joins a specific room (user or student)
+  socket.on("join", (roomName) => {
+    socket.join(roomName);
+    console.log(`Client joined room: ${roomName}`);
   });
 
   socket.on("disconnect", () => {
