@@ -38,7 +38,7 @@ const InvNavbar = () => {
 
         <div className="flex items-center space-x-6">
           {/* Notification */}
-          {userId && <Notification userId={userId} />}
+          <Notification />
 
           {/* Profile */}
           <div className="relative">

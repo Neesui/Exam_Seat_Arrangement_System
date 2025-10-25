@@ -10,6 +10,7 @@ import AdminDashboard from "../../pages/adminPages/AdminDashboard";
 import AssignedInvigilatorPage from "../../pages/adminPages/AssignedInvigilatorPage";
 import AssignedRoomPage from "../../pages/adminPages/AssignedRoomPage";
 import GenerateSeatingPlan from "../../pages/adminPages/GenerateSeatingPlan";
+import SendNotification from "../../pages/adminPages/SendNotification";
 import UpdateBenchPage from "../../pages/adminPages/UpdateBenchPage";
 import UpdateCoursePage from "../../pages/adminPages/UpdateCoursePage";
 import UpdateInvigilatorAssignPage from "../../pages/adminPages/UpdateInvigilatorAssignPage";
@@ -39,6 +40,10 @@ const adminRoutes = [
     {
       path: "/admin",
       element: <AdminDashboard />,
+    },
+    {
+      path: "/admin/notification",
+      element: <SendNotification />,
     },
     {
       path: "/admin/addInvigilator",

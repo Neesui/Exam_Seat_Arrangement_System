@@ -7,9 +7,9 @@ import {
   FaBookOpen,
   FaDoorOpen,
   FaChair,
-  FaTimes,
   FaClipboardList,
   FaTable,
+  FaTimes, // ✅ added missing icon
 } from "react-icons/fa";
 import SidebarSection from "./Sidebarsection";
 
@@ -27,6 +27,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           isOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0`}
       >
+        {/* Mobile Header */}
         <div className="flex justify-between items-center p-4 md:hidden">
           <div className="font-bold text-lg">NC Admin</div>
           <button onClick={toggleSidebar} className="text-xl">
@@ -34,6 +35,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </button>
         </div>
 
+        {/* Sidebar Header */}
         <div className="p-5 text-lg ml-4 font-bold hidden md:block">NC Admin</div>
 
         <ul className="ml-4 mt-4 md:mt-0">
@@ -42,6 +44,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <Link to="/admin">Dashboard</Link>
           </li>
 
+          {/* Students */}
           <SidebarSection
             icon={<FaUserGraduate className="mr-3" />}
             label="Students"
@@ -53,6 +56,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
+          {/* Invigilator */}
           <SidebarSection
             icon={<FaChalkboardTeacher className="mr-3" />}
             label="Invigilator"
@@ -64,6 +68,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
+          {/* Courses */}
           <SidebarSection
             icon={<FaBookOpen className="mr-3" />}
             label="Courses"
@@ -75,6 +80,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
+          {/* Room */}
           <SidebarSection
             icon={<FaDoorOpen className="mr-3" />}
             label="Room"
@@ -86,6 +92,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
+          {/* Bench */}
           <SidebarSection
             icon={<FaChair className="mr-3" />}
             label="Bench"
@@ -97,6 +104,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
+          {/* Exam */}
           <SidebarSection
             icon={<FaBookOpen className="mr-3" />}
             label="Exam"
@@ -108,6 +116,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
+          {/* Room Assignment */}
           <SidebarSection
             icon={<FaClipboardList className="mr-3" />}
             label="Room Assign"
@@ -119,6 +128,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             ]}
           />
 
+          {/* Invigilator Assignment */}
           <SidebarSection
             icon={<FaClipboardList className="mr-3" />}
             label="Invigilator Assign"
@@ -126,11 +136,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             setIsOpen={() => handleSectionToggle("Invigilator Assign")}
             links={[
               { path: "/admin/assignInvigilator", label: "Assign Invigilator" },
-              { path: "/admin/viewAllInvigilatorAssign", label: "View All Invigilator Assignment" },
-              // { path: "/admin/viewInvigilatorAssign", label: "View Invigilator Assignment" },
+              {
+                path: "/admin/viewAllInvigilatorAssign",
+                label: "View All Invigilator Assignment",
+              },
             ]}
           />
 
+          {/* Seat Plan */}
           <SidebarSection
             icon={<FaTable className="mr-3" />}
             label="Seat Plan"
@@ -140,12 +153,21 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               { path: "/admin/generateSeatingPlan", label: "Generate Seat Plan" },
               { path: "/admin/viewSeatingPlan", label: "View Seat Plan" },
               { path: "/admin/viewActiveSeatPlan", label: "View Active Seat Plan" },
-
             ]}
+          />
+
+          {/* Notification */}
+          <SidebarSection
+            icon={<FaClipboardList className="mr-3" />}
+            label="Notification"
+            isOpen={activeSection === "Notification"}
+            setIsOpen={() => handleSectionToggle("Notification")}
+            links={[{ path: "/admin/notification", label: "Send Notification" }]}
           />
         </ul>
       </div>
 
+      {/* Overlay for mobile */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black opacity-50 z-40 md:hidden"

@@ -1,35 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { FaBell } from "react-icons/fa";
 import dayjs from "dayjs";
-import { useGetUserNotificationsQuery, useMarkAsReadMutation } from "../../redux/api/notificationApi";
+import {
+  useGetInvigilatorNotificationsQuery,
+  useMarkAsReadMutation,
+} from "../../redux/api/notificationApi";
 import { socket } from "../../utils/socket";
 
-const Notification = ({ userId }) => {
+const Notification = () => {
   const [open, setOpen] = useState(false);
-  const { data, isLoading, refetch } = useGetUserNotificationsQuery(userId, {
-    skip: !userId,
-  });
+  const { data, isLoading, refetch } = useGetInvigilatorNotificationsQuery();
   const [markAsRead] = useMarkAsReadMutation();
 
   const notifications = data?.notifications || [];
 
   useEffect(() => {
-    if (!userId) return;
-
-    // Backend listens to `join` → join correct room
-    socket.emit("join", `user-${userId}`);
-    console.log("Joined room:", `user-${userId}`);
-
-    // Listen for same event emitted from backend controller
+    // Listen for real-time notification updates
     socket.on("invigilatorNotification", (note) => {
       console.log("📩 New notification:", note);
-      refetch(); // refresh list when a new one arrives
+      refetch(); // refresh when new notification arrives
     });
 
     return () => {
       socket.off("invigilatorNotification");
     };
-  }, [userId, refetch]);
+  }, [refetch]);
 
   const handleMarkRead = async (id) => {
     try {
@@ -64,9 +59,7 @@ const Notification = ({ userId }) => {
 
           <div className="max-h-80 overflow-y-auto">
             {isLoading ? (
-              <p className="p-3 text-gray-500 text-sm text-center italic">
-                Loading...
-              </p>
+              <p className="p-3 text-gray-500 text-sm text-center italic">Loading...</p>
             ) : notifications.length === 0 ? (
               <p className="p-3 text-gray-500 text-sm text-center italic">
                 No new notifications
@@ -80,9 +73,7 @@ const Notification = ({ userId }) => {
                     !n.isRead ? "bg-blue-50" : ""
                   }`}
                 >
-                  <p className="text-sm text-gray-800 font-medium">
-                    {n.title}
-                  </p>
+                  <p className="text-sm text-gray-800 font-medium">{n.title}</p>
                   <p className="text-sm text-gray-700">{n.message}</p>
                   <p className="text-xs text-gray-500">
                     {dayjs(n.createdAt).format("MMM D, YYYY h:mm A")}

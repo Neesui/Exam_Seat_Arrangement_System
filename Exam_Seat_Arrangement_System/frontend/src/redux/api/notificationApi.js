@@ -2,22 +2,22 @@ import { apiSlice } from "./apiSlice";
 
 export const notificationApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    // Get notifications for a user
-    getUserNotifications: builder.query({
-      query: (userId) => `/notification/user/${userId}`,
+    // Get notifications for invigilator (based on JWT)
+    getInvigilatorNotifications: builder.query({
+      query: () => `/api/notification/invigilator/notifications`,
       providesTags: ["Notifications"],
     }),
 
-    // Get notifications for a student
+    // Get notifications for student (based on JWT)
     getStudentNotifications: builder.query({
-      query: (studentId) => `/notification/student/${studentId}`,
+      query: () => `/api/notification/student/notifications`,
       providesTags: ["Notifications"],
     }),
 
     // Send bulk notifications (admin only)
     sendBulkNotification: builder.mutation({
       query: (body) => ({
-        url: `/notification/bulk`,
+        url: `/api/notification/bulk`,
         method: "POST",
         body,
       }),
@@ -27,7 +27,7 @@ export const notificationApi = apiSlice.injectEndpoints({
     // Mark notification as read
     markAsRead: builder.mutation({
       query: (id) => ({
-        url: `/notification/${id}/read`,
+        url: `/api/notification/${id}/read`,
         method: "PATCH",
       }),
       invalidatesTags: ["Notifications"],
@@ -36,7 +36,7 @@ export const notificationApi = apiSlice.injectEndpoints({
 });
 
 export const {
-  useGetUserNotificationsQuery,
+  useGetInvigilatorNotificationsQuery,
   useGetStudentNotificationsQuery,
   useSendBulkNotificationMutation,
   useMarkAsReadMutation,
