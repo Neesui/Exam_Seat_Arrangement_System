@@ -1,6 +1,7 @@
 import prisma from "../utils/db.js";
 import { sendEmail } from "../utils/emailService.js";
 
+// Bulk notification sender
 export const sendBulkNotification = async (req, res) => {
   try {
     const { target, title, message } = req.body;
@@ -67,35 +68,33 @@ export const sendBulkNotification = async (req, res) => {
   }
 };
 
-export const getUserNotifications = async (req, res) => {
+// Get Invigilator Notifications
+export const getInvigilatorNotifications = async (req, res) => {
   try {
-    const userId = parseInt(req.params.id);
-    const authUserId = req.user.id; // user from JWT
-
-    // ensure invigilator can only access their own notifications
-    if (userId !== authUserId) {
-      return res.status(403).json({ error: "Unauthorized access to notifications." });
-    }
+    const invigilatorId = req.user.id; // Get ID from JWT payload
 
     const notifications = await prisma.notification.findMany({
-      where: { userId },
+      where: { userId: invigilatorId },
       orderBy: { createdAt: "desc" },
     });
 
     res.json({ notifications });
   } catch (err) {
-    console.error("getUserNotifications error:", err.message);
+    console.error("getInvigilatorNotifications error:", err.message);
     res.status(500).json({ error: "Failed to fetch notifications" });
   }
 };
 
+// Student notifications
 export const getStudentNotifications = async (req, res) => {
   try {
-    const studentId = parseInt(req.params.id);
+    const studentId = req.user.id; // student logged in
+
     const notifications = await prisma.notification.findMany({
       where: { studentId },
       orderBy: { createdAt: "desc" },
     });
+
     res.json({ notifications });
   } catch (err) {
     console.error("getStudentNotifications error:", err.message);
@@ -103,6 +102,7 @@ export const getStudentNotifications = async (req, res) => {
   }
 };
 
+// Mark as read
 export const markNotificationAsRead = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
