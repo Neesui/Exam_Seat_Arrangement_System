@@ -1,22 +1,29 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { useGenerateSeatingPlanMutation } from "../../redux/api/seatPlanApi";
 import { useGetExamsQuery } from "../../redux/api/examApi";
-import { toast } from "react-toastify";
+import { parseISO, isBefore } from "date-fns";
 
 const GenerateSeatingPlan = () => {
   const [examId, setExamId] = useState("");
 
-  const { data: examsData, isLoading: examsLoading, isError: examsError } = useGetExamsQuery();
+  // Fetch exams
+  const {
+    data: examsData,
+    isLoading: examsLoading,
+    error: examsError,
+    refetch: refetchExams,
+  } = useGetExamsQuery();
 
-  const [generateSeatingPlan, { isLoading }] = useGenerateSeatingPlanMutation();
+  const [generateSeatingPlan, { isLoading: generating }] = useGenerateSeatingPlanMutation();
 
-  const examsList = examsData?.exams?.map((exam, index) => ({
-    key: exam.id || `exam-${index}`,
-    value: exam.id || `exam-${index}`,
-    name: exam.subject?.subjectName || "Unnamed Subject",
-  })) || [];
+  useEffect(() => {
+    if (examsError) toast.error("Failed to load exams");
+  }, [examsError]);
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (e) => {
+    e.preventDefault();
+
     if (!examId) {
       toast.error("Please select an exam");
       return;
@@ -24,53 +31,66 @@ const GenerateSeatingPlan = () => {
 
     try {
       const res = await generateSeatingPlan(examId).unwrap();
-      toast.success(res.message);
+      toast.success(res.message || "Seating plan generated successfully!");
       setExamId("");
-    } catch (error) {
-      toast.error(error?.data?.message || "Error generating seating plan");
+      refetchExams(); // refresh exams so dropdown updates
+    } catch (err) {
+      toast.error(err?.data?.message || "Error generating seating plan");
     }
   };
 
+  // Filter exams: only show exams that already have a seating plan
+  const availableExams =
+    examsData?.exams
+      ?.filter((exam) => exam.seatingPlans && exam.seatingPlans.length > 0)
+      .map((exam) => ({
+        id: exam.id,
+        name: `${exam.subject?.subjectName || "Unnamed Subject"} (${exam.subject?.code || ""}) - ${exam.date}`,
+      })) || [];
+
   return (
-    <div className="p-4  max-w-[99%] mx-auto bg-white rounded shadow-md mt-3">
-      <h2 className="text-2xl font-bold mb-4 underline">Generate Seating Plan</h2>
-      <div className="flex items-center gap-4">
-        <select
-          value={examId}
-          onChange={(e) => setExamId(e.target.value)}
-          className="border px-4 py-2 rounded"
-        >
-          <option key="default" value="">
-            Select Exam (Subject)
-          </option>
+    <div className="mx-auto max-w-[99%] bg-white p-6 rounded-lg shadow-md mt-3">
+      <h2 className="text-3xl font-bold mb-8 text-gray-800 underline">
+        Generate Seating Plan
+      </h2>
 
-          {examsLoading && (
-            <option key="loading" disabled>
-              Loading exams...
-            </option>
-          )}
+      {examsLoading ? (
+        <p>Loading exams...</p>
+      ) : (
+        <form onSubmit={handleGenerate} className="space-y-6">
+          <div>
+            <label className="block text-sm font-semibold mb-1">Select Exam</label>
+            <select
+              value={examId}
+              onChange={(e) => setExamId(e.target.value)}
+              className="w-full p-2 border rounded"
+              disabled={generating || availableExams.length === 0}
+              required
+            >
+              <option value="">-- Select Exam --</option>
+              {availableExams.length > 0 ? (
+                availableExams.map((exam) => (
+                  <option key={exam.id} value={exam.id}>
+                    {exam.name}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No exams available for room assignment</option>
+              )}
+            </select>
+          </div>
 
-          {examsError && (
-            <option key="error" disabled>
-              Error loading exams
-            </option>
-          )}
-
-          {examsList.map(({ key, value, name }) => (
-            <option key={key} value={value}>
-              {name}
-            </option>
-          ))}
-        </select>
-
-        <button
-          onClick={handleGenerate}
-          disabled={isLoading}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          {isLoading ? "Generating..." : "Generate"}
-        </button>
-      </div>
+          <button
+            type="submit"
+            disabled={generating || availableExams.length === 0}
+            className={`w-full p-3 rounded text-white font-semibold transition ${
+              generating ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            }`}
+          >
+            {generating ? "Generating..." : "Generate Seating Plan"}
+          </button>
+        </form>
+      )}
     </div>
   );
 };
