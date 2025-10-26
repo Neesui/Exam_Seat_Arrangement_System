@@ -38,10 +38,10 @@ export const studentApi = apiSlice.injectEndpoints({
       invalidatesTags: ["STUDENT"],
     }),
     importStudents: builder.mutation({
-      query: (studentsArray) => ({
+      query: (formData) => ({
         url: "/api/student/import",
         method: "POST",
-        body: studentsArray,
+        body: formData,
       }),
       invalidatesTags: ["STUDENT"],
     }),

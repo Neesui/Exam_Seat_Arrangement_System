@@ -53,6 +53,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             links={[
               { path: "/admin/addStudents", label: "Add Students" },
               { path: "/admin/viewStudents", label: "View Student Details" },
+              { path: "/admin/importStudents", label: "Import Students" },
             ]}
           />
 
