@@ -76,7 +76,7 @@ const LoginForm = () => {
           <input type="checkbox" />
           Remember me
         </label>
-        <a href="/forgot-password" className="text-red-500 text-[16px] hover:underline">Forgot Password?</a>
+        <a href="/forgotPassword" className="text-red-500 text-[16px] hover:underline">Forgot Password?</a>
       </div>
 
       {/* Submit Button */}
