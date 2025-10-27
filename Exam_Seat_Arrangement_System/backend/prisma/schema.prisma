@@ -38,6 +38,17 @@
     @@map("user")
   }
 
+  model OTPVerification {
+  id         Int      @id @default(autoincrement())
+  email      String
+  otp        String
+  purpose    String   // e.g., "2FA" or "RESET"
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@map("otp_verification")
+  }
+
   model Invigilator {
     id           Int                      @id @default(autoincrement())
     course       String

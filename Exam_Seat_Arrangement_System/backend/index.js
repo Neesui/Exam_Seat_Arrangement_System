@@ -29,6 +29,19 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = 3000;
 
+// Middleware
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true,
+  })
+);
+app.use(express.json());
+app.use(cookieParser());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api/upload", uploadRouter);
+
 // Create HTTP + Socket server
 const server = createServer(app);
 const io = new Server(server, {
@@ -57,18 +70,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// Middleware
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    credentials: true,
-  })
-);
-app.use(express.json());
-app.use(cookieParser());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/api/upload", uploadRouter);
+
 
 // Routes
 app.use("/api/auth", authRouter);

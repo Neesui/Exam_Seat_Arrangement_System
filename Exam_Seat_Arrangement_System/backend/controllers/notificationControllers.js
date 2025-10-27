@@ -8,7 +8,9 @@ export const sendBulkNotification = async (req, res) => {
     const io = req.app.get("io");
 
     if (!target || !message) {
-      return res.status(400).json({ error: "Target and message are required." });
+      return res
+        .status(400)
+        .json({ error: "Target and message are required." });
     }
 
     let students = [];
@@ -33,6 +35,21 @@ export const sendBulkNotification = async (req, res) => {
         data: { title, message, studentId: student.id },
       });
       io?.to(`student-${student.id}`).emit("studentNotification", note);
+      // console.log(student);
+
+      if (student.email) {
+        try {
+          await sendEmail(
+            student.email,
+            title || "Seatplan is ready  Notification",
+            `<h3>Hello ${student.studentName},</h3>
+             <p>${message}</p>
+             <p>Best regards,<br/>Exam Committee</p>`
+          );
+        } catch (err) {
+          console.error(`Email failed for ${student.email}:`, err.message);
+        }
+      }
     }
 
     // Send to invigilators
