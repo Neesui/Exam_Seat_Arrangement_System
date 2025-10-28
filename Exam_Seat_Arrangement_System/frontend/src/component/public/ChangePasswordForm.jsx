@@ -14,7 +14,8 @@ const ChangePasswordForm = () => {
     e.preventDefault();
     try {
       const res = await changePassword(formData).unwrap();
-      toast.success(res.message);
+      toast.success(res.message || "Password changed successfully");
+      setFormData({ oldPassword: "", newPassword: "" });
     } catch (error) {
       toast.error(error?.data?.message || "Something went wrong");
     }
@@ -22,26 +23,32 @@ const ChangePasswordForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-md">
-      <h2 className="text-2xl font-bold mb-4">Change Password</h2>
+      <label className="block mb-2 text-gray-700 font-medium">Old Password</label>
       <input
         type="password"
         name="oldPassword"
-        placeholder="Old Password"
         value={formData.oldPassword}
         onChange={handleChange}
-        className="w-full p-2 border rounded mb-2"
+        placeholder="Enter old password"
+        className="w-full p-2 mb-4 border border-gray-300 rounded-lg"
         required
       />
+
+      <label className="block mb-2 text-gray-700 font-medium">New Password</label>
       <input
         type="password"
         name="newPassword"
-        placeholder="New Password"
         value={formData.newPassword}
         onChange={handleChange}
-        className="w-full p-2 border rounded mb-4"
+        placeholder="Enter new password"
+        className="w-full p-2 mb-4 border border-gray-300 rounded-lg"
         required
       />
-      <button type="submit" className="w-full p-2 bg-yellow-600 text-white rounded">
+
+      <button
+        type="submit"
+        className="w-full p-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition duration-200"
+      >
         Change Password
       </button>
     </form>

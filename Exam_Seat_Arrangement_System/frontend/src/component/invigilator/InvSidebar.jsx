@@ -50,16 +50,16 @@ const InvSidebar = ({ isOpen, toggleSidebar }) => {
               { path: "/invigilator/profile", label: "View Profile" },
             ]}
           />
-{/* 
+
           <SidebarSection
             icon={<FaDoorOpen className="mr-3" />}
-            label="Room"
-            isOpen={activeSection === "Room"}
-            setIsOpen={() => handleSectionToggle("Room")}
+            label="Setting"
+            isOpen={activeSection === "Setting"}
+            setIsOpen={() => handleSectionToggle("Setting")}
             links={[
-              { path: "/invigilator/viewRoom", label: "View Room Details" },
+              { path: "/invigilator/changePassword", label: "change password" },
             ]}
-          /> */}
+          />
 
           <SidebarSection
             icon={<FaBookOpen className="mr-3" />}

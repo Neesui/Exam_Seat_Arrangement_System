@@ -1,5 +1,4 @@
 
-import ChangePasswordPage from "../../pages/publicPage/ChangePasswordPage";
 import ForgotPasswordPage from "../../pages/publicPage/ForgotPasswordPage";
 import HomePage from "../../pages/publicPage/HomePage";
 import ResetPasswordPage from "../../pages/publicPage/ResetPasswordPage";
@@ -18,10 +17,6 @@ export const publicRoutes = [
   {
     path: "/viewSeatPlan",
     element: <ViewSeatPlanPage />,
-  },
-  {
-    path: "/changePassword",
-    element: <ChangePasswordPage />,
   },
   {
     path: "/forgotPassword/resetPassword",
