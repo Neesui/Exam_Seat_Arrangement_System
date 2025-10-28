@@ -77,7 +77,7 @@ const Navbar = () => {
                   Profile
                 </a>
                 <a
-                  href="#"
+                  href="/admin/changePassword"
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Settings

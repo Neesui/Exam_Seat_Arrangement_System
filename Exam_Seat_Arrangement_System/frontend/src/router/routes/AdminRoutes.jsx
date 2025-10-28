@@ -36,12 +36,17 @@ import ViewRoomAssignDetailsPage from "../../pages/adminPages/ViewRoomAssignDeta
 import ViewRoomAssignPage from "../../pages/adminPages/ViewRoomAssignPage";
 import ViewRoomPage from "../../pages/adminPages/ViewRoomPage";
 import ViewStudentPage from "../../pages/adminPages/ViewStudentPage";
+import ChangePasswordPage from "../../pages/publicPage/ChangePasswordPage";
 
 const adminRoutes = [
     {
       path: "/admin",
       element: <AdminDashboard />,
     },
+        {
+    path: "/admin/changePassword",
+    element: <ChangePasswordPage />,
+  },
     {
       path: "/admin/notification",
       element: <SendNotification />,
