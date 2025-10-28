@@ -44,7 +44,8 @@ import ChangePasswordPage from "../../pages/publicPage/ChangePasswordPage";
     {
       path: '/invigilator/viewActiveSeatPlan',
       element: <ViewActiveSeatingPlan />
-    }
+    },
+    
   ];
 
   export default invigilatorRoutes;
