@@ -61,11 +61,12 @@ const SeatingPlanVisualLayout = ({ seatPlan }) => {
                       const seats = benches[benchNo];
                       const benchCapacity = seats[0]?.bench?.capacity || 2;
 
+                      // Fill empty seats for unassigned benches
                       const fullBench = [...seats];
                       while (fullBench.length < benchCapacity) {
                         fullBench.push({
-                          id: `dummy-${benchNo}-${fullBench.length}`,
-                          dummy: true,
+                          id: `empty-${benchNo}-${fullBench.length}`,
+                          student: null,
                         });
                       }
 
@@ -93,13 +94,13 @@ const SeatingPlanVisualLayout = ({ seatPlan }) => {
                                     boxShadow: "inset 0 0 0 1px #333",
                                   }}
                                 >
-                                  {seat.dummy ? (
-                                    <p>DUMMY</p>
-                                  ) : (
+                                  {seat.student ? (
                                     <>
                                       <p>{seat.student.college}</p>
                                       <p>{seat.student.symbolNumber}</p>
                                     </>
+                                  ) : (
+                                    <p>EMPTY</p>
                                   )}
                                 </div>
                               );

@@ -134,6 +134,7 @@ export const getActiveSeatingPlan = async (req, res) => {
     const today = new Date();
     const tomorrow = addDays(today, 1);
 
+    // Fetch all active seating plans
     const seatingPlans = await prisma.seatingPlan.findMany({
       where: {
         exam: { date: { gte: startOfDay(today), lte: endOfDay(tomorrow) } },
@@ -153,12 +154,44 @@ export const getActiveSeatingPlan = async (req, res) => {
     if (!seatingPlans || seatingPlans.length === 0)
       return res.json({ success: true, message: "No active exam found", data: [] });
 
-    res.json({ success: true, message: "Active seating plan retrieved", data: seatingPlans });
+    // Fetch all benches (so we can include empty ones)
+    const allBenches = await prisma.bench.findMany({
+      include: {
+        room: { select: { id: true, roomNumber: true, block: true, floor: true } },
+      },
+    });
+
+    // Map each seating plan to include all benches
+    const seatingPlansWithAllBenches = seatingPlans.map(plan => {
+      // Bench IDs that already have seats
+      const benchIdsWithSeats = plan.seats.map(seat => seat.benchId);
+
+      // Find benches with no seats assigned
+      const emptyBenches = allBenches
+        .filter(b => !benchIdsWithSeats.includes(b.id))
+        .map(b => ({ bench: b, student: null })); // student is null for empty benches
+
+      return {
+        ...plan,
+        seats: [...plan.seats, ...emptyBenches], // combine assigned and empty benches
+      };
+    });
+
+    res.json({
+      success: true,
+      message: "Active seating plan retrieved with all benches",
+      data: seatingPlansWithAllBenches,
+    });
   } catch (error) {
     console.error("Error fetching active seating plan:", error);
-    res.status(500).json({ success: false, message: "Failed to fetch active seating plan", error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch active seating plan",
+      error: error.message,
+    });
   }
 };
+
 
 
 export const getStudentSeating = async (req, res) => {
