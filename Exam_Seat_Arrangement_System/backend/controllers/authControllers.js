@@ -6,9 +6,7 @@ import { sendEmail } from "../utils/emailService.js";
 // Helper: generate 6-digit OTP
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-// ------------------------------------
-// LOGIN
-// ------------------------------------
+//login
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -39,17 +37,13 @@ export const login = async (req, res) => {
   }
 };
 
-// ------------------------------------
-// LOGOUT
-// ------------------------------------
+//logout
 export const logout = async (req, res) => {
   res.clearCookie("jwt");
   return res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 
-// ------------------------------------
-// FORGOT PASSWORD
-// ------------------------------------
+//forget password
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -76,9 +70,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-// ------------------------------------
-// RESET PASSWORD
-// ------------------------------------
+// reset password
 export const resetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
@@ -106,10 +98,7 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-// ------------------------------------
-// CHANGE PASSWORD
-// ------------------------------------
+// change password
 export const changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;

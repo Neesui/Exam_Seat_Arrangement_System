@@ -1,3 +1,4 @@
+
 import React from "react";
 
 const SeatingPlanVisualLayout = ({ seatPlan }) => {
@@ -43,7 +44,7 @@ const SeatingPlanVisualLayout = ({ seatPlan }) => {
           className="border border-gray-300 p-4 rounded-lg shadow"
         >
           <h3 className="text-xl font-bold text-center mb-6">
-            Room {roomNo}
+            Room:  {roomNo}
           </h3>
 
           {Object.keys(groupedByRoom[roomNo])

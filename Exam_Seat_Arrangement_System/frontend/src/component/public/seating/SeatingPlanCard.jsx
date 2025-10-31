@@ -1,3 +1,4 @@
+
 import React from "react";
 import SeatingPlanVisualLayout from "../../../layout/SeatingPlanVisualLayout";
 
@@ -36,8 +37,11 @@ const SeatingPlanCard = ({ plan, index }) => {
   return (
     <div className="mb-12">
       {Object.entries(seatsByRoom).map(([roomNo, seats], idx) => {
-        const seatsByCollege = seats.reduce((acc, seat) => {
-          const college = seat.student?.college || "Unknown College";
+        // Only include seats with assigned students for roll ranges
+        const seatsWithStudents = seats.filter((seat) => seat.student);
+
+        const seatsByCollege = seatsWithStudents.reduce((acc, seat) => {
+          const college = seat.student.college;
           if (!acc[college]) acc[college] = [];
           acc[college].push(seat);
           return acc;
