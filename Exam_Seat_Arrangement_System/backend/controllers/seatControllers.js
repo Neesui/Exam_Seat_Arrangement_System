@@ -154,26 +154,23 @@ export const getActiveSeatingPlan = async (req, res) => {
     if (!seatingPlans || seatingPlans.length === 0)
       return res.json({ success: true, message: "No active exam found", data: [] });
 
-    // Fetch all benches (so we can include empty ones)
+    // Fetch all benches
     const allBenches = await prisma.bench.findMany({
       include: {
         room: { select: { id: true, roomNumber: true, block: true, floor: true } },
       },
     });
 
-    // Map each seating plan to include all benches
     const seatingPlansWithAllBenches = seatingPlans.map(plan => {
-      // Bench IDs that already have seats
       const benchIdsWithSeats = plan.seats.map(seat => seat.benchId);
 
-      // Find benches with no seats assigned
       const emptyBenches = allBenches
         .filter(b => !benchIdsWithSeats.includes(b.id))
-        .map(b => ({ bench: b, student: null })); // student is null for empty benches
+        .map(b => ({ bench: b, student: null })); 
 
       return {
         ...plan,
-        seats: [...plan.seats, ...emptyBenches], // combine assigned and empty benches
+        seats: [...plan.seats, ...emptyBenches], 
       };
     });
 
@@ -191,8 +188,6 @@ export const getActiveSeatingPlan = async (req, res) => {
     });
   }
 };
-
-
 
 export const getStudentSeating = async (req, res) => {
   let { symbolNumber, college } = req.body;
@@ -307,31 +302,92 @@ export const getStudentSeating = async (req, res) => {
 };
 
 
-export const getAllSeatingPlan = async (req, res) => { 
-  try { const seatingPlans = await prisma.seatingPlan.findMany({ 
-    include: { 
-      exam: { 
-        include: { 
-          subject: { 
-            include: { 
-              semester: { 
-                include: { 
-                  course: true } } } } } }, 
-                  seats: { 
-                    include: { 
-                      student: { 
-                        select: { id: true, symbolNumber: true, college: true, studentName: true } }, 
-                        bench: { include: { room: { select: { id: true, roomNumber: true, block: true, floor: true } } } }, }, }, }, 
-                        orderBy: { id: "desc" }, }); 
-                        res.json({ success: true, 
-                          message: "Seating plans retrieved successfully", 
-                          data: seatingPlans }); } 
-                        catch (error) { console.error("Error fetching seating plans:", error); 
-                          res.status(500).json({ success: false, 
-                            message: "Failed to fetch seating plans", 
-                            error: error.message }); 
-                    }
-   };
+export const getAllSeatingPlan = async (req, res) => {
+  try {
+    const seatingPlans = await prisma.seatingPlan.findMany({
+      include: {
+        exam: {
+          include: {
+            subject: {
+              include: {
+                semester: {
+                  include: { course: true },
+                },
+              },
+            },
+          },
+        },
+        seats: {
+          include: {
+            student: {
+              select: {
+                id: true,
+                symbolNumber: true,
+                college: true,
+                studentName: true,
+              },
+            },
+            bench: {
+              include: {
+                room: {
+                  select: {
+                    id: true,
+                    roomNumber: true,
+                    block: true,
+                    floor: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { id: "desc" },
+    });
+
+    const allBenches = await prisma.bench.findMany({
+      include: {
+        room: {
+          select: {
+            id: true,
+            roomNumber: true,
+            block: true,
+            floor: true,
+          },
+        },
+      },
+    });
+
+    const seatingPlansWithAllBenches = seatingPlans.map((plan) => {
+      const benchIdsWithSeats = plan.seats.map((seat) => seat.benchId);
+
+      const emptyBenches = allBenches
+        .filter((b) => !benchIdsWithSeats.includes(b.id))
+        .map((b) => ({
+          bench: b,
+          student: null, 
+        }));
+
+      return {
+        ...plan,
+        seats: [...plan.seats, ...emptyBenches],
+      };
+    });
+
+    res.json({
+      success: true,
+      message: "All seating plans retrieved with all benches (assigned or not)",
+      data: seatingPlansWithAllBenches,
+    });
+  } catch (error) {
+    console.error("Error fetching seating plans:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch seating plans",
+      error: error.message,
+    });
+  }
+};
 
 
 export const getInvigilatorSeatingPlans = async (req, res) => {
